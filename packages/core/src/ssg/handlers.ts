@@ -110,7 +110,9 @@ function renderDefaultOPF(c: SSGContext): SSGResponse {
     .map((page) => {
       const fileName = page.path.split("/").pop() || "";
       const id = fileName.replace(/\.xhtml$/, "").replace(/[^a-zA-Z0-9_-]/g, "_");
-      const props = page.metadata.isNavigationItem ? ' properties="nav"' : "";
+      // Note: "nav" property should only be on the navigation document, not content pages
+      // Add "svg" property if the page contains SVG content
+      const props = page.metadata.containsSvg ? ' properties="svg"' : "";
       return `<item media-type="application/xhtml+xml" id="${escapeXml(id)}" href="${escapeXml(page.path.replace(/^item\//, ""))}"${props}/>`;
     })
     .join("\n");
