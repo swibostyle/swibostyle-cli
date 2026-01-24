@@ -108,30 +108,35 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
       - name: Setup Java
         uses: actions/setup-java@v4
         with:
           distribution: 'temurin'
           java-version: '21'
 
+      - name: Install dependencies
+        run: bun install
+
+      - name: Build epub-validator
+        run: bun run --filter '@swibostyle/epub-validator' build
+
       - name: Download EPubCheck
         run: |
           curl -L -o epubcheck.zip \
             "https://github.com/w3c/epubcheck/releases/download/v${EPUBCHECK_VERSION}/epubcheck-${EPUBCHECK_VERSION}.zip"
-
-      - name: Verify checksum
-        run: |
           ACTUAL_SHA256=$(sha256sum epubcheck.zip | awk '{print $1}')
           if [ "${ACTUAL_SHA256}" != "${EPUBCHECK_SHA256}" ]; then
             echo "ERROR: Checksum mismatch!"
-            echo "Expected: ${EPUBCHECK_SHA256}"
-            echo "Actual:   ${ACTUAL_SHA256}"
             exit 1
           fi
-          echo "Checksum verified"
-
-      - name: Extract EPubCheck
-        run: unzip epubcheck.zip
+          unzip -q epubcheck.zip
+          mkdir -p packages/epub-validator/bin
+          cp "epubcheck-${EPUBCHECK_VERSION}/epubcheck.jar" packages/epub-validator/bin/
 
       - name: Download EPUB artifact
         uses: actions/download-artifact@v4
@@ -139,18 +144,5 @@ jobs:
           name: sample-epub
           path: test-epub/
 
-      - name: Validate EPUB with EPubCheck
-        run: |
-          echo "Validating EPUB files..."
-          FAILED=0
-          for epub in test-epub/*.epub; do
-            echo "Validating: $epub"
-            if ! java -jar "epubcheck-${EPUBCHECK_VERSION}/epubcheck.jar" "$epub"; then
-              FAILED=1
-            fi
-          done
-          if [ "$FAILED" -eq 1 ]; then
-            echo "::error::EPUB validation failed"
-            exit 1
-          fi
-          echo "All EPUBs validated successfully"
+      - name: Validate EPUB
+        run: bun scripts/validate-epub.ts test-epub/*.epub
