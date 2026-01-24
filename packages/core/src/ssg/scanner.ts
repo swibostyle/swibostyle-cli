@@ -8,12 +8,7 @@
 
 import type { StorageAdapter } from "../adapters/storage/interface.js";
 import type { BuildTargetType, Frontmatter } from "../types.js";
-import type {
-  RouteInfo,
-  RouteMetadata,
-  RouteType,
-  Router,
-} from "./types.js";
+import type { RouteInfo, RouteMetadata, RouteType, Router } from "./types.js";
 import { readFrontmatter } from "../utils/frontmatter.js";
 
 /**
@@ -95,10 +90,7 @@ function frontmatterToMetadata(fm: Frontmatter): RouteMetadata {
 /**
  * Check if a file should be included for the target
  */
-function shouldIncludeForTarget(
-  metadata: RouteMetadata,
-  target: BuildTargetType,
-): boolean {
+function shouldIncludeForTarget(metadata: RouteMetadata, target: BuildTargetType): boolean {
   if (metadata.includeIf && metadata.includeIf !== target) {
     return false;
   }
@@ -111,11 +103,7 @@ function shouldIncludeForTarget(
 /**
  * Convert source path to output path
  */
-function sourceToOutputPath(
-  sourcePath: string,
-  srcDir: string,
-  metadata: RouteMetadata,
-): string {
+function sourceToOutputPath(sourcePath: string, srcDir: string, metadata: RouteMetadata): string {
   // Remove src dir prefix
   let path = sourcePath;
   if (path.startsWith(srcDir)) {
@@ -249,10 +237,7 @@ async function scanDirectory(
 /**
  * Find all index.ts files in the source directory
  */
-export async function findIndexFiles(
-  storage: StorageAdapter,
-  dir: string,
-): Promise<string[]> {
+export async function findIndexFiles(storage: StorageAdapter, dir: string): Promise<string[]> {
   const indexFiles: string[] = [];
 
   const entries = await storage.readDir(dir);

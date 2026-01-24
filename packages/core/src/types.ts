@@ -44,11 +44,6 @@ export interface BookConfig {
 
   /** Original image resolution (e.g., '1693x2361') */
   originalResolution?: string;
-  /** Image crop configurations for EPUB */
-  epubImageCrops?: ImageCropConfig[];
-
-  /** Pages to be generated from images */
-  pagesToBeGeneratedFromImage?: PageFromImageConfig[];
 
   /** Build target configurations */
   targets?: {
@@ -74,26 +69,6 @@ export interface TargetConfig {
   css: string;
   /** Enable image resizing for this target */
   enableImageResizing?: boolean;
-  /** Enable image cropping for this target */
-  enableImageCrop?: boolean;
-}
-
-export interface ImageCropConfig {
-  /** File name pattern (regex) */
-  fileNamePattern: string;
-  /** Bleed amounts to crop */
-  bleed: { x: number; y: number };
-}
-
-export interface PageFromImageConfig {
-  /** Page ID */
-  id: string;
-  /** Source image file name */
-  fileName: string;
-  /** Page title */
-  title?: string;
-  /** Additional frontmatter */
-  frontmatter?: Partial<Frontmatter>;
 }
 
 // =============================================================================
@@ -132,30 +107,8 @@ export interface Frontmatter {
 }
 
 // =============================================================================
-// Content Items
+// Image Dimensions
 // =============================================================================
-
-export type ContentItem = XHTMLContent | ImageContent;
-
-export interface XHTMLContent {
-  type: "xhtml";
-  id: string;
-  fileName: string;
-  title: string;
-  html: string;
-  frontmatter: Frontmatter;
-  properties?: string;
-  displayOrder: number;
-  fallbackImage?: string;
-}
-
-export interface ImageContent {
-  type: "image";
-  id: string;
-  fileName: string;
-  dimensions: ImageDimensions;
-  contentType: string;
-}
 
 export interface ImageDimensions {
   width: number;
@@ -167,73 +120,6 @@ export interface ImageDimensions {
 // =============================================================================
 
 export type BuildTargetType = "epub" | "print" | "pod";
-
-export interface BuildTarget {
-  type: BuildTargetType;
-  css: string;
-  enableImageResizing: boolean;
-  enableImageCrop: boolean;
-}
-
-export interface BuildOptions {
-  /** Build target type */
-  target: BuildTargetType;
-  /** Output mode */
-  output?: "file" | "memory";
-}
-
-export interface BuildResult {
-  /** Output file path (when output mode is 'file') */
-  outputPath?: string;
-  /** Output data (when output mode is 'memory') */
-  data?: Uint8Array;
-  /** List of generated content items */
-  contents: ContentItem[];
-}
-
-// =============================================================================
-// Path Configuration
-// =============================================================================
-
-export interface PathConfig {
-  /** Source directory */
-  src: string;
-  /** Build directory */
-  build: string;
-  /** Release directory */
-  release: string;
-  /** Markdown source directory */
-  markdown: string;
-  /** Styles directory */
-  styles: string;
-  /** Images directory */
-  images: string;
-  /** META-INF directory */
-  metaInf: string;
-}
-
-// =============================================================================
-// Progress Events
-// =============================================================================
-
-export type BuildPhase =
-  | "clean"
-  | "copy"
-  | "css"
-  | "image"
-  | "markdown"
-  | "opf"
-  | "navigation"
-  | "archive";
-
-export interface ProgressEvent {
-  phase: BuildPhase;
-  current: number;
-  total: number;
-  message?: string;
-}
-
-export type ProgressCallback = (event: ProgressEvent) => void;
 
 // =============================================================================
 // Logger

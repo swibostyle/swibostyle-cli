@@ -16,7 +16,12 @@ import type {
   SSGBuildResult,
   RegisteredRoute,
 } from "./types.js";
-import { scanRoutes, scannedToRouteInfo, findIndexFiles, sortRoutesByDisplayOrder } from "./scanner.js";
+import {
+  scanRoutes,
+  scannedToRouteInfo,
+  findIndexFiles,
+  sortRoutesByDisplayOrder,
+} from "./scanner.js";
 import { createSSGContext } from "./context.js";
 import { createDefaultRouter } from "./handlers.js";
 import { convertToXhtml } from "../utils/xhtml.js";
@@ -143,10 +148,17 @@ export async function buildSSG(ctx: SSGBuildContext): Promise<SSGBuildResult> {
   // Process default routes first (mimetype, container.xml, etc.)
   for (const defaultRoute of defaultRoutes) {
     // Skip if user has a custom route
-    const hasCustom = routes.some((r) => r.path === defaultRoute.pattern) ||
-      userRoutes.some((r) => `item/${r.pattern}` === defaultRoute.pattern || r.pattern === defaultRoute.pattern);
+    const hasCustom =
+      routes.some((r) => r.path === defaultRoute.pattern) ||
+      userRoutes.some(
+        (r) => `item/${r.pattern}` === defaultRoute.pattern || r.pattern === defaultRoute.pattern,
+      );
 
-    if (!hasCustom || defaultRoute.pattern === "item/standard.opf" || defaultRoute.pattern === "item/navigation-documents.xhtml") {
+    if (
+      !hasCustom ||
+      defaultRoute.pattern === "item/standard.opf" ||
+      defaultRoute.pattern === "item/navigation-documents.xhtml"
+    ) {
       const context = createSSGContext({
         book,
         target,
@@ -295,10 +307,7 @@ function responseToBytes(response: SSGResponse): Uint8Array {
 /**
  * Process a single route
  */
-async function processRoute(
-  route: RouteInfo,
-  ctx: SSGBuildContext,
-): Promise<Uint8Array | null> {
+async function processRoute(route: RouteInfo, ctx: SSGBuildContext): Promise<Uint8Array | null> {
   const { storage, imageAdapter, cssAdapter, book, target } = ctx;
 
   if (!route.sourcePath) {

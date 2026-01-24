@@ -70,7 +70,9 @@ describe("SSG Scanner", () => {
     // Should include p-900-colophon-epub.md, not p-900-colophon-print.md
     const colophonEpub = xhtmlRoutes.find((r) => r.sourcePath?.includes("p-900-colophon-epub.md"));
     expect(colophonEpub).toBeDefined();
-    const colophonPrint = xhtmlRoutes.find((r) => r.sourcePath?.includes("p-900-colophon-print.md"));
+    const colophonPrint = xhtmlRoutes.find((r) =>
+      r.sourcePath?.includes("p-900-colophon-print.md"),
+    );
     expect(colophonPrint).toBeUndefined();
   });
 
@@ -199,10 +201,10 @@ describe("SSG Router", () => {
   });
 
   test("should create handler with metadata", () => {
-    const handler = createHandler(
-      (c) => c.html`<html></html>`,
-      { title: "Test Page", displayOrder: 100 },
-    );
+    const handler = createHandler((c) => c.html`<html></html>`, {
+      title: "Test Page",
+      displayOrder: 100,
+    });
 
     expect(handler.metadata?.title).toBe("Test Page");
     expect(handler.metadata?.displayOrder).toBe(100);
@@ -263,7 +265,7 @@ describe("SSG Context", () => {
     const ctx = createSSGContext({
       book: {
         title: "Test & Book <1>",
-        authors: [{ name: "Test \"Author\"", role: "aut" }],
+        authors: [{ name: 'Test "Author"', role: "aut" }],
         publisher: "Publisher",
         lang: "en",
         bookId: { epub: "123" },

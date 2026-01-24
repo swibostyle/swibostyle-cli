@@ -10,40 +10,11 @@ export type {
   BookConfig,
   Author,
   TargetConfig,
-  ImageCropConfig,
-  PageFromImageConfig,
   Frontmatter,
-  ContentItem,
-  XHTMLContent,
-  ImageContent,
-  ImageDimensions,
   BuildTargetType,
-  BuildTarget,
-  BuildOptions,
-  BuildResult,
-  PathConfig,
-  BuildPhase,
-  ProgressEvent,
-  ProgressCallback,
   Logger,
   FileStat,
 } from "./types.js";
-
-// Builder
-export { build } from "./builder/pipeline.js";
-export { clean } from "./builder/clean.js";
-export { copy } from "./builder/copy.js";
-export { createEpubArchive, writeEpubFile } from "./builder/archive.js";
-export type {
-  BuildContext,
-  BuildContextOptions,
-  NodeContextOptions,
-  BuildPaths,
-} from "./builder/context.js";
-export { getDefaultPaths, getBuildPaths } from "./builder/context.js";
-
-// Context factories
-export { createNodeContext, createBuildContext } from "./context.js";
 
 // Adapters
 export type { StorageAdapter } from "./adapters/storage/interface.js";
@@ -66,14 +37,6 @@ export { PassthroughCSSAdapter } from "./adapters/css/passthrough.js";
 
 // Config
 export { loadBookConfig, getDefaultBookConfig } from "./config/loader.js";
-
-// Processors (for advanced use)
-export { processCSS } from "./processors/css.js";
-export { processMarkdown } from "./processors/markdown.js";
-export { processImages } from "./processors/image.js";
-export { generateOPF } from "./processors/opf.js";
-export { generateNavigation } from "./processors/navigation.js";
-export { generatePagesFromImages } from "./processors/page-from-image.js";
 
 // Utils
 export { convertToXhtml } from "./utils/xhtml.js";

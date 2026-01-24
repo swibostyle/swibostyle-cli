@@ -39,11 +39,7 @@ export function createRouter(basePath: string = ""): Router {
   const router: Router = {
     basePath,
 
-    get(
-      pattern: string,
-      handler: RouteHandler,
-      options?: RouteOptions,
-    ): Router {
+    get(pattern: string, handler: RouteHandler, options?: RouteOptions): Router {
       routes.push({ pattern, handler, options });
       return router;
     },
@@ -73,10 +69,7 @@ export function createRouter(basePath: string = ""): Router {
  * });
  * ```
  */
-export function createHandler(
-  handler: RouteHandler,
-  metadata?: RouteMetadata,
-): Handler {
+export function createHandler(handler: RouteHandler, metadata?: RouteMetadata): Handler {
   return { handler, metadata };
 }
 
@@ -120,10 +113,7 @@ export function matchRoute(pattern: string, path: string): boolean {
  * @param path - Path to find handler for
  * @returns Matching route or undefined
  */
-export function findRoute(
-  routes: RegisteredRoute[],
-  path: string,
-): RegisteredRoute | undefined {
+export function findRoute(routes: RegisteredRoute[], path: string): RegisteredRoute | undefined {
   // First try exact matches
   for (const route of routes) {
     if (route.pattern === path) {

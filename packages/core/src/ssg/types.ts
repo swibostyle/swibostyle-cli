@@ -127,9 +127,7 @@ export interface SSGContext {
 /**
  * Route handler function
  */
-export type RouteHandler = (
-  context: SSGContext,
-) => SSGResponse | Promise<SSGResponse>;
+export type RouteHandler = (context: SSGContext) => SSGResponse | Promise<SSGResponse>;
 
 /**
  * Route registration options
@@ -160,11 +158,7 @@ export interface RegisteredRoute {
  */
 export interface Router {
   /** Register a GET route */
-  get(
-    pattern: string,
-    handler: RouteHandler,
-    options?: RouteOptions,
-  ): Router;
+  get(pattern: string, handler: RouteHandler, options?: RouteOptions): Router;
   /** Get all registered routes */
   getRoutes(): RegisteredRoute[];
   /** Base path for this router */

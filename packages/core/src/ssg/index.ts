@@ -32,7 +32,13 @@ export { createSSGContext, raw, RawString } from "./context.js";
 export type { SSGContextOptions } from "./context.js";
 
 // Scanner
-export { scanRoutes, scannedToRouteInfo, sortRoutesByDisplayOrder, loadIndexRouter, findIndexFiles } from "./scanner.js";
+export {
+  scanRoutes,
+  scannedToRouteInfo,
+  sortRoutesByDisplayOrder,
+  loadIndexRouter,
+  findIndexFiles,
+} from "./scanner.js";
 export type { ScanOptions, ScannedRoute } from "./scanner.js";
 
 // Default handlers

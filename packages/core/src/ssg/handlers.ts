@@ -128,9 +128,7 @@ function renderDefaultOPF(c: SSGContext): SSGResponse {
     .join("\n");
 
   // Get book ID
-  const bookId = target === "epub"
-    ? book.bookId.epub
-    : book.bookId.print ?? book.bookId.epub;
+  const bookId = target === "epub" ? book.bookId.epub : (book.bookId.print ?? book.bookId.epub);
 
   // Metadata
   const titleSortKey = book.titleSortKey ?? book.title;
