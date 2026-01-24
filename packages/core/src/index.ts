@@ -100,6 +100,8 @@ export {
   findIndexFiles,
   // Default handlers
   createDefaultRouter,
+  // Build
+  buildSSG,
 } from "./ssg/index.js";
 
 export type {
@@ -124,6 +126,7 @@ export type {
   // Build types
   SSGBuildOptions,
   SSGBuildResult,
+  SSGBuildContext,
   // Context types
   SSGContextOptions,
 } from "./ssg/index.js";

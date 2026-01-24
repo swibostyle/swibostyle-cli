@@ -37,3 +37,7 @@ export type { ScanOptions, ScannedRoute } from "./scanner.js";
 
 // Default handlers
 export { createDefaultRouter } from "./handlers.js";
+
+// Build
+export { buildSSG } from "./build.js";
+export type { SSGBuildContext } from "./build.js";
