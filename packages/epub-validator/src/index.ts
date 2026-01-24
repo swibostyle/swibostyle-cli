@@ -6,8 +6,4 @@
  */
 
 export { validateEpub, createValidator } from "./validator.js";
-export type {
-  ValidationResult,
-  ValidationMessage,
-  ValidateOptions,
-} from "./types.js";
+export type { ValidationResult, ValidationMessage, ValidateOptions } from "./types.js";

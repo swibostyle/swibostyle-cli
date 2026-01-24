@@ -22,10 +22,7 @@ export interface EpubValidator {
    * @param options - Validation options
    * @returns Validation result
    */
-  validate(
-    epub: Uint8Array | string,
-    options?: ValidateOptions
-  ): Promise<ValidationResult>;
+  validate(epub: Uint8Array | string, options?: ValidateOptions): Promise<ValidationResult>;
 
   /**
    * Check if the WASM module is loaded.
@@ -87,7 +84,7 @@ async function loadWasmModule(): Promise<EpubCheckWasm> {
   } catch (error) {
     throw new Error(
       `Failed to load EPubCheck WASM module: ${error instanceof Error ? error.message : String(error)}\n` +
-      `Make sure to run 'bun run build:wasm' first to compile the WASM module.`
+        `Make sure to run 'bun run build:wasm' first to compile the WASM module.`,
     );
   }
 }
@@ -109,7 +106,7 @@ export async function createValidator(): Promise<EpubValidator> {
   return {
     async validate(
       epub: Uint8Array | string,
-      options?: ValidateOptions
+      options?: ValidateOptions,
     ): Promise<ValidationResult> {
       // Load EPUB data
       if (typeof epub === "string") {
@@ -145,7 +142,9 @@ export async function createValidator(): Promise<EpubValidator> {
       if (!validationResult) {
         return {
           valid: false,
-          errors: [{ severity: "ERROR", id: "NO_RESULT", message: "No validation result received" }],
+          errors: [
+            { severity: "ERROR", id: "NO_RESULT", message: "No validation result received" },
+          ],
           warnings: [],
         };
       }
@@ -192,7 +191,7 @@ export async function createValidator(): Promise<EpubValidator> {
  */
 export async function validateEpub(
   epub: Uint8Array | string,
-  options?: ValidateOptions
+  options?: ValidateOptions,
 ): Promise<ValidationResult> {
   const validator = await createValidator();
   return validator.validate(epub, options);

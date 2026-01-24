@@ -44,7 +44,7 @@ async function loadValidator(): Promise<{
   if (!existsSync(wasmDir)) {
     throw new Error(
       `WASM directory not found: ${wasmDir}\n` +
-        "Run 'bun run build:wasm' first to compile the validator."
+        "Run 'bun run build:wasm' first to compile the validator.",
     );
   }
 
@@ -58,7 +58,7 @@ async function loadValidator(): Promise<{
   if (!wasmFile) {
     throw new Error(
       `No .wasm file found in ${wasmDir}\n` +
-        "TeaVM compilation may have failed. Check the build logs."
+        "TeaVM compilation may have failed. Check the build logs.",
     );
   }
 
@@ -67,7 +67,9 @@ async function loadValidator(): Promise<{
   const wasmPath = resolve(wasmDir, wasmFile);
   const wasmBuffer = await readFile(wasmPath);
 
-  console.log(`${colors.gray}Loading WASM: ${wasmFile} (${wasmBuffer.length} bytes)${colors.reset}`);
+  console.log(
+    `${colors.gray}Loading WASM: ${wasmFile} (${wasmBuffer.length} bytes)${colors.reset}`,
+  );
 
   // Shared state for WASM communication
   let currentEpubData: Uint8Array | null = null;
@@ -120,7 +122,7 @@ async function loadValidator(): Promise<{
       const exports = Object.keys(instance.exports);
       throw new Error(
         `'validate' function not found in WASM exports.\n` +
-          `Available exports: ${exports.join(", ")}`
+          `Available exports: ${exports.join(", ")}`,
       );
     }
 
@@ -148,7 +150,9 @@ async function loadValidator(): Promise<{
         return (
           validationResult ?? {
             valid: false,
-            errors: [{ severity: "ERROR", id: "NO_RESULT", message: "No result returned from validator" }],
+            errors: [
+              { severity: "ERROR", id: "NO_RESULT", message: "No result returned from validator" },
+            ],
             warnings: [],
           }
         );
@@ -157,7 +161,7 @@ async function loadValidator(): Promise<{
   } catch (error) {
     throw new Error(
       `Failed to instantiate WASM module: ${error instanceof Error ? error.message : String(error)}\n` +
-        "TeaVM WASM may require browser-specific APIs not available in Node.js/Bun."
+        "TeaVM WASM may require browser-specific APIs not available in Node.js/Bun.",
     );
   }
 }
