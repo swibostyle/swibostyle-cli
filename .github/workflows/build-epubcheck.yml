@@ -18,7 +18,7 @@ env:
   EPUBCHECK_VERSION: ${{ github.event.inputs.epubcheck_version || '5.1.0' }}
   # SHA256 hash of epubcheck-5.1.0.zip from official release
   # Update this when changing EPUBCHECK_VERSION
-  EPUBCHECK_SHA256: "5a4f636dd614b4131be1dc50ecc7c8ff3d4f0f26db7a7d8d7e4e5c03f3f1c8a2"
+  EPUBCHECK_SHA256: "74a59af8602bf59b1d04266a450d9cdcb5986e36d825adc403cde0d95e88c9e8"
 
 jobs:
   build-linux-x64:
