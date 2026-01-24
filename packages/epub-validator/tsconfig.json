@@ -4,7 +4,9 @@
     "outDir": "./dist",
     "rootDir": "./src",
     "declaration": true,
-    "declarationMap": true
+    "declarationMap": true,
+    "lib": ["ES2022", "DOM"],
+    "types": ["node", "bun-types"]
   },
   "include": ["src/**/*.ts"],
   "exclude": ["node_modules", "dist", "java"]

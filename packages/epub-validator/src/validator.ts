@@ -150,12 +150,15 @@ export async function createValidator(): Promise<EpubValidator> {
         };
       }
 
+      // Copy to local variable for type narrowing
+      const result = validationResult;
+
       // Filter out infos if not requested
       if (!options?.includeInfos) {
-        delete validationResult.infos;
+        delete result.infos;
       }
 
-      return validationResult;
+      return result;
     },
 
     isReady(): boolean {
