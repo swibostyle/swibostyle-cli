@@ -1,0 +1,12 @@
+# Ignore JSON files (oxfmt has issues with JSON)
+**/*.json
+
+# Ignore fixture files
+tests/fixtures
+
+# Ignore build outputs
+_build
+_release
+_temp
+dist
+node_modules

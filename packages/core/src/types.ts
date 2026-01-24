@@ -23,11 +23,11 @@ export interface BookConfig {
   };
 
   /** Layout type */
-  layout: 'reflowable' | 'pre-paginated';
+  layout: "reflowable" | "pre-paginated";
   /** Page direction */
-  pageDirection: 'ltr' | 'rtl';
+  pageDirection: "ltr" | "rtl";
   /** Primary writing mode */
-  primaryWritingMode: 'horizontal-tb' | 'vertical-rl';
+  primaryWritingMode: "horizontal-tb" | "vertical-rl";
 
   /** Original image resolution (e.g., '1693x2361') */
   originalResolution?: string;
@@ -49,7 +49,7 @@ export interface Author {
   /** Author name */
   name: string;
   /** Role: aut=author, ill=illustrator, edt=editor, trl=translator */
-  role: 'aut' | 'ill' | 'edt' | 'trl';
+  role: "aut" | "ill" | "edt" | "trl";
   /** File-as name for sorting */
   fileAs?: string;
 }
@@ -98,10 +98,10 @@ export interface Frontmatter {
   /** Include in guide */
   isGuideItem?: boolean;
   /** Guide type */
-  guideType?: 'cover' | 'toc' | 'bodymatter' | 'copyright';
+  guideType?: "cover" | "toc" | "bodymatter" | "copyright";
 
   /** EPUB page spread property */
-  epubPageProperty?: 'page-spread-left' | 'page-spread-right';
+  epubPageProperty?: "page-spread-left" | "page-spread-right";
 
   /** Only include in this build type */
   includeIf?: BuildTargetType;
@@ -121,7 +121,7 @@ export interface Frontmatter {
 export type ContentItem = XHTMLContent | ImageContent;
 
 export interface XHTMLContent {
-  type: 'xhtml';
+  type: "xhtml";
   id: string;
   fileName: string;
   title: string;
@@ -133,7 +133,7 @@ export interface XHTMLContent {
 }
 
 export interface ImageContent {
-  type: 'image';
+  type: "image";
   id: string;
   fileName: string;
   dimensions: ImageDimensions;
@@ -149,7 +149,7 @@ export interface ImageDimensions {
 // Build Configuration
 // =============================================================================
 
-export type BuildTargetType = 'epub' | 'print' | 'pod';
+export type BuildTargetType = "epub" | "print" | "pod";
 
 export interface BuildTarget {
   type: BuildTargetType;
@@ -162,7 +162,7 @@ export interface BuildOptions {
   /** Build target type */
   target: BuildTargetType;
   /** Output mode */
-  output?: 'file' | 'memory';
+  output?: "file" | "memory";
 }
 
 export interface BuildResult {
@@ -202,14 +202,14 @@ export interface PathConfig {
 // =============================================================================
 
 export type BuildPhase =
-  | 'clean'
-  | 'copy'
-  | 'css'
-  | 'image'
-  | 'markdown'
-  | 'opf'
-  | 'navigation'
-  | 'archive';
+  | "clean"
+  | "copy"
+  | "css"
+  | "image"
+  | "markdown"
+  | "opf"
+  | "navigation"
+  | "archive";
 
 export interface ProgressEvent {
   phase: BuildPhase;

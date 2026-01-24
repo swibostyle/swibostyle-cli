@@ -1,16 +1,13 @@
 #!/usr/bin/env node
 
-import { Command } from 'commander';
-import { buildCommand } from './commands/build.js';
-import { previewCommand } from './commands/preview.js';
-import { pdfCommand } from './commands/pdf.js';
+import { Command } from "commander";
+import { buildCommand } from "./commands/build.js";
+import { previewCommand } from "./commands/preview.js";
+import { pdfCommand } from "./commands/pdf.js";
 
 const program = new Command();
 
-program
-  .name('swibostyle')
-  .description('CSS typesetting CLI for EPUB generation')
-  .version('0.1.0');
+program.name("swibostyle").description("CSS typesetting CLI for EPUB generation").version("0.1.0");
 
 // Register commands
 program.addCommand(buildCommand);
@@ -18,9 +15,8 @@ program.addCommand(previewCommand);
 program.addCommand(pdfCommand);
 
 // Default command is build
-program
-  .action(() => {
-    program.help();
-  });
+program.action(() => {
+  program.help();
+});
 
 program.parse();

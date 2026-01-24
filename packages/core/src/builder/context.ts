@@ -1,7 +1,7 @@
-import type { StorageAdapter } from '../adapters/storage/interface.js';
-import type { ImageAdapter } from '../adapters/image/interface.js';
-import type { CSSAdapter } from '../adapters/css/interface.js';
-import type { BookConfig, Logger, PathConfig, ProgressCallback } from '../types.js';
+import type { StorageAdapter } from "../adapters/storage/interface.js";
+import type { ImageAdapter } from "../adapters/image/interface.js";
+import type { CSSAdapter } from "../adapters/css/interface.js";
+import type { BookConfig, Logger, PathConfig, ProgressCallback } from "../types.js";
 
 /**
  * Build context containing all dependencies and configuration

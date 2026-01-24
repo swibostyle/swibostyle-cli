@@ -7,10 +7,10 @@
  * This package is licensed under AGPL-3.0 due to Vivliostyle dependency.
  */
 
-import { serve } from '@hono/node-server';
-import { createApp } from './server.js';
+import { serve } from "@hono/node-server";
+import { createApp } from "./server.js";
 
-const port = parseInt(process.env.PORT || '3000', 10);
+const port = parseInt(process.env.PORT || "3000", 10);
 
 const app = createApp();
 

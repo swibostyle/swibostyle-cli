@@ -1,1 +1,1 @@
-export { loadBookConfig, getDefaultBookConfig } from './loader.js';
+export { loadBookConfig, getDefaultBookConfig } from "./loader.js";

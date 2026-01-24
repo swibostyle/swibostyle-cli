@@ -1,5 +1,5 @@
-import pc from 'picocolors';
-import type { Logger } from '@swibostyle/core';
+import pc from "picocolors";
+import type { Logger } from "@swibostyle/core";
 
 /**
  * Create a console logger

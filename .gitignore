@@ -3,6 +3,7 @@ _build/
 _release/
 _temp/
 dist/
+*.tsbuildinfo
 
 # Dependencies
 node_modules/

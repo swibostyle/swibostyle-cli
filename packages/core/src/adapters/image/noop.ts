@@ -1,17 +1,18 @@
-import type { ImageDimensions } from '../../types.js';
-import type { ConvertOptions, CropOptions, ImageAdapter, ImageFormat, ResizeOptions } from './interface.js';
+import type { ImageDimensions } from "../../types.js";
+import type {
+  ConvertOptions,
+  CropOptions,
+  ImageAdapter,
+  ImageFormat,
+  ResizeOptions,
+} from "./interface.js";
 
 /**
  * Parse PNG dimensions from header
  */
 function getPngSize(data: Uint8Array): ImageDimensions | null {
   // PNG signature: 137 80 78 71 13 10 26 10
-  if (
-    data[0] !== 0x89 ||
-    data[1] !== 0x50 ||
-    data[2] !== 0x4e ||
-    data[3] !== 0x47
-  ) {
+  if (data[0] !== 0x89 || data[1] !== 0x50 || data[2] !== 0x4e || data[3] !== 0x47) {
     return null;
   }
 
@@ -43,7 +44,14 @@ function getJpegSize(data: Uint8Array): ImageDimensions | null {
     offset += 2;
 
     // SOF0-SOF15 markers (except SOF4, SOF8, SOF12 which are not frame markers)
-    if (marker !== undefined && marker >= 0xc0 && marker <= 0xcf && marker !== 0xc4 && marker !== 0xc8 && marker !== 0xcc) {
+    if (
+      marker !== undefined &&
+      marker >= 0xc0 &&
+      marker <= 0xcf &&
+      marker !== 0xc4 &&
+      marker !== 0xc8 &&
+      marker !== 0xcc
+    ) {
       // Skip length (2 bytes) and precision (1 byte)
       const height = (data[offset + 3]! << 8) | data[offset + 4]!;
       const width = (data[offset + 5]! << 8) | data[offset + 6]!;
@@ -65,11 +73,7 @@ function getJpegSize(data: Uint8Array): ImageDimensions | null {
  */
 function getGifSize(data: Uint8Array): ImageDimensions | null {
   // GIF signature: GIF87a or GIF89a
-  if (
-    data[0] !== 0x47 ||
-    data[1] !== 0x49 ||
-    data[2] !== 0x46
-  ) {
+  if (data[0] !== 0x47 || data[1] !== 0x49 || data[2] !== 0x46) {
     return null;
   }
 
@@ -98,32 +102,23 @@ export class NoopImageAdapter implements ImageAdapter {
     const gifSize = getGifSize(data);
     if (gifSize) return gifSize;
 
-    throw new Error('Unable to determine image dimensions: unsupported format');
+    throw new Error("Unable to determine image dimensions: unsupported format");
   }
 
   async getFormat(data: Uint8Array): Promise<ImageFormat | null> {
     // Check PNG
-    if (
-      data[0] === 0x89 &&
-      data[1] === 0x50 &&
-      data[2] === 0x4e &&
-      data[3] === 0x47
-    ) {
-      return 'png';
+    if (data[0] === 0x89 && data[1] === 0x50 && data[2] === 0x4e && data[3] === 0x47) {
+      return "png";
     }
 
     // Check JPEG
     if (data[0] === 0xff && data[1] === 0xd8) {
-      return 'jpeg';
+      return "jpeg";
     }
 
     // Check GIF
-    if (
-      data[0] === 0x47 &&
-      data[1] === 0x49 &&
-      data[2] === 0x46
-    ) {
-      return 'gif';
+    if (data[0] === 0x47 && data[1] === 0x49 && data[2] === 0x46) {
+      return "gif";
     }
 
     // Check WebP
@@ -137,27 +132,37 @@ export class NoopImageAdapter implements ImageAdapter {
       data[10] === 0x42 &&
       data[11] === 0x50
     ) {
-      return 'webp';
+      return "webp";
     }
 
     // Check SVG (text-based)
     const text = new TextDecoder().decode(data.slice(0, 100));
-    if (text.includes('<svg') || text.includes('<?xml')) {
-      return 'svg';
+    if (text.includes("<svg") || text.includes("<?xml")) {
+      return "svg";
     }
 
     return null;
   }
 
   async resize(_data: Uint8Array, _options: ResizeOptions): Promise<Uint8Array> {
-    throw new Error('NoopImageAdapter does not support resize. Use SharpImageAdapter or WasmImageAdapter.');
+    throw new Error(
+      "NoopImageAdapter does not support resize. Use SharpImageAdapter or WasmImageAdapter.",
+    );
   }
 
   async crop(_data: Uint8Array, _options: CropOptions): Promise<Uint8Array> {
-    throw new Error('NoopImageAdapter does not support crop. Use SharpImageAdapter or WasmImageAdapter.');
+    throw new Error(
+      "NoopImageAdapter does not support crop. Use SharpImageAdapter or WasmImageAdapter.",
+    );
   }
 
-  async convert(_data: Uint8Array, _format: ImageFormat, _options?: ConvertOptions): Promise<Uint8Array> {
-    throw new Error('NoopImageAdapter does not support convert. Use SharpImageAdapter or WasmImageAdapter.');
+  async convert(
+    _data: Uint8Array,
+    _format: ImageFormat,
+    _options?: ConvertOptions,
+  ): Promise<Uint8Array> {
+    throw new Error(
+      "NoopImageAdapter does not support convert. Use SharpImageAdapter or WasmImageAdapter.",
+    );
   }
 }

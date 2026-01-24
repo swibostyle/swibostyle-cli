@@ -1,4 +1,4 @@
-import type { FileStat } from '../../types.js';
+import type { FileStat } from "../../types.js";
 
 /**
  * Storage adapter interface for abstracting file system operations.

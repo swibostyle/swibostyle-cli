@@ -1,5 +1,5 @@
-import type { BuildContext } from './context.js';
-import { getBuildPaths } from './context.js';
+import type { BuildContext } from "./context.js";
+import { getBuildPaths } from "./context.js";
 
 /**
  * Copy source files to build directory
@@ -15,7 +15,7 @@ export async function copy(ctx: BuildContext): Promise<void> {
   tasks.push({
     src: `${paths.src}/mimetype`,
     dest: `${paths.build}/mimetype`,
-    description: 'mimetype',
+    description: "mimetype",
   });
 
   // 2. META-INF
@@ -33,10 +33,10 @@ export async function copy(ctx: BuildContext): Promise<void> {
   // 3. Images
   if (await storage.exists(paths.images)) {
     const imageFiles = await storage.readDir(paths.images);
-    const supportedExtensions = ['.png', '.jpg', '.jpeg', '.svg', '.gif', '.webp'];
+    const supportedExtensions = [".png", ".jpg", ".jpeg", ".svg", ".gif", ".webp"];
 
     for (const file of imageFiles) {
-      const ext = file.toLowerCase().slice(file.lastIndexOf('.'));
+      const ext = file.toLowerCase().slice(file.lastIndexOf("."));
       if (supportedExtensions.includes(ext)) {
         tasks.push({
           src: `${paths.images}/${file}`,
@@ -47,18 +47,23 @@ export async function copy(ctx: BuildContext): Promise<void> {
     }
   }
 
-  logger?.debug('Copying %d files', tasks.length);
-  onProgress?.({ phase: 'copy', current: 0, total: tasks.length, message: 'Starting copy' });
+  logger?.debug("Copying %d files", tasks.length);
+  onProgress?.({ phase: "copy", current: 0, total: tasks.length, message: "Starting copy" });
 
   // Execute copy tasks
   for (let i = 0; i < tasks.length; i++) {
     const task = tasks[i]!;
-    logger?.debug('Copying: %s', task.description);
-    onProgress?.({ phase: 'copy', current: i, total: tasks.length, message: task.description });
+    logger?.debug("Copying: %s", task.description);
+    onProgress?.({ phase: "copy", current: i, total: tasks.length, message: task.description });
 
     await storage.copyFile(task.src, task.dest);
   }
 
-  onProgress?.({ phase: 'copy', current: tasks.length, total: tasks.length, message: 'Copy complete' });
-  logger?.info('Copied %d files', tasks.length);
+  onProgress?.({
+    phase: "copy",
+    current: tasks.length,
+    total: tasks.length,
+    message: "Copy complete",
+  });
+  logger?.info("Copied %d files", tasks.length);
 }

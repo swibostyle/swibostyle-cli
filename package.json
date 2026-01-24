@@ -15,11 +15,18 @@
     "test:unit": "bun test packages/*/src",
     "test:integration": "bun test tests/integration",
     "typecheck": "bun run --filter '*' typecheck",
+    "lint": "oxlint --tsconfig tsconfig.base.json --ignore-pattern 'tests/fixtures/**' .",
+    "lint:fix": "oxlint --tsconfig tsconfig.base.json --ignore-pattern 'tests/fixtures/**' --fix .",
+    "format": "oxfmt --ignore-path .oxfmtignore --write packages tests/integration",
+    "format:check": "oxfmt --ignore-path .oxfmtignore --check packages tests/integration",
+    "check": "bun run typecheck && bun run lint && bun run format:check",
     "clean": "rm -rf packages/*/dist"
   },
   "devDependencies": {
-    "typescript": "^5.7.0",
     "@types/node": "^22.10.0",
-    "bun-types": "latest"
+    "bun-types": "latest",
+    "oxfmt": "^0.26.0",
+    "oxlint": "^1.41.0",
+    "typescript": "^5.7.0"
   }
 }

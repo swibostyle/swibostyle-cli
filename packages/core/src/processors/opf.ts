@@ -1,6 +1,6 @@
-import type { BuildContext } from '../builder/context.js';
-import { getBuildPaths } from '../builder/context.js';
-import type { BuildTargetType, ContentItem, XHTMLContent, ImageContent } from '../types.js';
+import type { BuildContext } from "../builder/context.js";
+import { getBuildPaths } from "../builder/context.js";
+import type { BuildTargetType, ContentItem, XHTMLContent, ImageContent } from "../types.js";
 
 /**
  * Generate OPF (Open Packaging Format) file
@@ -8,15 +8,15 @@ import type { BuildTargetType, ContentItem, XHTMLContent, ImageContent } from '.
 export async function generateOPF(
   ctx: BuildContext,
   contents: ContentItem[],
-  targetType: BuildTargetType
+  targetType: BuildTargetType,
 ): Promise<void> {
   const { storage, paths, config, logger, onProgress } = ctx;
   const buildPaths = getBuildPaths(paths.build);
 
-  onProgress?.({ phase: 'opf', current: 0, total: 1, message: 'Generating OPF' });
-  logger?.debug('Generating OPF');
+  onProgress?.({ phase: "opf", current: 0, total: 1, message: "Generating OPF" });
+  logger?.debug("Generating OPF");
 
-  const ejs = await import('ejs');
+  const ejs = await import("ejs");
 
   // Read template
   const templatePath = `${paths.templates}/standard.opf.ejs`;
@@ -24,13 +24,13 @@ export async function generateOPF(
 
   // Separate content types
   const pages = contents
-    .filter((c): c is XHTMLContent => c.type === 'xhtml')
+    .filter((c): c is XHTMLContent => c.type === "xhtml")
     .sort((a, b) => a.displayOrder - b.displayOrder);
 
-  const images = contents.filter((c): c is ImageContent => c.type === 'image');
+  const images = contents.filter((c): c is ImageContent => c.type === "image");
 
   // Generate modified timestamp
-  const modified = new Date().toISOString().replace(/\.\d{3}Z$/, 'Z');
+  const modified = new Date().toISOString().replace(/\.\d{3}Z$/, "Z");
 
   // Render OPF
   const opf = await ejs.render(
@@ -42,13 +42,13 @@ export async function generateOPF(
       buildType: targetType,
       modified,
     },
-    { async: true }
+    { async: true },
   );
 
   // Write OPF file
   const outputPath = `${buildPaths.item}/standard.opf`;
   await storage.writeFile(outputPath, opf);
 
-  onProgress?.({ phase: 'opf', current: 1, total: 1, message: 'OPF complete' });
-  logger?.info('Generated OPF: %s', outputPath);
+  onProgress?.({ phase: "opf", current: 1, total: 1, message: "OPF complete" });
+  logger?.info("Generated OPF: %s", outputPath);
 }

@@ -1,8 +1,7 @@
-import * as fs from 'node:fs';
-import * as fsp from 'node:fs/promises';
-import * as path from 'node:path';
-import type { FileStat } from '../../types.js';
-import type { StorageAdapter } from './interface.js';
+import * as fs from "node:fs";
+import * as fsp from "node:fs/promises";
+import type { FileStat } from "../../types.js";
+import type { StorageAdapter } from "./interface.js";
 
 /**
  * Node.js file system storage adapter
@@ -13,7 +12,7 @@ export class NodeStorageAdapter implements StorageAdapter {
     return new Uint8Array(buffer);
   }
 
-  async readTextFile(filePath: string, encoding: BufferEncoding = 'utf-8'): Promise<string> {
+  async readTextFile(filePath: string, encoding: BufferEncoding = "utf-8"): Promise<string> {
     return fsp.readFile(filePath, { encoding });
   }
 
@@ -60,13 +59,14 @@ export class NodeStorageAdapter implements StorageAdapter {
     const nodeStream = fs.createReadStream(filePath);
     return new ReadableStream({
       start(controller) {
-        nodeStream.on('data', (chunk: Buffer) => {
-          controller.enqueue(new Uint8Array(chunk));
+        nodeStream.on("data", (chunk: Buffer | string) => {
+          const buffer = typeof chunk === "string" ? Buffer.from(chunk) : chunk;
+          controller.enqueue(new Uint8Array(buffer));
         });
-        nodeStream.on('end', () => {
+        nodeStream.on("end", () => {
           controller.close();
         });
-        nodeStream.on('error', (err) => {
+        nodeStream.on("error", (err) => {
           controller.error(err);
         });
       },

@@ -1,4 +1,4 @@
-import type { CSSAdapter, CSSInput, CSSOutput } from './interface.js';
+import type { CSSAdapter, CSSInput, CSSOutput } from "./interface.js";
 
 /**
  * Pass-through CSS adapter that performs no processing.

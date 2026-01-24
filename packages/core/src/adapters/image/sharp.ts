@@ -1,15 +1,21 @@
-import type { ImageDimensions } from '../../types.js';
-import type { ConvertOptions, CropOptions, ImageAdapter, ImageFormat, ResizeOptions } from './interface.js';
+import type { ImageDimensions } from "../../types.js";
+import type {
+  ConvertOptions,
+  CropOptions,
+  ImageAdapter,
+  ImageFormat,
+  ResizeOptions,
+} from "./interface.js";
 
 /**
  * Sharp-based image adapter for Node.js/Bun environments
  */
 export class SharpImageAdapter implements ImageAdapter {
-  private sharp: typeof import('sharp') | null = null;
+  private sharp: typeof import("sharp") | null = null;
 
-  private async getSharp(): Promise<typeof import('sharp')> {
+  private async getSharp(): Promise<typeof import("sharp")> {
     if (!this.sharp) {
-      this.sharp = (await import('sharp')).default;
+      this.sharp = (await import("sharp")).default;
     }
     return this.sharp;
   }
@@ -29,16 +35,16 @@ export class SharpImageAdapter implements ImageAdapter {
     const format = metadata.format;
 
     switch (format) {
-      case 'png':
-        return 'png';
-      case 'jpeg':
-        return 'jpeg';
-      case 'webp':
-        return 'webp';
-      case 'gif':
-        return 'gif';
-      case 'svg':
-        return 'svg';
+      case "png":
+        return "png";
+      case "jpeg":
+        return "jpeg";
+      case "webp":
+        return "webp";
+      case "gif":
+        return "gif";
+      case "svg":
+        return "svg";
       default:
         return null;
     }
@@ -51,15 +57,15 @@ export class SharpImageAdapter implements ImageAdapter {
     image = image.resize({
       width: options.width,
       height: options.height,
-      fit: options.fit ?? 'inside',
+      fit: options.fit ?? "inside",
     });
 
     const format = await this.getFormat(data);
-    if (format === 'jpeg' && options.quality) {
+    if (format === "jpeg" && options.quality) {
       image = image.jpeg({ quality: options.quality });
-    } else if (format === 'png') {
+    } else if (format === "png") {
       image = image.png();
-    } else if (format === 'webp' && options.quality) {
+    } else if (format === "webp" && options.quality) {
       image = image.webp({ quality: options.quality });
     }
 
@@ -81,18 +87,22 @@ export class SharpImageAdapter implements ImageAdapter {
     return new Uint8Array(buffer);
   }
 
-  async convert(data: Uint8Array, format: ImageFormat, options?: ConvertOptions): Promise<Uint8Array> {
+  async convert(
+    data: Uint8Array,
+    format: ImageFormat,
+    options?: ConvertOptions,
+  ): Promise<Uint8Array> {
     const sharp = await this.getSharp();
     let image = sharp(data);
 
     switch (format) {
-      case 'png':
+      case "png":
         image = image.png();
         break;
-      case 'jpeg':
+      case "jpeg":
         image = image.jpeg({ quality: options?.quality ?? 90 });
         break;
-      case 'webp':
+      case "webp":
         image = image.webp({ quality: options?.quality ?? 90 });
         break;
       default:
@@ -105,7 +115,7 @@ export class SharpImageAdapter implements ImageAdapter {
 
   async convertPsdToPng(data: Uint8Array): Promise<Uint8Array> {
     // PSD conversion requires the 'psd' package
-    const PSD = (await import('psd')).default;
+    const PSD = (await import("psd")).default;
     const psd = new PSD(data);
     await psd.parse();
 

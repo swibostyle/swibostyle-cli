@@ -1,11 +1,11 @@
-import type { ImageDimensions } from '../../types.js';
+import type { ImageDimensions } from "../../types.js";
 
-export type ImageFormat = 'png' | 'jpeg' | 'webp' | 'svg' | 'gif';
+export type ImageFormat = "png" | "jpeg" | "webp" | "svg" | "gif";
 
 export interface ResizeOptions {
   width?: number;
   height?: number;
-  fit?: 'contain' | 'cover' | 'fill' | 'inside' | 'outside';
+  fit?: "contain" | "cover" | "fill" | "inside" | "outside";
   quality?: number;
 }
 

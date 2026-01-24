@@ -1,32 +1,32 @@
-import type { BuildContext } from '../builder/context.js';
-import { getBuildPaths } from '../builder/context.js';
-import type { BuildTargetType, Frontmatter, XHTMLContent } from '../types.js';
-import { convertToXhtml } from '../utils/xhtml.js';
-import { readFrontmatter } from '../utils/frontmatter.js';
+import type { BuildContext } from "../builder/context.js";
+import { getBuildPaths } from "../builder/context.js";
+import type { BuildTargetType, Frontmatter, XHTMLContent } from "../types.js";
+import { convertToXhtml } from "../utils/xhtml.js";
+import { readFrontmatter } from "../utils/frontmatter.js";
 
 /**
  * Process markdown files and generate XHTML
  */
 export async function processMarkdown(
   ctx: BuildContext,
-  targetType: BuildTargetType
+  targetType: BuildTargetType,
 ): Promise<XHTMLContent[]> {
   const { storage, paths, logger, onProgress } = ctx;
   const buildPaths = getBuildPaths(paths.build);
 
   // Get list of markdown files
   const markdownFiles = (await storage.readDir(paths.markdown))
-    .filter((f) => f.endsWith('.md'))
+    .filter((f) => f.endsWith(".md"))
     .sort();
 
-  logger?.debug('Processing %d markdown files', markdownFiles.length);
-  onProgress?.({ phase: 'markdown', current: 0, total: markdownFiles.length, message: 'Starting' });
+  logger?.debug("Processing %d markdown files", markdownFiles.length);
+  onProgress?.({ phase: "markdown", current: 0, total: markdownFiles.length, message: "Starting" });
 
   const contents: XHTMLContent[] = [];
 
   // Dynamically import VFM
-  const vfm = await import('@vivliostyle/vfm');
-  const ejs = await import('ejs');
+  const vfm = await import("@vivliostyle/vfm");
+  const ejs = await import("ejs");
 
   // Read template
   const templatePath = `${paths.templates}/xhtml.ejs`;
@@ -36,8 +36,8 @@ export async function processMarkdown(
     const file = markdownFiles[i]!;
     const filePath = `${paths.markdown}/${file}`;
 
-    logger?.debug('Processing: %s', file);
-    onProgress?.({ phase: 'markdown', current: i, total: markdownFiles.length, message: file });
+    logger?.debug("Processing: %s", file);
+    onProgress?.({ phase: "markdown", current: i, total: markdownFiles.length, message: file });
 
     // Read markdown content
     const mdContent = await storage.readTextFile(filePath);
@@ -47,7 +47,7 @@ export async function processMarkdown(
 
     // Check if should be included in this build
     if (!isIncluded(targetType, frontmatter)) {
-      logger?.debug('Skipping (excluded): %s', file);
+      logger?.debug("Skipping (excluded): %s", file);
       continue;
     }
 
@@ -58,7 +58,7 @@ export async function processMarkdown(
 
     // Convert to XHTML
     const htmlPartial = convertToXhtml(result.toString());
-    const title = metadata.title ?? frontmatter.title ?? '';
+    const title = metadata.title ?? frontmatter.title ?? "";
 
     // Render with EJS template
     const html = await ejs.render(
@@ -68,11 +68,11 @@ export async function processMarkdown(
         frontmatter,
         title,
       },
-      { async: true }
+      { async: true },
     );
 
     // Determine output filename
-    let fileName = file.replace(/\.md$/, '');
+    let fileName = file.replace(/\.md$/, "");
     if (frontmatter.outputFileName) {
       fileName = frontmatter.outputFileName;
     }
@@ -81,13 +81,13 @@ export async function processMarkdown(
     const hasSvg = /.*<svg .*/g.test(htmlPartial);
 
     const content: XHTMLContent = {
-      type: 'xhtml',
+      type: "xhtml",
       id: fileName,
       fileName: `${fileName}.xhtml`,
       title,
       html,
       frontmatter,
-      properties: hasSvg ? 'svg' : undefined,
+      properties: hasSvg ? "svg" : undefined,
       displayOrder: frontmatter.displayOrder ?? 0,
     };
 
@@ -97,12 +97,12 @@ export async function processMarkdown(
   }
 
   onProgress?.({
-    phase: 'markdown',
+    phase: "markdown",
     current: markdownFiles.length,
     total: markdownFiles.length,
-    message: 'Complete',
+    message: "Complete",
   });
-  logger?.info('Processed %d markdown files', contents.length);
+  logger?.info("Processed %d markdown files", contents.length);
 
   return contents;
 }

@@ -1,14 +1,14 @@
-import type { FileStat } from '../../types.js';
-import type { StorageAdapter } from './interface.js';
+import type { FileStat } from "../../types.js";
+import type { StorageAdapter } from "./interface.js";
 
 interface MemoryFile {
-  type: 'file';
+  type: "file";
   data: Uint8Array;
   mtime: Date;
 }
 
 interface MemoryDirectory {
-  type: 'directory';
+  type: "directory";
   mtime: Date;
 }
 
@@ -23,7 +23,7 @@ export class MemoryStorageAdapter implements StorageAdapter {
 
   constructor(initialFiles?: Map<string, Uint8Array | string>) {
     // Always create root directory
-    this.files.set('/', { type: 'directory', mtime: new Date() });
+    this.files.set("/", { type: "directory", mtime: new Date() });
 
     if (initialFiles) {
       for (const [path, data] of initialFiles) {
@@ -37,9 +37,9 @@ export class MemoryStorageAdapter implements StorageAdapter {
    */
   setFile(path: string, data: Uint8Array | string): void {
     const normalizedPath = this.normalizePath(path);
-    const uint8Data = typeof data === 'string' ? new TextEncoder().encode(data) : data;
+    const uint8Data = typeof data === "string" ? new TextEncoder().encode(data) : data;
     this.files.set(normalizedPath, {
-      type: 'file',
+      type: "file",
       data: uint8Data,
       mtime: new Date(),
     });
@@ -53,8 +53,8 @@ export class MemoryStorageAdapter implements StorageAdapter {
    */
   mkdirSync(path: string): void {
     const normalizedPath = this.normalizePath(path);
-    this.ensureParentDirs(normalizedPath + '/dummy');
-    this.files.set(normalizedPath, { type: 'directory', mtime: new Date() });
+    this.ensureParentDirs(normalizedPath + "/dummy");
+    this.files.set(normalizedPath, { type: "directory", mtime: new Date() });
   }
 
   /**
@@ -70,7 +70,7 @@ export class MemoryStorageAdapter implements StorageAdapter {
   exportFiles(): Map<string, Uint8Array> {
     const result = new Map<string, Uint8Array>();
     for (const [path, entry] of this.files) {
-      if (entry.type === 'file') {
+      if (entry.type === "file") {
         result.set(path, entry.data);
       }
     }
@@ -79,30 +79,30 @@ export class MemoryStorageAdapter implements StorageAdapter {
 
   private normalizePath(path: string): string {
     // Normalize path separators and remove trailing slashes
-    let normalized = path.replace(/\\/g, '/');
-    if (normalized !== '/' && normalized.endsWith('/')) {
+    let normalized = path.replace(/\\/g, "/");
+    if (normalized !== "/" && normalized.endsWith("/")) {
       normalized = normalized.slice(0, -1);
     }
-    if (!normalized.startsWith('/')) {
-      normalized = '/' + normalized;
+    if (!normalized.startsWith("/")) {
+      normalized = "/" + normalized;
     }
     return normalized;
   }
 
   private ensureParentDirs(path: string): void {
-    const parts = path.split('/').filter(Boolean);
-    let currentPath = '';
+    const parts = path.split("/").filter(Boolean);
+    let currentPath = "";
     for (let i = 0; i < parts.length - 1; i++) {
-      currentPath += '/' + parts[i];
+      currentPath += "/" + parts[i];
       if (!this.files.has(currentPath)) {
-        this.files.set(currentPath, { type: 'directory', mtime: new Date() });
+        this.files.set(currentPath, { type: "directory", mtime: new Date() });
       }
     }
   }
 
   private getParentPath(path: string): string {
-    const lastSlash = path.lastIndexOf('/');
-    if (lastSlash <= 0) return '/';
+    const lastSlash = path.lastIndexOf("/");
+    if (lastSlash <= 0) return "/";
     return path.slice(0, lastSlash);
   }
 
@@ -112,7 +112,7 @@ export class MemoryStorageAdapter implements StorageAdapter {
     if (!entry) {
       throw new Error(`ENOENT: no such file or directory: ${path}`);
     }
-    if (entry.type !== 'file') {
+    if (entry.type !== "file") {
       throw new Error(`EISDIR: illegal operation on a directory: ${path}`);
     }
     return entry.data;
@@ -129,11 +129,11 @@ export class MemoryStorageAdapter implements StorageAdapter {
     if (!entry) {
       throw new Error(`ENOENT: no such file or directory: ${path}`);
     }
-    if (entry.type !== 'directory') {
+    if (entry.type !== "directory") {
       throw new Error(`ENOTDIR: not a directory: ${path}`);
     }
 
-    const prefix = normalizedPath === '/' ? '/' : normalizedPath + '/';
+    const prefix = normalizedPath === "/" ? "/" : normalizedPath + "/";
     const results: string[] = [];
 
     for (const filePath of this.files.keys()) {
@@ -141,7 +141,7 @@ export class MemoryStorageAdapter implements StorageAdapter {
       if (!filePath.startsWith(prefix)) continue;
 
       const relativePath = filePath.slice(prefix.length);
-      const firstSlash = relativePath.indexOf('/');
+      const firstSlash = relativePath.indexOf("/");
       const name = firstSlash === -1 ? relativePath : relativePath.slice(0, firstSlash);
 
       if (name && !results.includes(name)) {
@@ -165,20 +165,20 @@ export class MemoryStorageAdapter implements StorageAdapter {
     }
 
     return {
-      isFile: entry.type === 'file',
-      isDirectory: entry.type === 'directory',
-      size: entry.type === 'file' ? entry.data.length : 0,
+      isFile: entry.type === "file",
+      isDirectory: entry.type === "directory",
+      size: entry.type === "file" ? entry.data.length : 0,
       mtime: entry.mtime,
     };
   }
 
   async writeFile(path: string, data: Uint8Array | string): Promise<void> {
     const normalizedPath = this.normalizePath(path);
-    const uint8Data = typeof data === 'string' ? new TextEncoder().encode(data) : data;
+    const uint8Data = typeof data === "string" ? new TextEncoder().encode(data) : data;
 
     this.ensureParentDirs(normalizedPath);
     this.files.set(normalizedPath, {
-      type: 'file',
+      type: "file",
       data: uint8Data,
       mtime: new Date(),
     });
@@ -188,14 +188,14 @@ export class MemoryStorageAdapter implements StorageAdapter {
     const normalizedPath = this.normalizePath(path);
 
     if (options?.recursive) {
-      this.ensureParentDirs(normalizedPath + '/dummy');
-      this.files.set(normalizedPath, { type: 'directory', mtime: new Date() });
+      this.ensureParentDirs(normalizedPath + "/dummy");
+      this.files.set(normalizedPath, { type: "directory", mtime: new Date() });
     } else {
       const parent = this.getParentPath(normalizedPath);
       if (!this.files.has(parent)) {
         throw new Error(`ENOENT: no such file or directory: ${parent}`);
       }
-      this.files.set(normalizedPath, { type: 'directory', mtime: new Date() });
+      this.files.set(normalizedPath, { type: "directory", mtime: new Date() });
     }
   }
 
@@ -207,9 +207,9 @@ export class MemoryStorageAdapter implements StorageAdapter {
       throw new Error(`ENOENT: no such file or directory: ${path}`);
     }
 
-    if (entry.type === 'directory' && options?.recursive) {
+    if (entry.type === "directory" && options?.recursive) {
       // Remove all files under this directory
-      const prefix = normalizedPath === '/' ? '/' : normalizedPath + '/';
+      const prefix = normalizedPath === "/" ? "/" : normalizedPath + "/";
       const toDelete: string[] = [];
 
       for (const filePath of this.files.keys()) {

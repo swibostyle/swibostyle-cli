@@ -1,8 +1,7 @@
-import * as fs from 'node:fs';
-import * as path from 'node:path';
-import * as p from '@clack/prompts';
-import pc from 'picocolors';
-import type { ProjectOptions, TemplateType } from './types.js';
+import * as fs from "node:fs";
+import * as path from "node:path";
+import * as p from "@clack/prompts";
+import type { ProjectOptions } from "./types.js";
 
 /**
  * Scaffold a new project
@@ -20,26 +19,19 @@ export async function scaffold(options: ProjectOptions): Promise<void> {
       });
 
       if (p.isCancel(overwrite) || !overwrite) {
-        throw new Error('cancelled');
+        throw new Error("cancelled");
       }
     }
   }
 
   const spinner = p.spinner();
-  spinner.start('Creating project...');
+  spinner.start("Creating project...");
 
   // Create project directory
   fs.mkdirSync(projectDir, { recursive: true });
 
   // Create directory structure
-  const dirs = [
-    'src',
-    'src/markdown',
-    'src/style',
-    'src/templates',
-    'src/image',
-    'src/META-INF',
-  ];
+  const dirs = ["src", "src/markdown", "src/style", "src/templates", "src/image", "src/META-INF"];
 
   for (const dir of dirs) {
     fs.mkdirSync(path.join(projectDir, dir), { recursive: true });
@@ -56,29 +48,29 @@ export async function scaffold(options: ProjectOptions): Promise<void> {
   await generateGitignore(projectDir);
   await generateReadme(projectDir, options);
 
-  spinner.stop('Project created');
+  spinner.stop("Project created");
 }
 
 async function generatePackageJson(projectDir: string, options: ProjectOptions): Promise<void> {
   const packageJson = {
     name: options.name,
-    version: '1.0.0',
-    type: 'module',
+    version: "1.0.0",
+    type: "module",
     private: true,
     scripts: {
-      build: 'swibostyle build',
-      'build:print': 'swibostyle build --target print',
-      'build:pod': 'swibostyle build --target pod',
-      preview: 'swibostyle preview',
+      build: "swibostyle build",
+      "build:print": "swibostyle build --target print",
+      "build:pod": "swibostyle build --target pod",
+      preview: "swibostyle preview",
     },
     dependencies: {
-      '@swibostyle/cli': '^0.1.0',
+      "@swibostyle/cli": "^0.1.0",
     },
   };
 
   fs.writeFileSync(
-    path.join(projectDir, 'package.json'),
-    JSON.stringify(packageJson, null, 2) + '\n'
+    path.join(projectDir, "package.json"),
+    JSON.stringify(packageJson, null, 2) + "\n",
   );
 }
 
@@ -87,29 +79,29 @@ async function generateBookJson(projectDir: string, options: ProjectOptions): Pr
     title: options.name,
     authors: [
       {
-        name: 'Author Name',
-        role: 'aut',
+        name: "Author Name",
+        role: "aut",
       },
     ],
-    publisher: 'Publisher',
+    publisher: "Publisher",
     lang: options.lang,
     bookId: {
-      epub: '00000000000000000000',
+      epub: "00000000000000000000",
     },
-    layout: options.template === 'manga' ? 'pre-paginated' : 'reflowable',
+    layout: options.template === "manga" ? "pre-paginated" : "reflowable",
     pageDirection: options.pageDirection,
     primaryWritingMode: options.writingMode,
     targets: {
       epub: {
-        css: 'epub.scss',
+        css: "epub.scss",
         enableImageResizing: true,
       },
       print: {
-        css: 'print.scss',
+        css: "print.scss",
         enableImageResizing: false,
       },
       pod: {
-        css: 'pod.scss',
+        css: "pod.scss",
         enableImageResizing: false,
       },
     },
@@ -118,21 +110,23 @@ async function generateBookJson(projectDir: string, options: ProjectOptions): Pr
   };
 
   fs.writeFileSync(
-    path.join(projectDir, 'src/book.json'),
-    JSON.stringify(bookJson, null, 2) + '\n'
+    path.join(projectDir, "src/book.json"),
+    JSON.stringify(bookJson, null, 2) + "\n",
   );
 }
 
 async function generateStyles(projectDir: string, options: ProjectOptions): Promise<void> {
-  const isVertical = options.writingMode === 'vertical-rl';
+  const isVertical = options.writingMode === "vertical-rl";
 
   // base.scss
   const baseScss = `// Base styles for ${options.name}
 
 :root {
-  --font-family-main: ${isVertical
-    ? '"BIZ UDMincho", "Hiragino Mincho ProN", serif'
-    : '"BIZ UDGothic", "Hiragino Sans", sans-serif'};
+  --font-family-main: ${
+    isVertical
+      ? '"BIZ UDMincho", "Hiragino Mincho ProN", serif'
+      : '"BIZ UDGothic", "Hiragino Sans", sans-serif'
+  };
 }
 
 html {
@@ -142,7 +136,7 @@ html {
 body {
   font-family: var(--font-family-main);
   line-height: 1.8;
-  ${isVertical ? 'text-orientation: mixed;' : ''}
+  ${isVertical ? "text-orientation: mixed;" : ""}
 }
 
 h1 {
@@ -163,7 +157,7 @@ p {
 }
 
 p + p {
-  margin-${isVertical ? 'right' : 'top'}: 0;
+  margin-${isVertical ? "right" : "top"}: 0;
 }
 `;
 
@@ -206,10 +200,10 @@ p + p {
 }
 `;
 
-  fs.writeFileSync(path.join(projectDir, 'src/style/base.scss'), baseScss);
-  fs.writeFileSync(path.join(projectDir, 'src/style/epub.scss'), epubScss);
-  fs.writeFileSync(path.join(projectDir, 'src/style/print.scss'), printScss);
-  fs.writeFileSync(path.join(projectDir, 'src/style/pod.scss'), podScss);
+  fs.writeFileSync(path.join(projectDir, "src/style/base.scss"), baseScss);
+  fs.writeFileSync(path.join(projectDir, "src/style/epub.scss"), epubScss);
+  fs.writeFileSync(path.join(projectDir, "src/style/print.scss"), printScss);
+  fs.writeFileSync(path.join(projectDir, "src/style/pod.scss"), podScss);
 }
 
 async function generateTemplates(projectDir: string, options: ProjectOptions): Promise<void> {
@@ -289,28 +283,30 @@ async function generateTemplates(projectDir: string, options: ProjectOptions): P
 </package>
 `;
 
-  fs.writeFileSync(path.join(projectDir, 'src/templates/xhtml.ejs'), xhtmlTemplate);
-  fs.writeFileSync(path.join(projectDir, 'src/templates/navigation-documents.ejs'), navTemplate);
-  fs.writeFileSync(path.join(projectDir, 'src/templates/standard.opf.ejs'), opfTemplate);
+  fs.writeFileSync(path.join(projectDir, "src/templates/xhtml.ejs"), xhtmlTemplate);
+  fs.writeFileSync(path.join(projectDir, "src/templates/navigation-documents.ejs"), navTemplate);
+  fs.writeFileSync(path.join(projectDir, "src/templates/standard.opf.ejs"), opfTemplate);
 }
 
 async function generateSampleContent(projectDir: string, options: ProjectOptions): Promise<void> {
-  const isVertical = options.writingMode === 'vertical-rl';
+  const isVertical = options.writingMode === "vertical-rl";
 
   const sampleMd = `---
-title: ${isVertical ? 'はじめに' : 'Introduction'}
+title: ${isVertical ? "はじめに" : "Introduction"}
 displayOrder: 1
 isNavigationItem: true
 ---
 
-# ${isVertical ? 'はじめに' : 'Introduction'}
+# ${isVertical ? "はじめに" : "Introduction"}
 
-${isVertical
-    ? 'これはswibostyleで作成されたサンプルです。\n\nこのファイルを編集して、あなたの本を作成してください。'
-    : 'This is a sample created with swibostyle.\n\nEdit this file to create your book.'}
+${
+  isVertical
+    ? "これはswibostyleで作成されたサンプルです。\n\nこのファイルを編集して、あなたの本を作成してください。"
+    : "This is a sample created with swibostyle.\n\nEdit this file to create your book."
+}
 `;
 
-  fs.writeFileSync(path.join(projectDir, 'src/markdown/p-001-intro.md'), sampleMd);
+  fs.writeFileSync(path.join(projectDir, "src/markdown/p-001-intro.md"), sampleMd);
 }
 
 async function generateMetaInf(projectDir: string): Promise<void> {
@@ -322,11 +318,11 @@ async function generateMetaInf(projectDir: string): Promise<void> {
 </container>
 `;
 
-  fs.writeFileSync(path.join(projectDir, 'src/META-INF/container.xml'), containerXml);
+  fs.writeFileSync(path.join(projectDir, "src/META-INF/container.xml"), containerXml);
 }
 
 async function generateMimetype(projectDir: string): Promise<void> {
-  fs.writeFileSync(path.join(projectDir, 'src/mimetype'), 'application/epub+zip');
+  fs.writeFileSync(path.join(projectDir, "src/mimetype"), "application/epub+zip");
 }
 
 async function generateGitignore(projectDir: string): Promise<void> {
@@ -350,7 +346,7 @@ Thumbs.db
 *.log
 `;
 
-  fs.writeFileSync(path.join(projectDir, '.gitignore'), gitignore);
+  fs.writeFileSync(path.join(projectDir, ".gitignore"), gitignore);
 }
 
 async function generateReadme(projectDir: string, options: ProjectOptions): Promise<void> {
@@ -394,5 +390,5 @@ ${options.name}/
 - \`${options.packageManager} run preview\` - Preview in browser
 `;
 
-  fs.writeFileSync(path.join(projectDir, 'README.md'), readme);
+  fs.writeFileSync(path.join(projectDir, "README.md"), readme);
 }

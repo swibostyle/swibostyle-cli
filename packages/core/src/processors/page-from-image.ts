@@ -1,13 +1,13 @@
-import type { BuildContext } from '../builder/context.js';
-import { getBuildPaths } from '../builder/context.js';
-import type { ImageContent, XHTMLContent, Frontmatter } from '../types.js';
+import type { BuildContext } from "../builder/context.js";
+import { getBuildPaths } from "../builder/context.js";
+import type { ImageContent, XHTMLContent, Frontmatter } from "../types.js";
 
 /**
  * Generate XHTML pages from images (for cover pages, illustrations, etc.)
  */
 export async function generatePagesFromImages(
   ctx: BuildContext,
-  images: ImageContent[]
+  images: ImageContent[],
 ): Promise<XHTMLContent[]> {
   const { storage, paths, config, logger } = ctx;
   const buildPaths = getBuildPaths(paths.build);
@@ -17,9 +17,9 @@ export async function generatePagesFromImages(
     return [];
   }
 
-  logger?.debug('Generating %d pages from images', pageConfigs.length);
+  logger?.debug("Generating %d pages from images", pageConfigs.length);
 
-  const ejs = await import('ejs');
+  const ejs = await import("ejs");
   const templatePath = `${paths.templates}/xhtml.ejs`;
   const template = await storage.readTextFile(templatePath);
 
@@ -28,7 +28,7 @@ export async function generatePagesFromImages(
   for (const pageConfig of pageConfigs) {
     const targetImage = images.find((img) => img.fileName === pageConfig.fileName);
     if (!targetImage) {
-      logger?.warn('Image not found for page: %s', pageConfig.fileName);
+      logger?.warn("Image not found for page: %s", pageConfig.fileName);
       continue;
     }
 
@@ -38,7 +38,7 @@ export async function generatePagesFromImages(
     // Build frontmatter with defaults for fixed layout
     const frontmatter: Frontmatter = {
       viewport: `width=${width}, height=${height}`,
-      htmlClass: 'horizontal fixed-layout',
+      htmlClass: "horizontal fixed-layout",
       displayOrder: 0,
       ...pageConfig.frontmatter,
     };
@@ -54,17 +54,17 @@ export async function generatePagesFromImages(
         frontmatter,
         title,
       },
-      { async: true }
+      { async: true },
     );
 
     const content: XHTMLContent = {
-      type: 'xhtml',
+      type: "xhtml",
       id: pageConfig.id,
       fileName: `${pageConfig.id}.xhtml`,
       title,
       html,
       frontmatter,
-      properties: 'svg',
+      properties: "svg",
       displayOrder: frontmatter.displayOrder ?? 0,
       fallbackImage: targetImage.id,
     };
@@ -73,9 +73,9 @@ export async function generatePagesFromImages(
     await storage.writeFile(`${buildPaths.xhtml}/${content.fileName}`, html);
     contents.push(content);
 
-    logger?.debug('Generated page from image: %s -> %s', pageConfig.fileName, content.fileName);
+    logger?.debug("Generated page from image: %s -> %s", pageConfig.fileName, content.fileName);
   }
 
-  logger?.info('Generated %d pages from images', contents.length);
+  logger?.info("Generated %d pages from images", contents.length);
   return contents;
 }

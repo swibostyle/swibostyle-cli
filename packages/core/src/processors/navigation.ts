@@ -1,6 +1,6 @@
-import type { BuildContext } from '../builder/context.js';
-import { getBuildPaths } from '../builder/context.js';
-import type { BuildTargetType, ContentItem, XHTMLContent } from '../types.js';
+import type { BuildContext } from "../builder/context.js";
+import { getBuildPaths } from "../builder/context.js";
+import type { BuildTargetType, ContentItem, XHTMLContent } from "../types.js";
 
 /**
  * Generate Navigation Documents (EPUB 3 nav)
@@ -8,15 +8,15 @@ import type { BuildTargetType, ContentItem, XHTMLContent } from '../types.js';
 export async function generateNavigation(
   ctx: BuildContext,
   contents: ContentItem[],
-  targetType: BuildTargetType
+  targetType: BuildTargetType,
 ): Promise<void> {
   const { storage, paths, config, logger, onProgress } = ctx;
   const buildPaths = getBuildPaths(paths.build);
 
-  onProgress?.({ phase: 'navigation', current: 0, total: 1, message: 'Generating navigation' });
-  logger?.debug('Generating navigation documents');
+  onProgress?.({ phase: "navigation", current: 0, total: 1, message: "Generating navigation" });
+  logger?.debug("Generating navigation documents");
 
-  const ejs = await import('ejs');
+  const ejs = await import("ejs");
 
   // Read template
   const templatePath = `${paths.templates}/navigation-documents.ejs`;
@@ -24,7 +24,7 @@ export async function generateNavigation(
 
   // Get pages sorted by display order
   const pages = contents
-    .filter((c): c is XHTMLContent => c.type === 'xhtml')
+    .filter((c): c is XHTMLContent => c.type === "xhtml")
     .sort((a, b) => a.displayOrder - b.displayOrder);
 
   // Filter navigation and guide items
@@ -41,13 +41,13 @@ export async function generateNavigation(
       guideItems,
       buildType: targetType,
     },
-    { async: true }
+    { async: true },
   );
 
   // Write navigation document
   const outputPath = `${buildPaths.item}/navigation-documents.xhtml`;
   await storage.writeFile(outputPath, nav);
 
-  onProgress?.({ phase: 'navigation', current: 1, total: 1, message: 'Navigation complete' });
-  logger?.info('Generated navigation: %s', outputPath);
+  onProgress?.({ phase: "navigation", current: 1, total: 1, message: "Navigation complete" });
+  logger?.info("Generated navigation: %s", outputPath);
 }
