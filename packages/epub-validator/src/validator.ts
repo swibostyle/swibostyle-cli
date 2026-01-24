@@ -150,11 +150,12 @@ export async function createValidator(): Promise<EpubValidator> {
         };
       }
 
-      // Copy to local variable for type narrowing
-      const result = validationResult;
+      // Copy to local variable with explicit type assertion
+      // (TypeScript can't narrow global variables across async boundaries)
+      const result: ValidationResult = validationResult;
 
       // Filter out infos if not requested
-      if (!options?.includeInfos) {
+      if (!options?.includeInfos && result.infos) {
         delete result.infos;
       }
 
