@@ -158,6 +158,51 @@ for (const img of images) {
 export default app;
 ```
 
+### メタデータ付きルート登録
+
+```typescript
+// src/item/xhtml/index.ts
+import { createRouter } from "@swibostyle/core";
+
+const app = createRouter();
+
+const illustrations = [
+  { file: "illustration1.png", order: 116, title: "挿絵1" },
+  { file: "illustration2.png", order: 126, title: "挿絵2" },
+];
+
+for (const img of illustrations) {
+  app.get(`p-${img.file.replace(".png", "")}.xhtml`, (c) => {
+    const info = c.getImage(`image/${img.file}`);
+    if (!info) return c.notFound();
+
+    return c.html`<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" class="fixed-layout">
+<head>
+  <meta name="viewport" content="width=${info.width}, height=${info.height}" />
+  <title>${img.title}</title>
+</head>
+<body>
+  <svg viewBox="0 0 ${info.width} ${info.height}">
+    <image href="../image/${img.file}" width="${info.width}" height="${info.height}" />
+  </svg>
+</body>
+</html>`;
+  }, {
+    // 第3引数でメタデータを指定（OPF/Navigation生成時に使用）
+    metadata: {
+      title: img.title,
+      displayOrder: img.order,
+      htmlClass: "horizontal fixed-layout",
+      epubPageProperty: "page-spread-left",
+    },
+  });
+}
+
+export default app;
+```
+
 ### 生成しないルート
 
 ```typescript
