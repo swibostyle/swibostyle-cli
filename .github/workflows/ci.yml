@@ -142,7 +142,15 @@ jobs:
       - name: Validate EPUB with EPubCheck
         run: |
           echo "Validating EPUB files..."
+          FAILED=0
           for epub in test-epub/*.epub; do
             echo "Validating: $epub"
-            java -jar "epubcheck-${EPUBCHECK_VERSION}/epubcheck.jar" "$epub" --json - | head -100
+            if ! java -jar "epubcheck-${EPUBCHECK_VERSION}/epubcheck.jar" "$epub"; then
+              FAILED=1
+            fi
           done
+          if [ "$FAILED" -eq 1 ]; then
+            echo "::error::EPUB validation failed"
+            exit 1
+          fi
+          echo "All EPUBs validated successfully"
