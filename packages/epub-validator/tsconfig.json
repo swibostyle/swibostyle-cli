@@ -8,5 +8,5 @@
     "types": ["node", "bun-types"]
   },
   "include": ["src/**/*.ts"],
-  "exclude": ["node_modules", "dist", "bin"]
+  "exclude": ["node_modules", "dist", "bin", "**/*.test.ts"]
 }

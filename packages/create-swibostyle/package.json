@@ -12,8 +12,8 @@
     "templates"
   ],
   "scripts": {
-    "build": "tsc",
-    "dev": "tsc --watch",
+    "build": "tsup",
+    "dev": "tsup --watch",
     "test": "bun test",
     "typecheck": "tsc --noEmit"
   },
