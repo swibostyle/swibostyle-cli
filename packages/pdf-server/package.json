@@ -1,0 +1,29 @@
+{
+  "name": "@swibostyle/pdf-server",
+  "version": "0.1.0",
+  "type": "module",
+  "license": "AGPL-3.0",
+  "description": "PDF generation server for swibostyle (AGPL licensed due to Vivliostyle dependency)",
+  "bin": {
+    "swibostyle-pdf-server": "./dist/index.js"
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "test": "bun test",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@hono/node-server": "^1.13.7",
+    "hono": "^4.6.0",
+    "playwright": "^1.49.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.0",
+    "bun-types": "latest",
+    "typescript": "^5.7.0"
+  }
+}

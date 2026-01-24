@@ -1,0 +1,30 @@
+{
+  "name": "create-swibostyle",
+  "version": "0.1.0",
+  "type": "module",
+  "license": "MIT",
+  "description": "Create a new swibostyle project",
+  "bin": {
+    "create-swibostyle": "./dist/index.js"
+  },
+  "files": [
+    "dist",
+    "templates"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "test": "bun test",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@clack/prompts": "^0.8.2",
+    "commander": "^12.1.0",
+    "picocolors": "^1.1.1"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.0",
+    "bun-types": "latest",
+    "typescript": "^5.7.0"
+  }
+}
