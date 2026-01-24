@@ -174,6 +174,11 @@ async function scanDirectory(
         const frontmatter = await readFrontmatter(content);
         const metadata = frontmatterToMetadata(frontmatter);
 
+        // Detect SVG content (case-insensitive match for <svg tag)
+        if (/<svg[\s>]/i.test(content)) {
+          metadata.containsSvg = true;
+        }
+
         // Check target filter
         if (!shouldIncludeForTarget(metadata, target)) {
           continue;

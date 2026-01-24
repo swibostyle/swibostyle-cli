@@ -34,6 +34,8 @@ export interface RouteMetadata {
   epubType?: string;
   /** Override output file name */
   outputFileName?: string;
+  /** Content contains SVG elements (auto-detected) */
+  containsSvg?: boolean;
 }
 
 /**

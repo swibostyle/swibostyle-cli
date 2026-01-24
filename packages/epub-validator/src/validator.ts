@@ -192,7 +192,16 @@ function createBundledValidator(provider: EpubCheckProvider): EpubValidator {
  */
 function parseEpubCheckJson(jsonOutput: string, options?: ValidateOptions): ValidationResult {
   try {
-    const data = JSON.parse(jsonOutput) as {
+    // EPubCheck may output text before JSON (e.g., "No errors or warnings detected.")
+    // Extract the JSON object from the output
+    const jsonStart = jsonOutput.indexOf("{");
+    const jsonEnd = jsonOutput.lastIndexOf("}");
+    if (jsonStart === -1 || jsonEnd === -1 || jsonEnd < jsonStart) {
+      throw new Error("No JSON object found in output");
+    }
+    const jsonString = jsonOutput.slice(jsonStart, jsonEnd + 1);
+
+    const data = JSON.parse(jsonString) as {
       messages?: Array<{
         severity: string;
         ID: string;
