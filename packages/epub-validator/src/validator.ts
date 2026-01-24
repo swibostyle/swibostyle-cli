@@ -101,17 +101,11 @@ function findEpubCheckJar(): string | null {
 /**
  * Create a system Java-based validator.
  */
-function createSystemJavaValidator(
-  javaPath: string,
-  jarPath: string,
-): EpubValidator {
+function createSystemJavaValidator(javaPath: string, jarPath: string): EpubValidator {
   return {
     type: "system-java",
 
-    async validate(
-      epubPath: string,
-      options?: ValidateOptions,
-    ): Promise<ValidationResult> {
+    async validate(epubPath: string, options?: ValidateOptions): Promise<ValidationResult> {
       const args = ["-jar", jarPath, "--json", "-"];
 
       if (options?.profile && options.profile !== "default") {
@@ -156,11 +150,13 @@ function createBundledValidator(provider: EpubCheckProvider): EpubValidator {
   return {
     type: "bundled",
 
-    async validate(
-      epubPath: string,
-      options?: ValidateOptions,
-    ): Promise<ValidationResult> {
-      const [command, ...args] = provider.getCommand(epubPath, true);
+    async validate(epubPath: string, options?: ValidateOptions): Promise<ValidationResult> {
+      const cmdArray = provider.getCommand(epubPath, true);
+      const command = cmdArray[0];
+      if (!command) {
+        throw new Error("Provider returned empty command array");
+      }
+      const args = cmdArray.slice(1);
 
       options?.onProgress?.(`Running: ${command} ${args.join(" ")}`);
 
@@ -193,10 +189,7 @@ function createBundledValidator(provider: EpubCheckProvider): EpubValidator {
 /**
  * Parse EPubCheck JSON output.
  */
-function parseEpubCheckJson(
-  jsonOutput: string,
-  options?: ValidateOptions,
-): ValidationResult {
+function parseEpubCheckJson(jsonOutput: string, options?: ValidateOptions): ValidationResult {
   try {
     const data = JSON.parse(jsonOutput) as {
       messages?: Array<{
@@ -216,11 +209,7 @@ function parseEpubCheckJson(
     const infos: ValidationResult["infos"] = [];
 
     for (const msg of data.messages ?? []) {
-      const severity = msg.severity.toUpperCase() as
-        | "FATAL"
-        | "ERROR"
-        | "WARNING"
-        | "INFO";
+      const severity = msg.severity.toUpperCase() as "FATAL" | "ERROR" | "WARNING" | "INFO";
       const location = msg.locations?.[0];
 
       const validationMsg = {
@@ -310,9 +299,7 @@ export async function createValidator(): Promise<EpubValidator> {
   if (!jarPath) {
     hints.push("epubcheck.jar not found.");
   }
-  hints.push(
-    "Alternatively, install @swibostyle/epub-validator-linux-x64 for bundled runtime.",
-  );
+  hints.push("Alternatively, install @swibostyle/epub-validator-linux-x64 for bundled runtime.");
 
   throw new Error(`EPubCheck not available.\n${hints.join("\n")}`);
 }

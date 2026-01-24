@@ -23,6 +23,7 @@
     "typecheck": "tsc --noEmit"
   },
   "devDependencies": {
+    "@swibostyle/epub-validator": "workspace:*",
     "@types/node": "^25.0.10",
     "typescript": "^5.9.3"
   }
