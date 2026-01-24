@@ -63,7 +63,8 @@ public class EpubValidatorMain {
 
             // Run EpubCheck
             EpubCheck checker = new EpubCheck(inputStream, report, "input.epub");
-            boolean valid = checker.validate();
+            checker.check();
+            boolean valid = (report.getErrorCount() == 0 && report.getFatalErrorCount() == 0);
 
             // Build JSON result
             String json = report.toJson(valid);
