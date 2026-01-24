@@ -1,0 +1,21 @@
+@charset "UTF-8";
+@import "base.scss";
+
+
+.print-only {
+    display: none;
+}
+
+.footnote {
+    display: inline-block;
+    background-color: #eee;
+    color: #666;
+    font-size: 0.6em;
+    padding: 0.2em;
+    border-radius: 0.2em;
+
+    a {
+        word-break: break-all;
+    }
+}
+

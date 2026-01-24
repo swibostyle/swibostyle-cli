@@ -417,3 +417,179 @@ src/
 5. **index.ts実行**: 動的インポートとルート登録
 6. **create-swibostyle更新**: 新しいフォルダ構成でスキャフォールド
 7. **テスト・ドキュメント更新**
+
+---
+
+## サンプルプロジェクト分析からの課題
+
+`tests/fixtures/sample-project-ssg/` の変換から以下の課題と設計ポイントを特定。
+
+### フロントマター属性
+
+Markdownのフロントマターで以下の属性をサポートする必要がある：
+
+| 属性 | 用途 | 例 |
+|-----|------|-----|
+| `title` | ページタイトル | `title: 表紙` |
+| `displayOrder` | ソート順（OPF spine順） | `displayOrder: 100` |
+| `viewport` | 固定レイアウトのビューポート | `viewport: width=1815, height=2580` |
+| `htmlClass` | html要素のclass | `htmlClass: horizontal fixed-layout page-cover` |
+| `epubPageProperty` | OPFのproperties属性 | `epubPageProperty: "page-spread-left"` |
+| `includeIf` | ターゲット限定（このターゲットのみ含める） | `includeIf: "epub"` |
+| `excludeIf` | ターゲット除外（このターゲットでは除外） | `excludeIf: "print"` |
+| `isGuideItem` | EPUBガイドに含める | `isGuideItem: true` |
+| `isNavigationItem` | ナビゲーションに含める | `isNavigationItem: true` |
+| `epubType` | EPUB semantic type | `epubType: cover` |
+| `outputFileName` | 出力ファイル名を上書き | `outputFileName: p-cover` |
+
+### 課題1: ターゲット別ファイルの命名競合
+
+現在のサンプルでは同じ `outputFileName` を持つターゲット別ファイルが存在：
+
+```
+p-000-cover-epub.md   → includeIf: epub  → p-cover.xhtml
+p-000-cover-print.md  → includeIf: print → p-cover.xhtml
+p-900-colophon-epub.md  → includeIf: epub  → p-colophon.xhtml
+p-900-colophon-print.md → includeIf: print → p-colophon.xhtml
+```
+
+**設計案**: ファイルベースルーティングでは `includeIf` を評価してルート登録をスキップ。
+同じ出力パスに対して異なるターゲット用ハンドラーが登録される形になる。
+
+```typescript
+// 内部動作イメージ
+if (frontmatter.includeIf && frontmatter.includeIf !== target) {
+  return; // このターゲットではルート登録しない
+}
+```
+
+### 課題2: outputFileName によるルート変換
+
+`outputFileName` 属性があると、ソースファイル名と出力ルートが異なる：
+
+```
+p-010-toc.md → p-toc.xhtml (outputFileName: p-toc)
+p-020-fmatter-001.md → p-frontmatter-001.xhtml (暗黙の変換?)
+```
+
+**設計案**:
+1. `outputFileName` があれば `${outputFileName}.xhtml` に変換
+2. なければデフォルトで `ソースファイル名.md → ソースファイル名.xhtml`
+
+### 課題3: TOCページ内のリンク
+
+TOCページ内のリンクは変換後のファイル名を参照：
+
+```markdown
+* [キャラクター・会社設定](./p-frontmatter-001.xhtml)
+* [序章](./p-100-section0.xhtml)
+```
+
+**考慮点**: ユーザーは変換後のファイル名を知っている必要がある。
+`outputFileName` を使用する場合はそれを参照。
+
+### 課題4: 画像パスの相対参照
+
+Markdownから画像への参照は相対パス：
+
+```html
+<image xlink:href="../image/cover.jpg"/>
+```
+
+**確認結果**: 新フォルダ構成 `src/item/xhtml/` → `src/item/image/` で
+`../image/` の相対パスは正しく機能する。問題なし。
+
+### 課題5: 固定レイアウトページ
+
+固定レイアウトページには以下が必要：
+- `viewport` でサイズ指定
+- `htmlClass` に `fixed-layout` を含める
+- SVG埋め込みで画像表示
+
+```markdown
+---
+viewport: width=1847, height=2591
+htmlClass: horizontal fixed-layout page-section-cover
+---
+<svg viewBox="0 0 1847 2591">
+  <image xlink:href="../image/chapter1.png"/>
+</svg>
+```
+
+**設計案**: Markdownハンドラーで `viewport` があれば固定レイアウト用XHTMLを生成。
+
+### 課題6: CSS条件分岐
+
+コンテンツ内でCSSクラスによる条件分岐：
+
+```markdown
+<div class="epub-only">
+* [特典](./p-300-appendix.xhtml)
+</div>
+```
+
+**現状維持**: CSSで `.epub-only { display: none; }` を印刷用CSSに記述。
+SSG側の変更は不要。
+
+### 課題7: CSSエントリーポイント
+
+ターゲット別のCSSエントリーポイント選択：
+
+| ターゲット | CSS |
+|-----------|-----|
+| epub | `epub.scss` |
+| print | `print.scss` |
+| pod | `pod.scss` |
+
+**設計案**: `book.json` の `targets` 設定で指定（現行通り）
+
+```json
+{
+  "targets": {
+    "epub": { "css": "epub.scss" },
+    "print": { "css": "print.scss" }
+  }
+}
+```
+
+### 課題8: displayOrder のソート
+
+OPFのspine順序は `displayOrder` で決定。
+ファイル名のプレフィックス番号に依存しない設計にする。
+
+**設計案**: `displayOrder` がない場合はファイル名のアルファベット順をフォールバック。
+
+### 課題9: epubPageProperty の伝播
+
+`epubPageProperty` はOPFのspine要素の `properties` 属性に反映される：
+
+```xml
+<itemref idref="p-cover" properties="page-spread-left" />
+```
+
+**設計案**: `RouteInfo.metadata` に `epubPageProperty` を含め、OPFハンドラーで参照。
+
+### RouteInfo の拡張案
+
+```typescript
+interface RouteMetadata {
+  title?: string;
+  displayOrder?: number;
+  viewport?: string;
+  htmlClass?: string;
+  epubPageProperty?: string;
+  includeIf?: string;
+  excludeIf?: string;
+  isGuideItem?: boolean;
+  isNavigationItem?: boolean;
+  epubType?: string;
+  outputFileName?: string;
+}
+
+interface RouteInfo {
+  path: string;                    // 出力パス (例: "item/xhtml/p-cover.xhtml")
+  sourcePath?: string;             // ソースパス (例: "src/item/xhtml/p-000-cover-epub.md")
+  type: "xhtml" | "image" | "css" | "opf" | "navigation" | "other";
+  metadata: RouteMetadata;
+}
+```

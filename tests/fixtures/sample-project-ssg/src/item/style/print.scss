@@ -1,0 +1,375 @@
+@charset "UTF-8";
+@import "base.scss";
+
+$page-bleed: 3mm;
+$page-margin: 15mm;
+$page-width: 128mm;
+$page-height: 182mm;
+
+$page-bleed-width: $page-width + $page-bleed * 2;
+$page-bleed-height: $page-height + $page-bleed * 2;
+
+$page-bleed-margin: $page-bleed + $page-margin;
+
+        
+@page {
+    counter-increment: printpage;
+    size: $page-width $page-height;
+    bleed: $page-bleed;
+    margin: $page-margin;
+    marks: crop cross;
+}
+
+@page :first {
+    counter-reset: printpage -2;
+}
+@page :left {
+    @top-left {
+        content: env(doc-title);
+        writing-mode: horizontal-tb;
+        font-family: $sans-font-family;
+    }
+    @bottom-left {
+        content: counter(printpage);
+        font-size: 9pt;
+        writing-mode: horizontal-tb;      
+        text-align: left;
+        font-family: $sans-font-family;
+    }
+}
+
+@page :right {
+    @bottom-right {
+        content: counter(printpage);  
+        font-size: 9pt;
+        writing-mode: horizontal-tb;
+        text-align: right;
+        font-family: $sans-font-family;
+    }
+}
+
+@page hide-page-number {
+    @top-left {
+        content: ''; 
+    }
+    @bottom-left { 
+        content: ''; 
+    } 
+    @bottom-right { 
+        content: ''; 
+    }
+}
+
+
+
+
+
+html,
+body {
+    font-size: 10.5pt;
+    line-height: 1.619; //17pt;
+}
+
+.fixed-layout {
+    margin: -$page-bleed-margin !important;
+}
+
+.column-2 {
+    columns: 2;
+    column-gap: 2em;
+}
+
+.epub-only {
+    display: none;
+}
+
+.tcy-dakuten {
+    writing-mode: horizontal-tb;
+    display: inline-block;
+    letter-spacing: -0.2em;
+    line-height: 1.2;
+}
+
+.image-fit {
+    page: hide-page-number;
+    float: top;
+    display: block;
+    position: relative;
+    width: $page-bleed-width;
+    height: $page-bleed-height;
+    max-width: $page-bleed-width;
+    max-height: $page-bleed-height;
+    object-fit: contain;
+    right: -$page-bleed-margin;
+    top: -$page-bleed-margin;
+}
+
+figure.image-fit {
+    margin: 0;
+    padding: 0;
+    img {
+        right: 0;
+        top: 0;
+    }
+}
+
+.image-top {
+    display: block;
+    float: top;
+    float-reference: page;
+    margin-top: 2em;
+}
+
+.image-bottom {
+    display: block;
+    float: bottom;
+    float-reference: page;
+    margin-top: 2em;
+}
+
+.footnote {
+    counter-increment: footnote;
+    float: footnote;
+    text-align: left;
+    font-size: 0.8em;
+    footnote-policy: block;
+    text-indent: -1.8em;
+    padding-top: 1.8em;
+
+    
+    &::footnote-call,
+    &::footnote-marker {
+        text-combine-upright: all;
+        content: "*"counter(footnote);
+        font-size: 0.8em;
+    }
+    
+    &::footnote-marker {
+        padding-bottom: 0.8em;
+    }
+
+}
+
+@-adapt-footnote-area {
+    word-break: break-all;
+}
+
+
+.footnote-back{
+    display: none;
+}
+
+.emoji {
+    filter: grayscale(1);
+}
+
+.vertical ol {
+    list-style: none;
+    counter-reset: list-num;
+    li {
+        position: relative;
+        counter-increment: list-num;
+    }
+    li::before {
+        display: block;
+        position: absolute;
+        top: -2em;
+        content: counter(list-num);
+        text-combine-upright: all;
+    }
+}
+
+.vertical .footnotes ol {
+    
+    list-style: none;
+    counter-reset: list-num;
+    li {
+        position: relative;
+        counter-increment: list-num;
+    }
+    li::before {
+        display: block;
+        position: absolute;
+        top: -2em;
+        right: 0;
+        content: '['counter(list-num)']';
+        font-size: 0.9em;
+        text-orientation: upright;
+        writing-mode: horizontal-tb;
+        text-align: center;
+    }
+}
+
+.page-cover * {
+    page: hide-page-number;
+}
+
+.page-toc {
+    
+    * {
+        page: hide-page-number;
+    }
+    
+    li a {
+        display: inline-flex;
+        height: 100%;
+        text-decoration: none;
+        color: currentColor;
+        align-items: baseline;
+    }
+
+    li a::before {
+        margin-inline-start: 0.5em;
+        margin-inline-end: 0.5em;
+        border-left: 1px dotted;
+        content: "";
+        order: 1;
+        flex: auto;
+    }
+
+    li a::after {
+        text-align: right;
+        content: target-counter(attr(href), printpage);
+        text-combine-upright: all;
+        align-self: flex-end;
+        flex: none;
+        order: 2;
+    }
+}
+
+.page-section-cover {
+    svg {
+        page: hide-page-number;
+    }
+    .sectionCover {
+        page: hide-page-number;
+            
+        h1,
+        .sectionCover-heading {
+            background-color: #868686;   
+        }
+    }
+}
+
+.page-acknowledgments {
+    word-break: break-all;
+
+    hanging-punctuation: allow-end;
+    text-spacing: none;
+
+    columns: 4;
+    column-gap: 2em;
+    column-rule: #000000 dotted 2px;
+    column-fill: auto;
+
+
+    // vivliostyleではcolumn-span 非対応のため、floatで代用
+    .acknowledgments-heading {
+        height: 100%;
+        float-reference: page;
+        float: top;
+        margin-top: -$page-bleed-margin;
+        margin-right: -$page-bleed-margin;
+        margin-bottom: -$page-bleed-margin;
+
+        padding-top: $page-bleed-margin;
+        padding-right: $page-bleed-margin;
+        padding-bottom: $page-bleed-margin;
+        padding-left: 2em;
+
+        background-color: white;
+    }
+
+    .acknowledgments {
+        font-family: $serif-p-font-family;
+        font-size: 7pt;
+        line-height: 1.5;
+    }
+    .acknowledgments-list {
+        dt {
+            font-family: $sans-font-family;
+            font-weight: bold;
+            break-inside: avoid;
+            break-after: avoid;
+        }
+
+        dd {
+            margin-inline-start: 1em;
+            margin-block-end: 1em;
+        }
+
+        ul {
+            padding-inline-start: 0;
+        }
+
+    }
+}
+
+.page-afterword {
+
+    columns: 3;
+    column-gap: 2em;
+    column-fill: auto;
+
+    * {
+        page: hide-page-number;
+    }
+
+    h1 {
+        height: 100%;
+    }
+
+    h3 {
+        margin-left: 0.5em;
+        margin-right: 0.5em;
+    }
+
+    .afterword-body {
+        font-size: 7.2pt;
+    }
+
+}
+
+.page-colophon {
+
+    * {
+        page: hide-page-number;
+    }
+    font-size: 8pt;
+    
+    .main {
+        height: calc($page-height - 30mm);
+        display: flex;
+        flex-direction: row;
+        align-items: flex-end;
+    }
+
+    .book-title {
+        margin-left: 0;
+    }
+
+    .colophon {        
+    }
+
+    .book-id {
+        margin-top: 1rem;
+        font-size: 0.8rem;
+        display: flex;
+        flex-direction: row;
+        .isbn {
+            flex-grow: 1;
+            text-align: left;
+        }
+        .country {
+            flex-grow: 1;
+            text-align: right;
+        }
+    }
+    .print-history {
+        dt, dd { padding: 0 3px; }
+        padding: 3px 0;
+    }
+
+}
+
+

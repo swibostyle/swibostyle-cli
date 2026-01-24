@@ -1,0 +1,35 @@
+{
+    "title": "ハックしないで監査役!! 小説こうしす!EEシリーズ 元社内SE祝園アカネ 監査役編 [1]",
+    "titleSortKey": "ハックシナイデカンサヤクショウセツコウシスイーイーシリーズモトシャナイエスイーホウソノアカネカンサヤクヘン1",
+    "authors": [
+        { 
+            "name": "井二かける",
+            "role": "aut",
+            "nameSortKey": "イブタカケル"
+        }
+    ],
+    "publisher": "京姫鉄道出版",
+    "publisherSortKey": "キョウキテツドウシュッパン",
+    "lang": "ja",
+    "bookId": {
+        "epub": "91039111000000000000",
+        "print": "9784910391106"
+    },
+    // Kindleではpre-pagenateではテキスト部分が小さくなりすぎる上に、ページ単位でのpre-paginated/refloableの指定が無視される。
+    // 小説混在の場合はreflowableにするしかないが、副作用として見開きにならない。
+    "layout": "reflowable",
+    "orientation": "auto",
+    "spread": "auto",
+    "cover": "cover.jpg",
+    "pageDirection": "rtl",
+    "primaryWritingMode": "vertical-rl",
+    // bookTypeをcomicにするとKindleでは背景が黒くなってしまう。小説混在の場合は使えない
+    "bookType": "",
+    "originalResolution": "1693x2361",
+
+    "epubImageCrops": [
+    ],
+    
+    "pagesToBeGeneratedFromImage": [
+   ]
+}

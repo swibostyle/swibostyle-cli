@@ -1,0 +1,415 @@
+@charset "UTF-8";
+
+$serif-font-family: "BIZ UDMincho Regular", "源ノ明朝", "Source Han Serif JP", "Noto Serif JP", "Noto Serif CJK JP", serif;
+
+$serif-p-font-family: "BIZ UDPMincho Regular", serif;
+
+$sans-font-family: "BIZ UDGothic", "源ノ角ゴシック", "Source Han Sans JP", "Noto Sans JP", "Noto Sans CJK JP", sans-serif;
+
+$monospace-font-familiy: "源ノ等幅", "Source Han Mono", "Source Han Code JP", monospace;
+
+
+// Kinoppyはrem単位、vh単位に対応していない
+
+html {
+    orphans: 1;
+    widows: 1;
+    font-family: $serif-font-family;
+    font-weight: normal;
+    text-align: justify;
+    color: #000000;
+    hanging-punctuation: allow-end;
+    text-spacing: allow-end;
+}
+
+// 縦組
+.vertical,
+.vertical body { // bodyにスタイルを適用しないとKindleで認識してもらえない
+    -epub-writing-mode: vertical-rl;
+    -webkit-writing-mode: vertical-rl;
+    writing-mode: vertical-rl; //prefixなしは最後にしないとKindle Previewerが上手く対応してくれない
+}
+
+// 横組
+.horizontal,
+.horizontal body { // bodyにスタイルを適用しないとKindleで認識してもらえない
+    -epub-writing-mode: horizontal-tb;
+    -webkit-writing-mode: horizontal-tb;
+    writing-mode: horizontal-tb; //prefixなしは最後にしないとKindle Previewerが上手く対応してくれない
+}
+
+body {
+    font-size: 100%;
+    -epub-line-break: normal;
+    -webkit-line-break: normal;
+    line-break: normal;
+    line-height: 2.0;
+}
+
+
+// 固定レイアウト用のスタイル
+html.fixed-layout {
+    margin: 0;
+    padding: 0;
+    font-size: 0;
+
+    body {
+        margin: 0;
+        padding: 0;
+        font-size: 0;
+    }
+    svg {
+        margin: 0;
+        padding:  0;
+    }
+}
+
+
+// 見出し
+h1 {
+    font-size: 2em;
+}
+
+h2 {
+    font-weight: normal;
+    font-size: 1.5em;
+    break-before: page;
+    page-break-before: always;
+    padding: 1em;
+}
+
+.horizontal h2 { // Kinoppyがmargin-block-startなどに対応していないため
+    margin-top: 1.5em;
+    margin-bottom: 1.5em;
+    border-left: solid black 1mm;
+}
+
+.vertical h2 {
+    margin-left: 1.5em;
+    margin-right: 1.5em;
+    border-top: solid black 1mm;
+}
+
+
+h3 {    
+    font-size: 1em;
+    margin: 3em;
+}
+
+.horizontal h3 { // Kinoppyがmargin-block-startなどに対応していないため
+    margin-top: 1.5em;
+    margin-bottom: 1.5em;
+    margin-left: 1.5em;
+}
+
+.vertical h3 {
+    margin-left: 1.5em;
+    margin-right: 1.5em;
+    margin-top: 1.5em;
+}
+
+
+.horizontal h4 { // Kinoppyがmargin-block-startなどに対応していないため
+    margin-top: 2em;
+    margin-bottom: 2em;
+}
+
+.vertical h4 {
+    margin-left: 2em;
+    margin-right: 2em;
+}
+
+
+// その他スタイル
+ruby>rt {
+    font-size: 0.5em;
+}
+
+p {
+    hanging-punctuation: force-end;
+    margin: 0 0;
+}
+
+a {
+    text-decoration: none;
+    color: black;
+}
+
+strong.kenten {
+    font-weight: normal;
+    text-emphasis-style: sesame filled;
+}
+
+.tcy {
+    -epub-text-combine: horizontal;
+    text-combine-upright: all;
+}
+
+.tcy-dakuten {
+    -epub-text-combine: horizontal;
+    text-combine-upright: all;
+}
+
+
+.kenten {
+    text-emphasis: filled dot;
+    font-weight: normal;
+}
+
+.break-page {
+    break-before: page;
+    break-after: page;
+    page-break-before: always;
+    page-break-after: always;
+}
+
+blockquote {
+    padding: 1em 1em;
+    background-color: #d3d3d3;
+}
+
+.horizontal blockquote {
+    margin: 2em 0;
+}
+.vertical blockquote {
+    margin: 0 2em;
+}
+
+.subparagraph {    
+    text-indent: -2em;
+}
+
+.vertical .subparagraph {
+    margin-top: 2em; 
+    padding-top: 2em; 
+}
+.horizontal .subparagraph {
+    margin-left: 2em; 
+    padding-left: 2em; 
+}
+
+code {
+    border-radius: 0.3em;
+    padding: 0.1em;
+    background-color: #d3d3d3;
+    font-family: $monospace-font-familiy;
+    
+}
+
+blockquote code {
+    background-color: white;
+}
+
+pre {
+    padding: 1em 1em;
+    background-color: #d3d3d3;
+}
+
+pre code {
+    border-radius: 0;
+    display: block;
+    word-break: break-all;
+    font-family: $monospace-font-familiy;
+}
+
+
+.horizontal pre {
+    margin: 2em 0;
+}
+.vertical pre {
+    margin: 0 2em;
+}
+
+pre {
+    white-space: pre-wrap;
+    font-family: $monospace-font-familiy;
+
+}
+
+.vertical .footnote-ref sup {
+    writing-mode: horizontal-tb;
+    vertical-align: baseline;
+}
+
+.footnote-ref sup::before{
+    content: "[";
+}
+.footnote-ref sup::after{
+    content: "]";
+}
+
+.url {
+    word-break: break-all;
+    font-family: $monospace-font-familiy;
+}
+
+.emoji {
+    font-family: "Noto Color Emoji";
+}
+
+.small {
+    font-size: 0.8em;
+}
+
+.xsmall {
+    font-size: 0.6em;
+}
+
+.image-fit,
+.image-top,
+.image-bottom {
+    display: inline-block;
+    break-inside: avoid;
+    page-break-inside: avoid;
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+}
+
+.sectionCover {    
+    break-before: left;
+    break-inside: avoid;
+    page-break-before: left;
+    page-break-inside: avoid;
+    height: 100%;
+    width: 100%;
+    padding-top: 20%;
+
+    h1,
+    .sectionCover-heading {
+        font-weight: bold;
+        margin-top: 0;
+        padding: 2em;
+        text-align: center;
+        font-size: 1.5em;
+        font-family: $sans-font-family;
+        background-color: #d23f86;   
+        color: white;     
+    }
+}
+
+
+.page-toc {
+        
+    li {
+        font-size: 1.0em;
+        margin-bottom: 1em;
+    }
+
+    li li {
+        font-size: 0.7em;
+        margin-bottom: 0.5em;
+        line-height: 1.6;
+    }
+
+
+}
+
+.page-colophon {
+    break-before: right;
+    page-break-before: right;
+    
+    font-family: $serif-font-family;
+
+    .main {
+        font-size: 0.7em;
+    }
+
+    hr {
+        margin: 0;
+        padding: 0;
+        border: none;
+        border-top: 1px solid black;
+    }
+    
+    .series-title {
+        font-family: $sans-font-family;
+        font-size: 0.8em;
+        font-weight: bold;         
+        margin: 0;
+    } 
+
+    .book-title {
+        font-family: $sans-font-family;
+        font-size: 1.1em;
+        font-weight: bold;
+        border: none;
+        margin: 0;
+        padding: 0;
+    }
+    
+    .print-history,
+    .book-credit {
+        display: block;
+        padding: 0;
+        margin: 0;
+        dt {
+            display: block;
+            clear: both;
+            float: left;
+            margin: 0;
+            padding: 3px;
+        }
+        dd {
+            display: block;
+            margin: 0;
+            margin-left: 8em;
+            padding: 3px;
+        }
+    }
+    .print-history {
+        dd {
+            margin: 0;
+            margin-left: 10em;
+        }
+    }
+
+    .colophon-note {
+        padding: 0.5em 0;
+    }
+    
+    .book-title,
+    .print-history,
+    .book-credit,
+    .colophon-note {
+        border-bottom: solid 1px #000000;
+    }
+    
+}
+.vertical.page-colophon {
+    
+    .book-title,
+    .print-history,
+    .book-credit,
+    .colophon-note {
+        border-bottom: none;
+        border-left: solid 1px #000000;
+    }
+
+    .colophon-note {
+        padding: 0 0.5em;
+    }
+    
+    .print-history,
+    .book-credit {
+        dd {
+            margin: 0;
+            margin-top: 8em;
+        }
+        dd::after {
+            content: "";
+            display: table;
+            clear: both;
+        }
+    }
+
+    .print-history {
+        dd {
+            margin: 0;
+            margin-top: 10em;
+        }
+    }
+
+
+}
+
