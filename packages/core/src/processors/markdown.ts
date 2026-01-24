@@ -26,7 +26,8 @@ export async function processMarkdown(
 
   // Dynamically import VFM
   const vfm = await import("@vivliostyle/vfm");
-  const ejs = await import("ejs");
+  const ejsModule = await import("ejs");
+  const ejs = ejsModule.default ?? ejsModule;
 
   // Read template
   const templatePath = `${paths.templates}/xhtml.ejs`;

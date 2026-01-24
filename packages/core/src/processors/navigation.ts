@@ -16,7 +16,8 @@ export async function generateNavigation(
   onProgress?.({ phase: "navigation", current: 0, total: 1, message: "Generating navigation" });
   logger?.debug("Generating navigation documents");
 
-  const ejs = await import("ejs");
+  const ejsModule = await import("ejs");
+  const ejs = ejsModule.default ?? ejsModule;
 
   // Read template
   const templatePath = `${paths.templates}/navigation-documents.ejs`;

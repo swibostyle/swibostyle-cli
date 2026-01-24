@@ -19,7 +19,8 @@ export async function generatePagesFromImages(
 
   logger?.debug("Generating %d pages from images", pageConfigs.length);
 
-  const ejs = await import("ejs");
+  const ejsModule = await import("ejs");
+  const ejs = ejsModule.default ?? ejsModule;
   const templatePath = `${paths.templates}/xhtml.ejs`;
   const template = await storage.readTextFile(templatePath);
 

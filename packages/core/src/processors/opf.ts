@@ -16,7 +16,8 @@ export async function generateOPF(
   onProgress?.({ phase: "opf", current: 0, total: 1, message: "Generating OPF" });
   logger?.debug("Generating OPF");
 
-  const ejs = await import("ejs");
+  const ejsModule = await import("ejs");
+  const ejs = ejsModule.default ?? ejsModule;
 
   // Read template
   const templatePath = `${paths.templates}/standard.opf.ejs`;
