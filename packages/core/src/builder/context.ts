@@ -65,7 +65,6 @@ export function getDefaultPaths(srcDir: string, buildDir: string, releaseDir: st
     markdown: `${srcDir}/markdown`,
     styles: `${srcDir}/style`,
     images: `${srcDir}/image`,
-    templates: `${srcDir}/templates`,
     metaInf: `${srcDir}/META-INF`,
   };
 }

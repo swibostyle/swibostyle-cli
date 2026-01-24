@@ -9,10 +9,14 @@
 export interface BookConfig {
   /** Book title */
   title: string;
+  /** Title sort key for file-as */
+  titleSortKey?: string;
   /** List of authors */
   authors: Author[];
   /** Publisher name */
   publisher: string;
+  /** Publisher sort key for file-as */
+  publisherSortKey?: string;
   /** Language code (e.g., 'ja', 'en') */
   lang: string;
 
@@ -28,6 +32,15 @@ export interface BookConfig {
   pageDirection: "ltr" | "rtl";
   /** Primary writing mode */
   primaryWritingMode: "horizontal-tb" | "vertical-rl";
+
+  /** Rendition orientation */
+  orientation?: string;
+  /** Rendition spread */
+  spread?: string;
+  /** Cover image file name */
+  cover?: string;
+  /** Book type (e.g., 'comic') */
+  bookType?: string;
 
   /** Original image resolution (e.g., '1693x2361') */
   originalResolution?: string;
@@ -49,9 +62,11 @@ export interface Author {
   /** Author name */
   name: string;
   /** Role: aut=author, ill=illustrator, edt=editor, trl=translator */
-  role: "aut" | "ill" | "edt" | "trl";
+  role: "aut" | "ill" | "edt" | "trl" | string;
   /** File-as name for sorting */
   fileAs?: string;
+  /** Name sort key (Japanese style) */
+  nameSortKey?: string;
 }
 
 export interface TargetConfig {
@@ -99,6 +114,8 @@ export interface Frontmatter {
   isGuideItem?: boolean;
   /** Guide type */
   guideType?: "cover" | "toc" | "bodymatter" | "copyright";
+  /** EPUB type for landmarks */
+  epubType?: string;
 
   /** EPUB page spread property */
   epubPageProperty?: "page-spread-left" | "page-spread-right";
@@ -191,8 +208,6 @@ export interface PathConfig {
   styles: string;
   /** Images directory */
   images: string;
-  /** Templates directory */
-  templates: string;
   /** META-INF directory */
   metaInf: string;
 }

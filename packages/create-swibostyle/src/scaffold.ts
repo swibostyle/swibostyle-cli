@@ -31,7 +31,7 @@ export async function scaffold(options: ProjectOptions): Promise<void> {
   fs.mkdirSync(projectDir, { recursive: true });
 
   // Create directory structure
-  const dirs = ["src", "src/markdown", "src/style", "src/templates", "src/image", "src/META-INF"];
+  const dirs = ["src", "src/markdown", "src/style", "src/image", "src/META-INF"];
 
   for (const dir of dirs) {
     fs.mkdirSync(path.join(projectDir, dir), { recursive: true });
@@ -41,7 +41,6 @@ export async function scaffold(options: ProjectOptions): Promise<void> {
   await generatePackageJson(projectDir, options);
   await generateBookJson(projectDir, options);
   await generateStyles(projectDir, options);
-  await generateTemplates(projectDir, options);
   await generateSampleContent(projectDir, options);
   await generateMetaInf(projectDir);
   await generateMimetype(projectDir);
@@ -206,88 +205,6 @@ p + p {
   fs.writeFileSync(path.join(projectDir, "src/style/pod.scss"), podScss);
 }
 
-async function generateTemplates(projectDir: string, options: ProjectOptions): Promise<void> {
-  // xhtml.ejs
-  const xhtmlTemplate = `<?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE html>
-<html xmlns="http://www.w3.org/1999/xhtml" xmlns:epub="http://www.idpf.org/2007/ops" xml:lang="${options.lang}" lang="${options.lang}"<% if (frontmatter.htmlClass) { %> class="<%= frontmatter.htmlClass %>"<% } %>>
-<head>
-  <meta charset="UTF-8" />
-  <title><%= title %></title>
-<% if (frontmatter.viewport) { %>
-  <meta name="viewport" content="<%= frontmatter.viewport %>" />
-<% } %>
-  <link rel="stylesheet" type="text/css" href="../style/style.css" />
-</head>
-<body>
-<%- body %>
-</body>
-</html>
-`;
-
-  // navigation-documents.ejs
-  const navTemplate = `<?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE html>
-<html xmlns="http://www.w3.org/1999/xhtml" xmlns:epub="http://www.idpf.org/2007/ops" xml:lang="${options.lang}" lang="${options.lang}">
-<head>
-  <meta charset="UTF-8" />
-  <title>Navigation</title>
-</head>
-<body>
-  <nav epub:type="toc" id="toc">
-    <h1>Table of Contents</h1>
-    <ol>
-<% for (const item of navigationItems) { %>
-      <li><a href="xhtml/<%= item.fileName %>"><%= item.title %></a></li>
-<% } %>
-    </ol>
-  </nav>
-</body>
-</html>
-`;
-
-  // standard.opf.ejs
-  const opfTemplate = `<?xml version="1.0" encoding="UTF-8"?>
-<package xmlns="http://www.idpf.org/2007/opf" version="3.0" xml:lang="${options.lang}" unique-identifier="unique-id" prefix="ebpaj: http://www.ebpaj.jp/">
-  <metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
-    <dc:title><%= bookConfig.title %></dc:title>
-    <dc:language><%= bookConfig.lang %></dc:language>
-    <dc:identifier id="unique-id"><%= bookConfig.bookId.epub %></dc:identifier>
-<% for (const author of bookConfig.authors) { %>
-    <dc:creator><%= author.name %></dc:creator>
-<% } %>
-    <dc:publisher><%= bookConfig.publisher %></dc:publisher>
-    <meta property="dcterms:modified"><%= modified %></meta>
-<% if (bookConfig.layout === 'pre-paginated') { %>
-    <meta property="rendition:layout">pre-paginated</meta>
-    <meta property="rendition:spread">landscape</meta>
-<% } %>
-  </metadata>
-
-  <manifest>
-    <item id="nav" href="navigation-documents.xhtml" media-type="application/xhtml+xml" properties="nav" />
-    <item id="style" href="style/style.css" media-type="text/css" />
-<% for (const page of pages) { %>
-    <item id="<%= page.id %>" href="xhtml/<%= page.fileName %>" media-type="application/xhtml+xml"<% if (page.properties) { %> properties="<%= page.properties %>"<% } %> />
-<% } %>
-<% for (const image of images) { %>
-    <item id="<%= image.id %>" href="image/<%= image.fileName %>" media-type="<%= image.contentType %>" />
-<% } %>
-  </manifest>
-
-  <spine page-progression-direction="<%= bookConfig.pageDirection %>">
-<% for (const page of pages) { %>
-    <itemref idref="<%= page.id %>"<% if (page.frontmatter.epubPageProperty) { %> properties="<%= page.frontmatter.epubPageProperty %>"<% } %> />
-<% } %>
-  </spine>
-</package>
-`;
-
-  fs.writeFileSync(path.join(projectDir, "src/templates/xhtml.ejs"), xhtmlTemplate);
-  fs.writeFileSync(path.join(projectDir, "src/templates/navigation-documents.ejs"), navTemplate);
-  fs.writeFileSync(path.join(projectDir, "src/templates/standard.opf.ejs"), opfTemplate);
-}
-
 async function generateSampleContent(projectDir: string, options: ProjectOptions): Promise<void> {
   const isVertical = options.writingMode === "vertical-rl";
 
@@ -375,7 +292,6 @@ ${options.name}/
 │   ├── book.json          # Book configuration
 │   ├── markdown/          # Content (Markdown files)
 │   ├── style/             # Stylesheets (SCSS)
-│   ├── templates/         # EJS templates
 │   ├── image/             # Images
 │   └── META-INF/          # EPUB metadata
 ├── _build/                # Build output (generated)

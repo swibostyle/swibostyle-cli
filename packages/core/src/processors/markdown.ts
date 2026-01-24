@@ -3,6 +3,7 @@ import { getBuildPaths } from "../builder/context.js";
 import type { BuildTargetType, Frontmatter, XHTMLContent } from "../types.js";
 import { convertToXhtml } from "../utils/xhtml.js";
 import { readFrontmatter } from "../utils/frontmatter.js";
+import { renderXHTML } from "../templates/xhtml.js";
 
 /**
  * Process markdown files and generate XHTML
@@ -11,7 +12,7 @@ export async function processMarkdown(
   ctx: BuildContext,
   targetType: BuildTargetType,
 ): Promise<XHTMLContent[]> {
-  const { storage, paths, logger, onProgress } = ctx;
+  const { storage, paths, config, logger, onProgress } = ctx;
   const buildPaths = getBuildPaths(paths.build);
 
   // Get list of markdown files
@@ -26,12 +27,6 @@ export async function processMarkdown(
 
   // Dynamically import VFM
   const vfm = await import("@vivliostyle/vfm");
-  const ejsModule = await import("ejs");
-  const ejs = ejsModule.default ?? ejsModule;
-
-  // Read template
-  const templatePath = `${paths.templates}/xhtml.ejs`;
-  const template = await storage.readTextFile(templatePath);
 
   for (let i = 0; i < markdownFiles.length; i++) {
     const file = markdownFiles[i]!;
@@ -61,16 +56,13 @@ export async function processMarkdown(
     const htmlPartial = convertToXhtml(result.toString());
     const title = metadata.title ?? frontmatter.title ?? "";
 
-    // Render with EJS template
-    const html = await ejs.render(
-      template,
-      {
-        body: htmlPartial,
-        frontmatter,
-        title,
-      },
-      { async: true },
-    );
+    // Render with template function
+    const html = renderXHTML({
+      body: htmlPartial,
+      frontmatter,
+      title,
+      lang: config.lang,
+    });
 
     // Determine output filename
     let fileName = file.replace(/\.md$/, "");

@@ -65,7 +65,6 @@ describe("Memory Storage Build", () => {
         markdown: "/src/markdown",
         styles: "/src/style",
         images: "/src/image",
-        templates: "/src/templates",
         metaInf: "/src/META-INF",
       },
       config,
@@ -125,7 +124,6 @@ describe("Minimal Memory Build", () => {
     storage.mkdirSync("/src/META-INF");
     storage.mkdirSync("/src/markdown");
     storage.mkdirSync("/src/style");
-    storage.mkdirSync("/src/templates");
     storage.mkdirSync("/src/image");
 
     // Create files
@@ -163,71 +161,7 @@ h1 { font-size: 1.5em; }
 p { margin: 1em 0; }`,
     );
 
-    // Create templates
-    storage.setFile(
-      "/src/templates/xhtml.ejs",
-      `<?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE html>
-<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <title><%= title %></title>
-  <link rel="stylesheet" type="text/css" href="../style/style.css" />
-</head>
-<body>
-<%- body %>
-</body>
-</html>`,
-    );
-
-    storage.setFile(
-      "/src/templates/navigation-documents.ejs",
-      `<?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE html>
-<html xmlns="http://www.w3.org/1999/xhtml" xmlns:epub="http://www.idpf.org/2007/ops">
-<head><title>Navigation</title></head>
-<body>
-  <nav epub:type="toc" id="toc">
-    <h1>Contents</h1>
-    <ol>
-<% for (const item of navigationItems) { %>
-      <li><a href="xhtml/<%= item.fileName %>"><%= item.title %></a></li>
-<% } %>
-    </ol>
-  </nav>
-</body>
-</html>`,
-    );
-
-    storage.setFile(
-      "/src/templates/standard.opf.ejs",
-      `<?xml version="1.0" encoding="UTF-8"?>
-<package xmlns="http://www.idpf.org/2007/opf" version="3.0" xml:lang="en" unique-identifier="uid">
-  <metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
-    <dc:identifier id="uid"><%= bookConfig.bookId.epub %></dc:identifier>
-    <dc:title><%= bookConfig.title %></dc:title>
-    <dc:language><%= bookConfig.lang %></dc:language>
-<% for (const author of bookConfig.authors) { %>
-    <dc:creator><%= author.name %></dc:creator>
-<% } %>
-    <meta property="dcterms:modified"><%= modified %></meta>
-  </metadata>
-  <manifest>
-    <item id="nav" href="navigation-documents.xhtml" media-type="application/xhtml+xml" properties="nav" />
-    <item id="style" href="style/style.css" media-type="text/css" />
-<% for (const page of pages) { %>
-    <item id="<%= page.id %>" href="xhtml/<%= page.fileName %>" media-type="application/xhtml+xml" />
-<% } %>
-  </manifest>
-  <spine>
-<% for (const page of pages) { %>
-    <itemref idref="<%= page.id %>" />
-<% } %>
-  </spine>
-</package>`,
-    );
-
-    // Build
+    // Build (no templates needed - they are built-in now)
     const ctx = createBuildContext({
       storage,
       imageAdapter: new NoopImageAdapter(),
@@ -239,7 +173,6 @@ p { margin: 1em 0; }`,
         markdown: "/src/markdown",
         styles: "/src/style",
         images: "/src/image",
-        templates: "/src/templates",
         metaInf: "/src/META-INF",
       },
       config,

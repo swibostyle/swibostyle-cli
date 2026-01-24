@@ -1,6 +1,7 @@
 import type { BuildContext } from "../builder/context.js";
 import { getBuildPaths } from "../builder/context.js";
 import type { ImageContent, XHTMLContent, Frontmatter } from "../types.js";
+import { renderXHTML } from "../templates/xhtml.js";
 
 /**
  * Generate XHTML pages from images (for cover pages, illustrations, etc.)
@@ -18,11 +19,6 @@ export async function generatePagesFromImages(
   }
 
   logger?.debug("Generating %d pages from images", pageConfigs.length);
-
-  const ejsModule = await import("ejs");
-  const ejs = ejsModule.default ?? ejsModule;
-  const templatePath = `${paths.templates}/xhtml.ejs`;
-  const template = await storage.readTextFile(templatePath);
 
   const contents: XHTMLContent[] = [];
 
@@ -47,16 +43,13 @@ export async function generatePagesFromImages(
     // Generate SVG-based HTML for fixed layout
     const htmlPartial = `<p><svg xmlns="http://www.w3.org/2000/svg" version="1.1" xmlns:xlink="http://www.w3.org/1999/xlink" width="100%" height="100%" viewBox="0 0 ${width} ${height}"><image width="${width}" height="${height}" xlink:href="../image/${targetImage.fileName}"/></svg></p>`;
 
-    // Render with template
-    const html = await ejs.render(
-      template,
-      {
-        body: htmlPartial,
-        frontmatter,
-        title,
-      },
-      { async: true },
-    );
+    // Render with template function
+    const html = renderXHTML({
+      body: htmlPartial,
+      frontmatter,
+      title,
+      lang: config.lang,
+    });
 
     const content: XHTMLContent = {
       type: "xhtml",

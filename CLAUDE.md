@@ -32,6 +32,10 @@ swibostyle-cli/
 │   │       │   ├── image.ts    # 画像リサイズ/クロップ
 │   │       │   ├── opf.ts      # OPF生成
 │   │       │   └── navigation.ts
+│   │       ├── templates/      # 組み込みテンプレート関数
+│   │       │   ├── xhtml.ts    # XHTMLページテンプレート
+│   │       │   ├── opf.ts      # OPFテンプレート
+│   │       │   └── navigation.ts # ナビゲーションテンプレート
 │   │       ├── config/         # book.json読み込み
 │   │       ├── utils/          # ユーティリティ
 │   │       ├── types.ts        # 型定義

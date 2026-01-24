@@ -1,6 +1,7 @@
 import type { BuildContext } from "../builder/context.js";
 import { getBuildPaths } from "../builder/context.js";
 import type { BuildTargetType, ContentItem, XHTMLContent, ImageContent } from "../types.js";
+import { renderOPF } from "../templates/opf.js";
 
 /**
  * Generate OPF (Open Packaging Format) file
@@ -16,13 +17,6 @@ export async function generateOPF(
   onProgress?.({ phase: "opf", current: 0, total: 1, message: "Generating OPF" });
   logger?.debug("Generating OPF");
 
-  const ejsModule = await import("ejs");
-  const ejs = ejsModule.default ?? ejsModule;
-
-  // Read template
-  const templatePath = `${paths.templates}/standard.opf.ejs`;
-  const template = await storage.readTextFile(templatePath);
-
   // Separate content types
   const pages = contents
     .filter((c): c is XHTMLContent => c.type === "xhtml")
@@ -33,18 +27,14 @@ export async function generateOPF(
   // Generate modified timestamp
   const modified = new Date().toISOString().replace(/\.\d{3}Z$/, "Z");
 
-  // Render OPF
-  const opf = await ejs.render(
-    template,
-    {
-      pages,
-      images,
-      bookConfig: config,
-      buildType: targetType,
-      modified,
-    },
-    { async: true },
-  );
+  // Render OPF with template function
+  const opf = renderOPF({
+    pages,
+    images,
+    bookConfig: config,
+    buildType: targetType,
+    modified,
+  });
 
   // Write OPF file
   const outputPath = `${buildPaths.item}/standard.opf`;

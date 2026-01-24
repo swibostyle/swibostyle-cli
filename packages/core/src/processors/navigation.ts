@@ -1,6 +1,7 @@
 import type { BuildContext } from "../builder/context.js";
 import { getBuildPaths } from "../builder/context.js";
 import type { BuildTargetType, ContentItem, XHTMLContent } from "../types.js";
+import { renderNavigation } from "../templates/navigation.js";
 
 /**
  * Generate Navigation Documents (EPUB 3 nav)
@@ -8,20 +9,13 @@ import type { BuildTargetType, ContentItem, XHTMLContent } from "../types.js";
 export async function generateNavigation(
   ctx: BuildContext,
   contents: ContentItem[],
-  targetType: BuildTargetType,
+  _targetType: BuildTargetType,
 ): Promise<void> {
   const { storage, paths, config, logger, onProgress } = ctx;
   const buildPaths = getBuildPaths(paths.build);
 
   onProgress?.({ phase: "navigation", current: 0, total: 1, message: "Generating navigation" });
   logger?.debug("Generating navigation documents");
-
-  const ejsModule = await import("ejs");
-  const ejs = ejsModule.default ?? ejsModule;
-
-  // Read template
-  const templatePath = `${paths.templates}/navigation-documents.ejs`;
-  const template = await storage.readTextFile(templatePath);
 
   // Get pages sorted by display order
   const pages = contents
@@ -32,18 +26,12 @@ export async function generateNavigation(
   const navigationItems = pages.filter((p) => p.frontmatter.isNavigationItem);
   const guideItems = pages.filter((p) => p.frontmatter.isGuideItem);
 
-  // Render navigation document
-  const nav = await ejs.render(
-    template,
-    {
-      bookConfig: config,
-      pages,
-      navigationItems,
-      guideItems,
-      buildType: targetType,
-    },
-    { async: true },
-  );
+  // Render navigation document with template function
+  const nav = renderNavigation({
+    navigationItems,
+    guideItems,
+    lang: config.lang,
+  });
 
   // Write navigation document
   const outputPath = `${buildPaths.item}/navigation-documents.xhtml`;
