@@ -15,7 +15,7 @@
     "wasm"
   ],
   "scripts": {
-    "build:wasm": "cd java && mvn clean compile -B",
+    "build:wasm": "cd java && mvn clean process-classes -B",
     "build:ts": "tsc",
     "build": "bun run build:wasm && bun run build:ts",
     "dev": "tsc --watch",
