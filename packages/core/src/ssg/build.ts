@@ -336,6 +336,7 @@ async function processRoute(route: RouteInfo, ctx: SSGBuildContext): Promise<Uin
         frontmatter,
         title,
         lang: book.lang,
+        target,
       });
 
       return new TextEncoder().encode(html);
@@ -355,7 +356,11 @@ async function processRoute(route: RouteInfo, ctx: SSGBuildContext): Promise<Uin
       // Copy or resize image
       const imageData = await storage.readFile(route.sourcePath);
 
-      if (target === "epub") {
+      // Check if image resizing is enabled for this target
+      const targetConfig = book.targets?.[target];
+      const enableImageResizing = targetConfig?.enableImageResizing ?? target === "epub";
+
+      if (enableImageResizing) {
         // Resize for EPUB (Apple Books: 4MP max, Google: 3200px max)
         const dimensions = await imageAdapter.getSize(imageData);
         const maxDimension = 3200;

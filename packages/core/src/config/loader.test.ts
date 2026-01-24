@@ -96,7 +96,6 @@ describe("getDefaultBookConfig", () => {
     expect(defaults.layout).toBe("reflowable");
     expect(defaults.pageDirection).toBe("ltr");
     expect(defaults.primaryWritingMode).toBe("horizontal-tb");
-    expect(defaults.targets?.epub?.css).toBe("epub.scss");
-    expect(defaults.targets?.print?.css).toBe("print.scss");
+    expect(defaults.targets?.epub?.enableImageResizing).toBe(true);
   });
 });

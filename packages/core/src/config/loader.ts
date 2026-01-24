@@ -71,9 +71,8 @@ export function getDefaultBookConfig(): Partial<BookConfig> {
     pageDirection: "ltr",
     primaryWritingMode: "horizontal-tb",
     targets: {
-      epub: { css: "epub.scss", enableImageResizing: true },
-      print: { css: "print.scss", enableImageResizing: false },
-      pod: { css: "pod.scss", enableImageResizing: false },
+      // Default target: epub with image resizing enabled
+      epub: { enableImageResizing: true },
     },
   };
 }

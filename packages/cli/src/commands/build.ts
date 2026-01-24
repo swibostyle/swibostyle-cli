@@ -14,7 +14,7 @@ import { createLogger } from "../ui/logger.js";
 
 export const buildCommand = new Command("build")
   .description("Build EPUB from source files")
-  .option("-t, --target <type>", "Build target (epub, print, pod)", "epub")
+  .option("-t, --target <name>", "Build target name (default: epub)", "epub")
   .option("-v, --verbose", "Verbose output")
   .action(async (options) => {
     const spinner = ora("Initializing...").start();
@@ -23,9 +23,9 @@ export const buildCommand = new Command("build")
     try {
       const target = options.target as BuildTargetType;
 
-      // Validate target
-      if (!["epub", "print", "pod"].includes(target)) {
-        spinner.fail(pc.red(`Invalid target: ${target}`));
+      // Validate target name (must be non-empty)
+      if (!target || target.trim().length === 0) {
+        spinner.fail(pc.red("Invalid target: target name cannot be empty"));
         process.exit(1);
       }
 

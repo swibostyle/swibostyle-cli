@@ -45,12 +45,8 @@ export interface BookConfig {
   /** Original image resolution (e.g., '1693x2361') */
   originalResolution?: string;
 
-  /** Build target configurations */
-  targets?: {
-    epub?: TargetConfig;
-    print?: TargetConfig;
-    pod?: TargetConfig;
-  };
+  /** Build target configurations (keyed by target name) */
+  targets?: Record<string, TargetConfig>;
 }
 
 export interface Author {
@@ -65,8 +61,8 @@ export interface Author {
 }
 
 export interface TargetConfig {
-  /** Entry CSS file name */
-  css: string;
+  /** Entry CSS file name (defaults to {target}.scss) */
+  css?: string;
   /** Enable image resizing for this target */
   enableImageResizing?: boolean;
 }
@@ -119,7 +115,10 @@ export interface ImageDimensions {
 // Build Configuration
 // =============================================================================
 
-export type BuildTargetType = "epub" | "print" | "pod";
+/**
+ * Build target type (customizable name, e.g., "epub", "print", "pod", "kindle")
+ */
+export type BuildTargetType = string;
 
 // =============================================================================
 // Logger
