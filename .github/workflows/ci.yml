@@ -22,7 +22,7 @@ jobs:
         run: bun install
 
       - name: Security audit
-        run: bun pm audit
+        run: bun audit
 
   check:
     name: Check
