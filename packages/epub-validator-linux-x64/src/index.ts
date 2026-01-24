@@ -1,7 +1,16 @@
 import { existsSync } from "node:fs";
 import { resolve, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
-import type { EpubCheckProvider } from "@swibostyle/epub-validator";
+
+/**
+ * EPubCheck binary provider interface.
+ * This is inlined to avoid build-time dependency on @swibostyle/epub-validator.
+ */
+interface EpubCheckProvider {
+  getExecutablePath(): string;
+  isAvailable(): boolean;
+  getCommand(epubPath: string, jsonOutput?: boolean): string[];
+}
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 

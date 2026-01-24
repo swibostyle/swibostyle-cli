@@ -85,7 +85,6 @@
       "name": "@swibostyle/epub-validator-linux-x64",
       "version": "0.1.0",
       "devDependencies": {
-        "@swibostyle/epub-validator": "workspace:*",
         "@types/node": "^25.0.10",
         "typescript": "^5.9.3",
       },
