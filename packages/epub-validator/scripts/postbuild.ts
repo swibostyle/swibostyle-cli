@@ -67,14 +67,17 @@ async function main() {
     throw new Error("Checksum verification failed!");
   }
 
-  // Extract JAR
-  console.log("Extracting epubcheck.jar...");
-  execSync(
-    `unzip -j -o "${ZIP_PATH}" "epubcheck-${EPUBCHECK_VERSION}/epubcheck.jar" -d "${BIN_DIR}"`,
-    {
-      stdio: "inherit",
-    },
-  );
+  // Extract JAR and lib directory
+  console.log("Extracting epubcheck.jar and dependencies...");
+  execSync(`unzip -o "${ZIP_PATH}" -d "${BIN_DIR}"`, {
+    stdio: "inherit",
+  });
+
+  // Move files to correct location
+  const extractedDir = resolve(BIN_DIR, `epubcheck-${EPUBCHECK_VERSION}`);
+  execSync(`mv "${extractedDir}/epubcheck.jar" "${BIN_DIR}/"`, { stdio: "inherit" });
+  execSync(`mv "${extractedDir}/lib" "${BIN_DIR}/"`, { stdio: "inherit" });
+  execSync(`rm -rf "${extractedDir}"`, { stdio: "inherit" });
 
   // Clean up ZIP
   unlinkSync(ZIP_PATH);

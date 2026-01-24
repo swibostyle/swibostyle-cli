@@ -12,7 +12,8 @@
   },
   "files": [
     "dist",
-    "bin"
+    "bin/epubcheck.jar",
+    "bin/lib"
   ],
   "scripts": {
     "build": "tsc && bun scripts/postbuild.ts",
