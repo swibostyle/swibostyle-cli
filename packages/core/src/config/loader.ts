@@ -1,5 +1,5 @@
-import type { StorageAdapter } from "../adapters/storage/interface.js";
-import type { BookConfig } from "../types.js";
+import type { StorageAdapter } from "../adapters/storage/interface";
+import type { BookConfig } from "../types";
 
 /**
  * Load book configuration from book.json

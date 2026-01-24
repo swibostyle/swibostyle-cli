@@ -1,7 +1,7 @@
 import * as fs from "node:fs";
 import * as path from "node:path";
 import * as p from "@clack/prompts";
-import type { ProjectOptions } from "./types.js";
+import type { ProjectOptions } from "./types";
 
 /**
  * Scaffold a new project using SSG format

@@ -14,12 +14,12 @@ export type {
   BuildTargetType,
   Logger,
   FileStat,
-} from "./types.js";
+} from "./types";
 
 // Adapters
-export type { StorageAdapter } from "./adapters/storage/interface.js";
-export { NodeStorageAdapter } from "./adapters/storage/node.js";
-export { MemoryStorageAdapter } from "./adapters/storage/memory.js";
+export type { StorageAdapter } from "./adapters/storage/interface";
+export { NodeStorageAdapter } from "./adapters/storage/node";
+export { MemoryStorageAdapter } from "./adapters/storage/memory";
 
 export type {
   ImageAdapter,
@@ -27,21 +27,21 @@ export type {
   ResizeOptions,
   CropOptions,
   ConvertOptions,
-} from "./adapters/image/interface.js";
-export { SharpImageAdapter } from "./adapters/image/sharp.js";
-export { NoopImageAdapter } from "./adapters/image/noop.js";
+} from "./adapters/image/interface";
+export { SharpImageAdapter } from "./adapters/image/sharp";
+export { NoopImageAdapter } from "./adapters/image/noop";
 
-export type { CSSAdapter, CSSInput, CSSOutput } from "./adapters/css/interface.js";
-export { SassAdapter } from "./adapters/css/sass.js";
-export { PassthroughCSSAdapter } from "./adapters/css/passthrough.js";
+export type { CSSAdapter, CSSInput, CSSOutput } from "./adapters/css/interface";
+export { SassAdapter } from "./adapters/css/sass";
+export { PassthroughCSSAdapter } from "./adapters/css/passthrough";
 
 // Config
-export { loadBookConfig, getDefaultBookConfig } from "./config/loader.js";
+export { loadBookConfig, getDefaultBookConfig } from "./config/loader";
 
 // Utils
-export { convertToXhtml } from "./utils/xhtml.js";
-export { readFrontmatter } from "./utils/frontmatter.js";
-export { getContentType } from "./utils/mime.js";
+export { convertToXhtml } from "./utils/xhtml";
+export { readFrontmatter } from "./utils/frontmatter";
+export { getContentType } from "./utils/mime";
 
 // SSG (Swibo Style Generator)
 export {
@@ -65,7 +65,7 @@ export {
   createDefaultRouter,
   // Build
   buildSSG,
-} from "./ssg/index.js";
+} from "./ssg/index";
 
 export type {
   // Route types
@@ -92,4 +92,4 @@ export type {
   SSGBuildContext,
   // Context types
   SSGContextOptions,
-} from "./ssg/index.js";
+} from "./ssg/index";

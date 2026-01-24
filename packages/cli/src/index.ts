@@ -1,9 +1,9 @@
 #!/usr/bin/env node
 
 import { Command } from "commander";
-import { buildCommand } from "./commands/build.js";
-import { previewCommand } from "./commands/preview.js";
-import { pdfCommand } from "./commands/pdf.js";
+import { buildCommand } from "./commands/build";
+import { previewCommand } from "./commands/preview";
+import { pdfCommand } from "./commands/pdf";
 
 const program = new Command();
 

@@ -10,7 +10,7 @@ import {
   SassAdapter,
 } from "@swibostyle/core";
 import type { BuildTargetType } from "@swibostyle/core";
-import { createLogger } from "../ui/logger.js";
+import { createLogger } from "../ui/logger";
 
 export const buildCommand = new Command("build")
   .description("Build EPUB from source files")

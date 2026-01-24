@@ -6,10 +6,10 @@
  * - Dynamic routes from index.ts files
  */
 
-import type { StorageAdapter } from "../adapters/storage/interface.js";
-import type { BuildTargetType, Frontmatter } from "../types.js";
-import type { RouteInfo, RouteMetadata, RouteType, Router } from "./types.js";
-import { readFrontmatter } from "../utils/frontmatter.js";
+import type { StorageAdapter } from "../adapters/storage/interface";
+import type { BuildTargetType, Frontmatter } from "../types";
+import type { RouteInfo, RouteMetadata, RouteType, Router } from "./types";
+import { readFrontmatter } from "../utils/frontmatter";
 
 /**
  * Scanner options

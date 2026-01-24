@@ -1,7 +1,7 @@
 import * as fs from "node:fs";
 import * as fsp from "node:fs/promises";
-import type { FileStat } from "../../types.js";
-import type { StorageAdapter } from "./interface.js";
+import type { FileStat } from "../../types";
+import type { StorageAdapter } from "./interface";
 
 /**
  * Node.js file system storage adapter

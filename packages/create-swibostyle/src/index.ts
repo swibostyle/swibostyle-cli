@@ -3,8 +3,8 @@
 import { Command } from "commander";
 import * as p from "@clack/prompts";
 import pc from "picocolors";
-import { scaffold } from "./scaffold.js";
-import type { ProjectOptions, TemplateType } from "./types.js";
+import { scaffold } from "./scaffold";
+import type { ProjectOptions, TemplateType } from "./types";
 
 const program = new Command();
 

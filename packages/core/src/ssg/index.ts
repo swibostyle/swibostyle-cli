@@ -22,14 +22,14 @@ export type {
   ScannerOptions,
   SSGBuildOptions,
   SSGBuildResult,
-} from "./types.js";
+} from "./types";
 
 // Router
-export { createRouter, createHandler, matchRoute, findRoute, mergeRoutes } from "./router.js";
+export { createRouter, createHandler, matchRoute, findRoute, mergeRoutes } from "./router";
 
 // Context
-export { createSSGContext, raw, RawString } from "./context.js";
-export type { SSGContextOptions } from "./context.js";
+export { createSSGContext, raw, RawString } from "./context";
+export type { SSGContextOptions } from "./context";
 
 // Scanner
 export {
@@ -38,12 +38,12 @@ export {
   sortRoutesByDisplayOrder,
   loadIndexRouter,
   findIndexFiles,
-} from "./scanner.js";
-export type { ScanOptions, ScannedRoute } from "./scanner.js";
+} from "./scanner";
+export type { ScanOptions, ScannedRoute } from "./scanner";
 
 // Default handlers
-export { createDefaultRouter } from "./handlers.js";
+export { createDefaultRouter } from "./handlers";
 
 // Build
-export { buildSSG } from "./build.js";
-export type { SSGBuildContext } from "./build.js";
+export { buildSSG } from "./build";
+export type { SSGBuildContext } from "./build";

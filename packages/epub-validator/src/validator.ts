@@ -3,12 +3,7 @@ import { promisify } from "node:util";
 import { existsSync } from "node:fs";
 import { resolve, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
-import type {
-  ValidationResult,
-  ValidateOptions,
-  EpubValidator,
-  EpubCheckProvider,
-} from "./types.js";
+import type { ValidationResult, ValidateOptions, EpubValidator, EpubCheckProvider } from "./types";
 
 const execFileAsync = promisify(execFile);
 const __dirname = dirname(fileURLToPath(import.meta.url));

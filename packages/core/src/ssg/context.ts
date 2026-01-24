@@ -4,8 +4,8 @@
  * The context object passed to route handlers.
  */
 
-import type { BookConfig, BuildTargetType } from "../types.js";
-import type { SSGContext, SSGResponse, RouteInfo, ImageInfo } from "./types.js";
+import type { BookConfig, BuildTargetType } from "../types";
+import type { SSGContext, SSGResponse, RouteInfo, ImageInfo } from "./types";
 
 /**
  * Options for creating an SSG context

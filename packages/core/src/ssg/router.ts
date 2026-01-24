@@ -11,7 +11,7 @@ import type {
   RegisteredRoute,
   Handler,
   RouteMetadata,
-} from "./types.js";
+} from "./types";
 
 /**
  * Create a new router instance

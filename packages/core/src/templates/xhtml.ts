@@ -1,4 +1,4 @@
-import type { BuildTargetType, Frontmatter } from "../types.js";
+import type { BuildTargetType, Frontmatter } from "../types";
 
 /**
  * Options for rendering XHTML page

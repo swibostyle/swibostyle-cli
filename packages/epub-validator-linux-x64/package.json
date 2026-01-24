@@ -19,7 +19,8 @@
     "lib"
   ],
   "scripts": {
-    "build": "tsc",
+    "build": "tsup",
+    "dev": "tsup --watch",
     "typecheck": "tsc --noEmit"
   },
   "devDependencies": {

@@ -2,7 +2,7 @@
  * SSG (Swibo Style Generator) type definitions
  */
 
-import type { BookConfig, BuildTargetType } from "../types.js";
+import type { BookConfig, BuildTargetType } from "../types";
 
 // =============================================================================
 // Route Types

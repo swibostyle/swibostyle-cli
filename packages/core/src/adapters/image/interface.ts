@@ -1,4 +1,4 @@
-import type { ImageDimensions } from "../../types.js";
+import type { ImageDimensions } from "../../types";
 
 export type ImageFormat = "png" | "jpeg" | "webp" | "svg" | "gif";
 

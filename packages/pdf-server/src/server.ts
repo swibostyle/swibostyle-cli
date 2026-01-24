@@ -1,7 +1,7 @@
 import { Hono } from "hono";
 import { cors } from "hono/cors";
 import { logger } from "hono/logger";
-import { renderPDF } from "./renderer.js";
+import { renderPDF } from "./renderer";
 
 export function createApp() {
   const app = new Hono();
