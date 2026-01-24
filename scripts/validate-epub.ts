@@ -4,7 +4,7 @@
  * Usage: bun scripts/validate-epub.ts <epub-file> [<epub-file>...]
  */
 
-import { validateEpub } from "@swibostyle/epub-validator";
+import { validateEpub } from "../packages/epub-validator/src/index.js";
 
 async function main() {
   const files = process.argv.slice(2);
