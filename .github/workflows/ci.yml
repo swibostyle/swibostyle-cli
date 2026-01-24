@@ -38,6 +38,9 @@ jobs:
       - name: Install dependencies
         run: bun install
 
+      - name: Build core (required for CLI typecheck)
+        run: bun run --filter '@swibostyle/core' build
+
       - name: Typecheck
         run: bun run typecheck
 
