@@ -1,64 +1,21 @@
 # @swibostyle/epub-validator
 
-EPUB validation using W3C EPubCheck compiled to WebAssembly via TeaVM.
+EPUB validation using W3C EPubCheck with automatic fallback.
 
-**Status: Experimental**
+## Features
 
-This package attempts to compile the official W3C EPubCheck to WebAssembly,
-allowing EPUB validation without requiring a Java runtime.
+- **Automatic runtime detection**: Uses bundled JRE or system Java
+- **TypeScript-friendly API**: Full type definitions
+- **CI-ready**: Install `@swibostyle/epub-validator-linux-x64` for Java-free CI
 
-## Goals
-
-- Run EPubCheck entirely in Node.js/Bun (no Java required)
-- Provide TypeScript-friendly API
-- Support both CLI and programmatic usage
-
-## Architecture
-
-```
-┌─────────────────────────────────────────────────────────┐
-│  TypeScript/JavaScript                                  │
-│  ┌─────────────────────────────────────────────────┐   │
-│  │  validateEpub(epub: Uint8Array)                 │   │
-│  │       ↓                                          │   │
-│  │  WebAssembly.instantiate(epubcheck.wasm)        │   │
-│  │       ↓                                          │   │
-│  │  wasm.validate() → ValidationResult (JSON)      │   │
-│  └─────────────────────────────────────────────────┘   │
-└─────────────────────────────────────────────────────────┘
-                          ↑
-                    WASM boundary
-                          ↓
-┌─────────────────────────────────────────────────────────┐
-│  Java (compiled to WASM via TeaVM)                      │
-│  ┌─────────────────────────────────────────────────┐   │
-│  │  EpubValidatorMain.validate()                   │   │
-│  │       ↓                                          │   │
-│  │  com.adobe.epubcheck.api.EpubCheck              │   │
-│  │       ↓                                          │   │
-│  │  ValidationReport → JSON string                 │   │
-│  └─────────────────────────────────────────────────┘   │
-└─────────────────────────────────────────────────────────┘
-```
-
-## Prerequisites
-
-To build the WASM module, you need:
-
-- Java 11+ (JDK)
-- Maven 3.6+
-
-## Building
+## Installation
 
 ```bash
-# Build WASM module (requires Java + Maven)
-bun run build:wasm
+# Main package (uses system Java)
+bun add @swibostyle/epub-validator
 
-# Build TypeScript
-bun run build:ts
-
-# Build everything
-bun run build
+# For CI/Docker (includes bundled JRE, no Java required)
+bun add @swibostyle/epub-validator-linux-x64
 ```
 
 ## Usage
@@ -66,40 +23,60 @@ bun run build
 ```typescript
 import { validateEpub } from "@swibostyle/epub-validator";
 
-// Validate from file path
 const result = await validateEpub("book.epub");
 
-// Validate from Uint8Array
-const epubData = await fs.readFile("book.epub");
-const result = await validateEpub(new Uint8Array(epubData));
-
-// Check result
 if (result.valid) {
   console.log("EPUB is valid!");
 } else {
-  console.error("Errors found:");
+  console.error("Validation errors:");
   for (const error of result.errors) {
     console.error(`  [${error.id}] ${error.message}`);
   }
 }
 ```
 
-## Known Limitations
+## Resolution Order
 
-TeaVM may not support all Java APIs used by EPubCheck. Potential issues:
+1. **Bundled binary** (e.g., `@swibostyle/epub-validator-linux-x64`)
+2. **System Java** + bundled `epubcheck.jar`
 
-1. **XML parsing** - Saxon-HE, Jing may use unsupported APIs
-2. **File I/O** - Must be adapted for WASM memory model
-3. **Reflection** - Limited support in TeaVM
-4. **Native code** - JNI not available
+## Packages
 
-This package is experimental. If WASM compilation fails, consider:
+| Package | Description | Size |
+|---------|-------------|------|
+| `@swibostyle/epub-validator` | Main package, requires Java | ~20KB |
+| `@swibostyle/epub-validator-linux-x64` | Bundled JRE for Linux x64 | ~50MB |
 
-- Using the Java JAR directly (requires JRE)
-- Using a lightweight JavaScript-based validator (less complete)
+## API
+
+### `validateEpub(epubPath, options?)`
+
+Validate an EPUB file.
+
+```typescript
+const result = await validateEpub("book.epub", {
+  profile: "default",      // "default" | "edupub" | "idx" | "dict"
+  includeInfos: false,     // Include INFO-level messages
+  onProgress: (msg) => {}, // Progress callback
+});
+```
+
+### `createValidator()`
+
+Create a reusable validator instance.
+
+```typescript
+const validator = await createValidator();
+
+// Reuse for multiple validations
+const result1 = await validator.validate("book1.epub");
+const result2 = await validator.validate("book2.epub");
+
+console.log(`Validator type: ${validator.type}`); // "bundled" | "system-java"
+```
 
 ## License
 
 MIT (this package)
 
-Note: EPubCheck itself is licensed under BSD-3-Clause.
+EPubCheck is licensed under BSD-3-Clause.

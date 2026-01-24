@@ -4,9 +4,8 @@
     "outDir": "./dist",
     "rootDir": "./src",
     "declaration": true,
-    "declarationMap": true,
-    "types": ["node", "bun-types"]
+    "declarationMap": true
   },
   "include": ["src/**/*.ts"],
-  "exclude": ["node_modules", "dist", "bin"]
+  "exclude": ["node_modules", "dist", "jre"]
 }

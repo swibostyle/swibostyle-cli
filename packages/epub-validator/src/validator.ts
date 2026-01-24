@@ -1,96 +1,284 @@
-import { readFile } from "node:fs/promises";
+import { execFile } from "node:child_process";
+import { promisify } from "node:util";
+import { existsSync } from "node:fs";
+import { resolve, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
-import { dirname, join } from "node:path";
-import type { ValidationResult, ValidateOptions } from "./types.js";
+import type {
+  ValidationResult,
+  ValidateOptions,
+  EpubValidator,
+  EpubCheckProvider,
+} from "./types.js";
 
+const execFileAsync = promisify(execFile);
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
 /**
- * WASM module interface for EPubCheck.
+ * Try to load a bundled EPubCheck provider (e.g., linux-x64).
  */
-interface EpubCheckWasm {
-  validate: () => void;
+async function tryLoadBundledProvider(): Promise<EpubCheckProvider | null> {
+  // Try to import optional platform-specific package
+  const platformPackages = [
+    "@swibostyle/epub-validator-linux-x64",
+    // Future: add more platforms
+    // "@swibostyle/epub-validator-darwin-arm64",
+    // "@swibostyle/epub-validator-darwin-x64",
+    // "@swibostyle/epub-validator-win32-x64",
+  ];
+
+  for (const pkg of platformPackages) {
+    try {
+      const module = await import(pkg);
+      const provider = module.default as EpubCheckProvider;
+      if (provider.isAvailable()) {
+        return provider;
+      }
+    } catch {
+      // Package not installed or not available for this platform
+    }
+  }
+
+  return null;
 }
 
 /**
- * Validator instance that can be reused for multiple validations.
+ * Find system Java installation.
  */
-export interface EpubValidator {
-  /**
-   * Validate an EPUB file.
-   * @param epub - EPUB data as Uint8Array or path to EPUB file
-   * @param options - Validation options
-   * @returns Validation result
-   */
-  validate(epub: Uint8Array | string, options?: ValidateOptions): Promise<ValidationResult>;
+async function findSystemJava(): Promise<string | null> {
+  // Check JAVA_HOME
+  if (process.env["JAVA_HOME"]) {
+    const javaPath = resolve(process.env["JAVA_HOME"], "bin", "java");
+    if (existsSync(javaPath)) {
+      return javaPath;
+    }
+  }
 
-  /**
-   * Check if the WASM module is loaded.
-   */
-  isReady(): boolean;
+  // Try to find java in PATH
+  try {
+    const { stdout } = await execFileAsync("which", ["java"]);
+    const javaPath = stdout.trim();
+    if (javaPath && existsSync(javaPath)) {
+      return javaPath;
+    }
+  } catch {
+    // which command failed or java not found
+  }
+
+  // Windows: try where command
+  if (process.platform === "win32") {
+    try {
+      const { stdout } = await execFileAsync("where", ["java"]);
+      const javaPath = stdout.trim().split("\n")[0];
+      if (javaPath && existsSync(javaPath)) {
+        return javaPath;
+      }
+    } catch {
+      // where command failed or java not found
+    }
+  }
+
+  return null;
 }
 
 /**
- * Shared state for WASM communication.
+ * Find epubcheck.jar bundled with this package or downloaded.
  */
-let epubData: Uint8Array | null = null;
-let validationResult: ValidationResult | null = null;
-let logCallback: ((message: string) => void) | null = null;
+function findEpubCheckJar(): string | null {
+  const possiblePaths = [
+    resolve(__dirname, "..", "bin", "epubcheck.jar"),
+    resolve(__dirname, "..", "epubcheck.jar"),
+  ];
+
+  for (const p of possiblePaths) {
+    if (existsSync(p)) {
+      return p;
+    }
+  }
+
+  return null;
+}
 
 /**
- * Create import object for WASM module.
+ * Create a system Java-based validator.
  */
-function createImportObject(): WebAssembly.Imports {
+function createSystemJavaValidator(
+  javaPath: string,
+  jarPath: string,
+): EpubValidator {
   return {
-    env: {
-      getEpubData: (): Uint8Array => {
-        return epubData ?? new Uint8Array(0);
-      },
-      getEpubDataLength: (): number => {
-        return epubData?.length ?? 0;
-      },
-      setResult: (json: string): void => {
-        try {
-          validationResult = JSON.parse(json) as ValidationResult;
-        } catch {
-          validationResult = {
-            valid: false,
-            errors: [{ severity: "ERROR", id: "PARSE", message: "Failed to parse result" }],
-            warnings: [],
-          };
+    type: "system-java",
+
+    async validate(
+      epubPath: string,
+      options?: ValidateOptions,
+    ): Promise<ValidationResult> {
+      const args = ["-jar", jarPath, "--json", "-"];
+
+      if (options?.profile && options.profile !== "default") {
+        args.push("--profile", options.profile);
+      }
+
+      args.push(epubPath);
+
+      options?.onProgress?.(`Running: ${javaPath} ${args.join(" ")}`);
+
+      try {
+        const { stdout, stderr } = await execFileAsync(javaPath, args, {
+          maxBuffer: 10 * 1024 * 1024, // 10MB buffer for large reports
+        });
+
+        options?.onProgress?.("Parsing EPubCheck output...");
+
+        return parseEpubCheckJson(stdout || stderr, options);
+      } catch (error) {
+        // EPubCheck returns non-zero exit code for invalid EPUBs
+        if (
+          error &&
+          typeof error === "object" &&
+          "stdout" in error &&
+          typeof error.stdout === "string"
+        ) {
+          return parseEpubCheckJson(error.stdout, options);
         }
-      },
-      logMessage: (message: string): void => {
-        logCallback?.(message);
-      },
+
+        throw new Error(
+          `EPubCheck execution failed: ${error instanceof Error ? error.message : String(error)}`,
+        );
+      }
     },
   };
 }
 
 /**
- * Load the WASM module.
+ * Create a bundled binary-based validator.
  */
-async function loadWasmModule(): Promise<EpubCheckWasm> {
-  const wasmPath = join(__dirname, "..", "wasm", "epubcheck.wasm");
+function createBundledValidator(provider: EpubCheckProvider): EpubValidator {
+  return {
+    type: "bundled",
 
+    async validate(
+      epubPath: string,
+      options?: ValidateOptions,
+    ): Promise<ValidationResult> {
+      const [command, ...args] = provider.getCommand(epubPath, true);
+
+      options?.onProgress?.(`Running: ${command} ${args.join(" ")}`);
+
+      try {
+        const { stdout, stderr } = await execFileAsync(command, args, {
+          maxBuffer: 10 * 1024 * 1024,
+        });
+
+        options?.onProgress?.("Parsing EPubCheck output...");
+
+        return parseEpubCheckJson(stdout || stderr, options);
+      } catch (error) {
+        if (
+          error &&
+          typeof error === "object" &&
+          "stdout" in error &&
+          typeof error.stdout === "string"
+        ) {
+          return parseEpubCheckJson(error.stdout, options);
+        }
+
+        throw new Error(
+          `EPubCheck execution failed: ${error instanceof Error ? error.message : String(error)}`,
+        );
+      }
+    },
+  };
+}
+
+/**
+ * Parse EPubCheck JSON output.
+ */
+function parseEpubCheckJson(
+  jsonOutput: string,
+  options?: ValidateOptions,
+): ValidationResult {
   try {
-    const wasmBuffer = await readFile(wasmPath);
-    const wasmModule = await WebAssembly.compile(wasmBuffer);
-    const instance = await WebAssembly.instantiate(wasmModule, createImportObject());
+    const data = JSON.parse(jsonOutput) as {
+      messages?: Array<{
+        severity: string;
+        ID: string;
+        message: string;
+        locations?: Array<{
+          path?: string;
+          line?: number;
+          column?: number;
+        }>;
+      }>;
+    };
+
+    const errors: ValidationResult["errors"] = [];
+    const warnings: ValidationResult["warnings"] = [];
+    const infos: ValidationResult["infos"] = [];
+
+    for (const msg of data.messages ?? []) {
+      const severity = msg.severity.toUpperCase() as
+        | "FATAL"
+        | "ERROR"
+        | "WARNING"
+        | "INFO";
+      const location = msg.locations?.[0];
+
+      const validationMsg = {
+        severity,
+        id: msg.ID,
+        message: msg.message,
+        ...(location && {
+          location: {
+            path: location.path ?? "",
+            line: location.line,
+            column: location.column,
+          },
+        }),
+      };
+
+      switch (severity) {
+        case "FATAL":
+        case "ERROR":
+          errors.push(validationMsg);
+          break;
+        case "WARNING":
+          warnings.push(validationMsg);
+          break;
+        case "INFO":
+          if (options?.includeInfos) {
+            infos.push(validationMsg);
+          }
+          break;
+      }
+    }
 
     return {
-      validate: instance.exports["validate"] as () => void,
+      valid: errors.length === 0,
+      errors,
+      warnings,
+      ...(options?.includeInfos && { infos }),
     };
-  } catch (error) {
-    throw new Error(
-      `Failed to load EPubCheck WASM module: ${error instanceof Error ? error.message : String(error)}\n` +
-        `Make sure to run 'bun run build:wasm' first to compile the WASM module.`,
-    );
+  } catch {
+    return {
+      valid: false,
+      errors: [
+        {
+          severity: "FATAL",
+          id: "PARSE_ERROR",
+          message: `Failed to parse EPubCheck output: ${jsonOutput.slice(0, 200)}...`,
+        },
+      ],
+      warnings: [],
+    };
   }
 }
 
 /**
- * Create a reusable validator instance.
+ * Create an EPUB validator with automatic fallback.
+ *
+ * Resolution order:
+ * 1. Bundled binary (e.g., @swibostyle/epub-validator-linux-x64)
+ * 2. System Java + bundled epubcheck.jar
  *
  * @example
  * ```ts
@@ -100,80 +288,39 @@ async function loadWasmModule(): Promise<EpubCheckWasm> {
  * ```
  */
 export async function createValidator(): Promise<EpubValidator> {
-  const wasm = await loadWasmModule();
-  let ready = true;
+  // Try bundled binary first
+  const bundledProvider = await tryLoadBundledProvider();
+  if (bundledProvider) {
+    return createBundledValidator(bundledProvider);
+  }
 
-  return {
-    async validate(
-      epub: Uint8Array | string,
-      options?: ValidateOptions,
-    ): Promise<ValidationResult> {
-      // Load EPUB data
-      if (typeof epub === "string") {
-        epubData = new Uint8Array(await readFile(epub));
-      } else {
-        epubData = epub;
-      }
+  // Fall back to system Java
+  const javaPath = await findSystemJava();
+  const jarPath = findEpubCheckJar();
 
-      // Set up logging
-      logCallback = options?.onProgress ?? null;
+  if (javaPath && jarPath) {
+    return createSystemJavaValidator(javaPath, jarPath);
+  }
 
-      // Reset result
-      validationResult = null;
+  // Neither available
+  const hints: string[] = [];
+  if (!javaPath) {
+    hints.push("Java not found. Install Java 11+ or set JAVA_HOME.");
+  }
+  if (!jarPath) {
+    hints.push("epubcheck.jar not found.");
+  }
+  hints.push(
+    "Alternatively, install @swibostyle/epub-validator-linux-x64 for bundled runtime.",
+  );
 
-      // Run validation
-      try {
-        wasm.validate();
-      } catch (error) {
-        return {
-          valid: false,
-          errors: [
-            {
-              severity: "FATAL",
-              id: "WASM",
-              message: `WASM execution error: ${error instanceof Error ? error.message : String(error)}`,
-            },
-          ],
-          warnings: [],
-        };
-      }
-
-      // Return result
-      if (!validationResult) {
-        return {
-          valid: false,
-          errors: [
-            { severity: "ERROR", id: "NO_RESULT", message: "No validation result received" },
-          ],
-          warnings: [],
-        };
-      }
-
-      // Copy to local variable with explicit type assertion
-      // (TypeScript can't narrow global variables across async boundaries)
-      const result: ValidationResult = validationResult;
-
-      // Filter out infos if not requested
-      if (!options?.includeInfos && result.infos) {
-        delete result.infos;
-      }
-
-      return result;
-    },
-
-    isReady(): boolean {
-      return ready;
-    },
-  };
+  throw new Error(`EPubCheck not available.\n${hints.join("\n")}`);
 }
 
 /**
  * Validate an EPUB file (one-shot).
  *
- * For multiple validations, use `createValidator()` instead to avoid
- * reloading the WASM module each time.
- *
- * @param epub - EPUB data as Uint8Array or path to EPUB file
+ * @param epubPath - Path to the EPUB file
  * @param options - Validation options
  * @returns Validation result
  *
@@ -190,9 +337,9 @@ export async function createValidator(): Promise<EpubValidator> {
  * ```
  */
 export async function validateEpub(
-  epub: Uint8Array | string,
+  epubPath: string,
   options?: ValidateOptions,
 ): Promise<ValidationResult> {
   const validator = await createValidator();
-  return validator.validate(epub, options);
+  return validator.validate(epubPath, options);
 }

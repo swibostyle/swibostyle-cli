@@ -1,11 +1,9 @@
-# Maven build output
-java/target/
-
-# Generated WASM (will be committed when successfully built)
-# wasm/*.wasm
-
 # Node modules
 node_modules/
 
 # TypeScript build output
 dist/
+
+# EPubCheck JAR (downloaded for local dev)
+bin/
+epubcheck.jar

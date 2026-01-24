@@ -41,3 +41,43 @@ export interface ValidateOptions {
   /** Callback for progress updates */
   onProgress?: (message: string) => void;
 }
+
+/**
+ * EPUB Validator interface.
+ */
+export interface EpubValidator {
+  /**
+   * Validate an EPUB file.
+   * @param epubPath - Path to the EPUB file
+   * @param options - Validation options
+   * @returns Validation result
+   */
+  validate(epubPath: string, options?: ValidateOptions): Promise<ValidationResult>;
+
+  /**
+   * Get the validator type.
+   */
+  readonly type: "bundled" | "system-java";
+}
+
+/**
+ * EPubCheck binary provider interface.
+ * Implemented by platform-specific packages.
+ */
+export interface EpubCheckProvider {
+  /**
+   * Get the path to the epubcheck executable or JAR.
+   */
+  getExecutablePath(): string;
+
+  /**
+   * Check if this provider is available.
+   */
+  isAvailable(): boolean;
+
+  /**
+   * Get the command to run epubcheck.
+   * Returns [command, ...args] array.
+   */
+  getCommand(epubPath: string, jsonOutput?: boolean): string[];
+}

@@ -1,9 +1,15 @@
 /**
  * @swibostyle/epub-validator
  *
- * EPUB validation using W3C EPubCheck compiled to WebAssembly via TeaVM.
- * Runs entirely in Node.js/Bun without requiring Java.
+ * EPUB validation using W3C EPubCheck.
+ * Automatically uses bundled binary or falls back to system Java.
  */
 
 export { validateEpub, createValidator } from "./validator.js";
-export type { ValidationResult, ValidationMessage, ValidateOptions } from "./types.js";
+export type {
+  ValidationResult,
+  ValidationMessage,
+  ValidateOptions,
+  EpubValidator,
+  EpubCheckProvider,
+} from "./types.js";
