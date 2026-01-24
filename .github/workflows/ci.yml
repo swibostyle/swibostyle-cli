@@ -86,4 +86,5 @@ jobs:
         run: bun run build
 
       - name: Build sample EPUB
-        run: bun packages/cli/src/index.ts build -s tests/fixtures/sample-project/src -o tests/fixtures/sample-project/_release -b tests/fixtures/sample-project/_build
+        working-directory: tests/fixtures/sample-project-ssg
+        run: bun ../../../packages/cli/src/index.ts build
