@@ -79,3 +79,51 @@ export { generatePagesFromImages } from "./processors/page-from-image.js";
 export { convertToXhtml } from "./utils/xhtml.js";
 export { readFrontmatter } from "./utils/frontmatter.js";
 export { getContentType } from "./utils/mime.js";
+
+// SSG (Swibo Style Generator)
+export {
+  // Router
+  createRouter,
+  createHandler,
+  matchRoute,
+  findRoute,
+  mergeRoutes,
+  // Context
+  createSSGContext,
+  raw,
+  RawString,
+  // Scanner
+  scanRoutes,
+  scannedToRouteInfo,
+  sortRoutesByDisplayOrder,
+  loadIndexRouter,
+  findIndexFiles,
+  // Default handlers
+  createDefaultRouter,
+} from "./ssg/index.js";
+
+export type {
+  // Route types
+  RouteMetadata,
+  RouteType,
+  RouteInfo,
+  ResponseType,
+  SSGResponse,
+  ImageInfo,
+  SSGContext,
+  RouteHandler,
+  RouteOptions,
+  RegisteredRoute,
+  Router,
+  Handler,
+  // Scanner types
+  ScannedFile,
+  ScannerOptions,
+  ScanOptions,
+  ScannedRoute,
+  // Build types
+  SSGBuildOptions,
+  SSGBuildResult,
+  // Context types
+  SSGContextOptions,
+} from "./ssg/index.js";
