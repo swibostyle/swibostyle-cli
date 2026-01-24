@@ -15,7 +15,7 @@
     "bin"
   ],
   "scripts": {
-    "build": "tsc",
+    "build": "tsc && bun scripts/postbuild.ts",
     "dev": "tsc --watch",
     "test": "bun test",
     "typecheck": "tsc --noEmit"

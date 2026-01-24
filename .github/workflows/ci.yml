@@ -74,9 +74,6 @@ jobs:
     name: Build & Validate
     runs-on: ubuntu-latest
     needs: [check, test]
-    env:
-      EPUBCHECK_VERSION: "5.1.0"
-      EPUBCHECK_SHA256: "74a59af8602bf59b1d04266a450d9cdcb5986e36d825adc403cde0d95e88c9e8"
     steps:
       - uses: actions/checkout@v4
 
@@ -96,19 +93,6 @@ jobs:
 
       - name: Build packages
         run: bun run build
-
-      - name: Download EPubCheck
-        run: |
-          curl -L -o epubcheck.zip \
-            "https://github.com/w3c/epubcheck/releases/download/v${EPUBCHECK_VERSION}/epubcheck-${EPUBCHECK_VERSION}.zip"
-          ACTUAL_SHA256=$(sha256sum epubcheck.zip | awk '{print $1}')
-          if [ "${ACTUAL_SHA256}" != "${EPUBCHECK_SHA256}" ]; then
-            echo "ERROR: Checksum mismatch!"
-            exit 1
-          fi
-          unzip -q epubcheck.zip
-          mkdir -p packages/epub-validator/bin
-          cp "epubcheck-${EPUBCHECK_VERSION}/epubcheck.jar" packages/epub-validator/bin/
 
       - name: Build sample EPUB
         working-directory: tests/fixtures/sample-project-ssg
