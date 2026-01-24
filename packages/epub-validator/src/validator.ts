@@ -126,13 +126,13 @@ function createSystemJavaValidator(javaPath: string, jarPath: string): EpubValid
         return parseEpubCheckJson(stdout || stderr, options);
       } catch (error) {
         // EPubCheck returns non-zero exit code for invalid EPUBs
-        if (
-          error &&
-          typeof error === "object" &&
-          "stdout" in error &&
-          typeof error.stdout === "string"
-        ) {
-          return parseEpubCheckJson(error.stdout, options);
+        if (error && typeof error === "object") {
+          const stdout = "stdout" in error && typeof error.stdout === "string" ? error.stdout : "";
+          const stderr = "stderr" in error && typeof error.stderr === "string" ? error.stderr : "";
+          const output = stdout || stderr;
+          if (output) {
+            return parseEpubCheckJson(output, options);
+          }
         }
 
         throw new Error(
@@ -169,13 +169,14 @@ function createBundledValidator(provider: EpubCheckProvider): EpubValidator {
 
         return parseEpubCheckJson(stdout || stderr, options);
       } catch (error) {
-        if (
-          error &&
-          typeof error === "object" &&
-          "stdout" in error &&
-          typeof error.stdout === "string"
-        ) {
-          return parseEpubCheckJson(error.stdout, options);
+        // EPubCheck returns non-zero exit code for invalid EPUBs
+        if (error && typeof error === "object") {
+          const stdout = "stdout" in error && typeof error.stdout === "string" ? error.stdout : "";
+          const stderr = "stderr" in error && typeof error.stderr === "string" ? error.stderr : "";
+          const output = stdout || stderr;
+          if (output) {
+            return parseEpubCheckJson(output, options);
+          }
         }
 
         throw new Error(
