@@ -28,5 +28,9 @@
     "oxfmt": "^0.26.0",
     "oxlint": "^1.41.0",
     "typescript": "^5.9.3"
+  },
+  "overrides": {
+    "trim": "^1.0.1",
+    "prismjs": "^1.30.0"
   }
 }
