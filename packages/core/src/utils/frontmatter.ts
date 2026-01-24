@@ -1,4 +1,4 @@
-import type { Frontmatter } from "../types.js";
+import type { Frontmatter } from "../types";
 
 /**
  * Read frontmatter from markdown content

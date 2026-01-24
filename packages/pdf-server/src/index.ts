@@ -8,7 +8,7 @@
  */
 
 import { serve } from "@hono/node-server";
-import { createApp } from "./server.js";
+import { createApp } from "./server";
 
 const port = parseInt(process.env.PORT || "3000", 10);
 

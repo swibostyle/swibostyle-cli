@@ -5,8 +5,8 @@
  * custom handlers for routes.
  */
 
-import type { Router, SSGContext, SSGResponse } from "./types.js";
-import { createRouter } from "./router.js";
+import type { Router, SSGContext, SSGResponse } from "./types";
+import { createRouter } from "./router";
 
 /**
  * Escape XML special characters

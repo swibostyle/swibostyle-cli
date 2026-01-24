@@ -1,3 +1,3 @@
-export type { StorageAdapter } from "./interface.js";
-export { NodeStorageAdapter } from "./node.js";
-export { MemoryStorageAdapter } from "./memory.js";
+export type { StorageAdapter } from "./interface";
+export { NodeStorageAdapter } from "./node";
+export { MemoryStorageAdapter } from "./memory";

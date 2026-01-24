@@ -1,11 +1,11 @@
-import type { ImageDimensions } from "../../types.js";
+import type { ImageDimensions } from "../../types";
 import type {
   ConvertOptions,
   CropOptions,
   ImageAdapter,
   ImageFormat,
   ResizeOptions,
-} from "./interface.js";
+} from "./interface";
 
 /**
  * Parse PNG dimensions from header

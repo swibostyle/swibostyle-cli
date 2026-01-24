@@ -4,6 +4,6 @@ export type {
   ResizeOptions,
   CropOptions,
   ConvertOptions,
-} from "./interface.js";
-export { SharpImageAdapter } from "./sharp.js";
-export { NoopImageAdapter } from "./noop.js";
+} from "./interface";
+export { SharpImageAdapter } from "./sharp";
+export { NoopImageAdapter } from "./noop";

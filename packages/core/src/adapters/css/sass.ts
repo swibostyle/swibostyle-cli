@@ -1,5 +1,5 @@
 import * as path from "node:path";
-import type { CSSAdapter, CSSInput, CSSOutput } from "./interface.js";
+import type { CSSAdapter, CSSInput, CSSOutput } from "./interface";
 
 /**
  * Sass-based CSS adapter

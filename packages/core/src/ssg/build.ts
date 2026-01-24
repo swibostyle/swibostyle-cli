@@ -4,10 +4,10 @@
  * Builds an EPUB using the SSG router system.
  */
 
-import type { StorageAdapter } from "../adapters/storage/interface.js";
-import type { ImageAdapter } from "../adapters/image/interface.js";
-import type { CSSAdapter } from "../adapters/css/interface.js";
-import type { BookConfig, BuildTargetType } from "../types.js";
+import type { StorageAdapter } from "../adapters/storage/interface";
+import type { ImageAdapter } from "../adapters/image/interface";
+import type { CSSAdapter } from "../adapters/css/interface";
+import type { BookConfig, BuildTargetType } from "../types";
 import type {
   RouteInfo,
   SSGResponse,
@@ -15,18 +15,18 @@ import type {
   ImageInfo,
   SSGBuildResult,
   RegisteredRoute,
-} from "./types.js";
+} from "./types";
 import {
   scanRoutes,
   scannedToRouteInfo,
   findIndexFiles,
   sortRoutesByDisplayOrder,
-} from "./scanner.js";
-import { createSSGContext } from "./context.js";
-import { createDefaultRouter } from "./handlers.js";
-import { convertToXhtml } from "../utils/xhtml.js";
-import { readFrontmatter } from "../utils/frontmatter.js";
-import { renderXHTML } from "../templates/xhtml.js";
+} from "./scanner";
+import { createSSGContext } from "./context";
+import { createDefaultRouter } from "./handlers";
+import { convertToXhtml } from "../utils/xhtml";
+import { readFrontmatter } from "../utils/frontmatter";
+import { renderXHTML } from "../templates/xhtml";
 
 /**
  * SSG Build Context

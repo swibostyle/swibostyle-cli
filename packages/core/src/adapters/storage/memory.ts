@@ -1,5 +1,5 @@
-import type { FileStat } from "../../types.js";
-import type { StorageAdapter } from "./interface.js";
+import type { FileStat } from "../../types";
+import type { StorageAdapter } from "./interface";
 
 interface MemoryFile {
   type: "file";

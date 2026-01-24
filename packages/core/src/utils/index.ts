@@ -1,3 +1,3 @@
-export { convertToXhtml } from "./xhtml.js";
-export { readFrontmatter } from "./frontmatter.js";
-export { getContentType } from "./mime.js";
+export { convertToXhtml } from "./xhtml";
+export { readFrontmatter } from "./frontmatter";
+export { getContentType } from "./mime";
