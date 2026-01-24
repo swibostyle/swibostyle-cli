@@ -1,0 +1,26 @@
+GNU AFFERO GENERAL PUBLIC LICENSE
+Version 3, 19 November 2007
+
+Copyright (C) 2007 Free Software Foundation, Inc. <https://fsf.org/>
+
+This package (@swibostyle/pdf-server) is licensed under AGPL-3.0 because it
+depends on Vivliostyle Viewer, which is licensed under AGPL-3.0.
+
+The full text of the AGPL-3.0 license can be found at:
+https://www.gnu.org/licenses/agpl-3.0.html
+
+---
+
+IMPORTANT NOTICE:
+
+This package is separate from the main swibostyle packages (@swibostyle/core,
+@swibostyle/cli, create-swibostyle) which are licensed under MIT.
+
+If you use this PDF server package, you must comply with AGPL-3.0 requirements,
+including making your source code available if you distribute or provide
+network access to this software.
+
+For applications that cannot comply with AGPL-3.0, consider:
+1. Using the EPUB output directly (MIT licensed packages only)
+2. Using alternative PDF generation methods
+3. Contacting Vivliostyle for commercial licensing options

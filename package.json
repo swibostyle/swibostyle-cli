@@ -1,32 +1,36 @@
 {
-  "name": "kosys-ee-incident1-comic-part3",
-  "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
-  "author": "",
-  "license": "UNLICENSED",
+  "name": "swibostyle-monorepo",
+  "version": "0.1.0",
+  "private": true,
   "type": "module",
-  "dependencies": {
-    "@vivliostyle/vfm": "^1.2.1",
-    "archiver": "^5.0.0",
-    "comment-json": "^4.1.0",
-    "ejs": "^3.1.3",
-    "gulp": "^4.0.2",
-    "gulp-concat": "^2.6.1",
-    "gulp-sass": "^5.1.0",
-    "image-size": "^0.8.3",
-    "merge-stream": "^2.0.0",
-    "psd": "^3.2.0",
-    "remark-frontmatter": "^4.0.1",
-    "remark-parse": "^10.0.1",
-    "sass": "^1.49.9",
-    "sharp": "^0.27.0",
-    "unified": "^10.1.1",
-    "webserver": "^4.0.2",
-    "xmldom": "^0.3.0",
-    "yaml": "^1.10.2"
+  "license": "MIT",
+  "description": "CSS typesetting CLI tool for EPUB generation",
+  "workspaces": [
+    "packages/*"
+  ],
+  "scripts": {
+    "build": "bun run --filter '*' build",
+    "dev": "bun run --filter '*' dev",
+    "test": "bun test",
+    "test:unit": "bun test packages/*/src",
+    "test:integration": "bun test tests/integration",
+    "typecheck": "bun run --filter '*' typecheck",
+    "lint": "oxlint --tsconfig tsconfig.base.json --ignore-pattern 'tests/fixtures/**' .",
+    "lint:fix": "oxlint --tsconfig tsconfig.base.json --ignore-pattern 'tests/fixtures/**' --fix .",
+    "format": "oxfmt --ignore-path .oxfmtignore --write packages tests/integration",
+    "format:check": "oxfmt --ignore-path .oxfmtignore --check packages tests/integration",
+    "check": "bun run typecheck && bun run lint && bun run format:check",
+    "clean": "rm -rf packages/*/dist"
+  },
+  "devDependencies": {
+    "@types/node": "^25.0.10",
+    "bun-types": "^1.3.6",
+    "oxfmt": "^0.26.0",
+    "oxlint": "^1.41.0",
+    "typescript": "^5.9.3"
+  },
+  "overrides": {
+    "trim": "^1.0.1",
+    "prismjs": "^1.30.0"
   }
 }

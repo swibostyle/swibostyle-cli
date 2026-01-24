@@ -1,0 +1,23 @@
+{
+  "$schema": "./node_modules/oxfmt/configuration_schema.json",
+  "indentation": {
+    "style": "space",
+    "width": 2
+  },
+  "lineWidth": 100,
+  "quoteStyle": "single",
+  "semicolons": "always",
+  "trailingCommas": "es5",
+  "bracketSpacing": true,
+  "arrowParentheses": "always",
+  "endOfLine": "lf",
+  "ignorePatterns": [
+    "node_modules",
+    "dist",
+    "_build",
+    "_release",
+    "_temp",
+    "*.d.ts",
+    "tests/fixtures"
+  ]
+}

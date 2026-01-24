@@ -1,0 +1,30 @@
+{
+  "name": "@swibostyle/cli",
+  "version": "0.1.0",
+  "type": "module",
+  "license": "MIT",
+  "description": "CLI for swibostyle CSS typesetting tool",
+  "bin": {
+    "swibostyle": "./dist/index.js"
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "test": "bun test",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@swibostyle/core": "workspace:*",
+    "commander": "^14.0.2",
+    "ora": "^9.1.0",
+    "picocolors": "^1.1.1"
+  },
+  "devDependencies": {
+    "@types/node": "^25.0.10",
+    "bun-types": "^1.3.6",
+    "typescript": "^5.9.3"
+  }
+}
