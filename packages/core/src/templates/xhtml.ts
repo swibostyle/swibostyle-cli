@@ -1,4 +1,4 @@
-import type { Frontmatter } from "../types.js";
+import type { BuildTargetType, Frontmatter } from "../types.js";
 
 /**
  * Options for rendering XHTML page
@@ -12,6 +12,8 @@ export interface XHTMLTemplateOptions {
   frontmatter: Frontmatter;
   /** Language code (default: 'ja') */
   lang?: string;
+  /** Build target name for CSS reference */
+  target?: BuildTargetType;
 }
 
 /**
@@ -28,12 +30,22 @@ function escapeXml(str: string): string {
 
 /**
  * Render XHTML page template
+ *
+ * CSS loading order:
+ * 1. base.css - Common styles shared across all targets
+ * 2. {target}.css - Target-specific styles (e.g., epub.css, print.css)
  */
 export function renderXHTML(options: XHTMLTemplateOptions): string {
-  const { title, body, frontmatter, lang = "ja" } = options;
+  const { title, body, frontmatter, lang = "ja", target = "epub" } = options;
 
   const htmlClass = frontmatter.htmlClass ?? "vertical";
   const viewport = frontmatter.viewport;
+
+  // CSS references: base.css first, then target-specific CSS
+  const cssLinks = [
+    `<link rel="stylesheet" type="text/css" href="../style/base.css" />`,
+    `<link rel="stylesheet" type="text/css" href="../style/${escapeXml(target)}.css" />`,
+  ].join("\n  ");
 
   return `<?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE html>
@@ -41,7 +53,7 @@ export function renderXHTML(options: XHTMLTemplateOptions): string {
 <head>
   <meta charset="UTF-8" />
   <title>${escapeXml(title)}</title>${viewport ? `\n  <meta name="viewport" content="${escapeXml(viewport)}" />` : ""}
-  <link rel="stylesheet" type="text/css" href="../style/style.css" />
+  ${cssLinks}
 </head>
 <body>
   <div class="main">

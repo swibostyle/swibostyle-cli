@@ -187,8 +187,9 @@ ${authorsMetadata}
 <!-- Navigation -->
 <item media-type="application/xhtml+xml" id="toc" href="navigation-documents.xhtml" properties="nav"/>
 
-<!-- Style -->
-<item media-type="text/css" id="style" href="style/style.css"/>
+<!-- Styles -->
+<item media-type="text/css" id="style-base" href="style/base.css"/>
+<item media-type="text/css" id="style-target" href="style/${escapeXml(target)}.css"/>
 
 <!-- Images -->
 ${imageManifest}
