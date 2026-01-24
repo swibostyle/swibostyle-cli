@@ -9,10 +9,14 @@
 export interface BookConfig {
   /** Book title */
   title: string;
+  /** Title sort key for file-as */
+  titleSortKey?: string;
   /** List of authors */
   authors: Author[];
   /** Publisher name */
   publisher: string;
+  /** Publisher sort key for file-as */
+  publisherSortKey?: string;
   /** Language code (e.g., 'ja', 'en') */
   lang: string;
 
@@ -29,13 +33,17 @@ export interface BookConfig {
   /** Primary writing mode */
   primaryWritingMode: "horizontal-tb" | "vertical-rl";
 
+  /** Rendition orientation */
+  orientation?: string;
+  /** Rendition spread */
+  spread?: string;
+  /** Cover image file name */
+  cover?: string;
+  /** Book type (e.g., 'comic') */
+  bookType?: string;
+
   /** Original image resolution (e.g., '1693x2361') */
   originalResolution?: string;
-  /** Image crop configurations for EPUB */
-  epubImageCrops?: ImageCropConfig[];
-
-  /** Pages to be generated from images */
-  pagesToBeGeneratedFromImage?: PageFromImageConfig[];
 
   /** Build target configurations */
   targets?: {
@@ -49,9 +57,11 @@ export interface Author {
   /** Author name */
   name: string;
   /** Role: aut=author, ill=illustrator, edt=editor, trl=translator */
-  role: "aut" | "ill" | "edt" | "trl";
+  role: "aut" | "ill" | "edt" | "trl" | string;
   /** File-as name for sorting */
   fileAs?: string;
+  /** Name sort key (Japanese style) */
+  nameSortKey?: string;
 }
 
 export interface TargetConfig {
@@ -59,26 +69,6 @@ export interface TargetConfig {
   css: string;
   /** Enable image resizing for this target */
   enableImageResizing?: boolean;
-  /** Enable image cropping for this target */
-  enableImageCrop?: boolean;
-}
-
-export interface ImageCropConfig {
-  /** File name pattern (regex) */
-  fileNamePattern: string;
-  /** Bleed amounts to crop */
-  bleed: { x: number; y: number };
-}
-
-export interface PageFromImageConfig {
-  /** Page ID */
-  id: string;
-  /** Source image file name */
-  fileName: string;
-  /** Page title */
-  title?: string;
-  /** Additional frontmatter */
-  frontmatter?: Partial<Frontmatter>;
 }
 
 // =============================================================================
@@ -99,6 +89,8 @@ export interface Frontmatter {
   isGuideItem?: boolean;
   /** Guide type */
   guideType?: "cover" | "toc" | "bodymatter" | "copyright";
+  /** EPUB type for landmarks */
+  epubType?: string;
 
   /** EPUB page spread property */
   epubPageProperty?: "page-spread-left" | "page-spread-right";
@@ -115,30 +107,8 @@ export interface Frontmatter {
 }
 
 // =============================================================================
-// Content Items
+// Image Dimensions
 // =============================================================================
-
-export type ContentItem = XHTMLContent | ImageContent;
-
-export interface XHTMLContent {
-  type: "xhtml";
-  id: string;
-  fileName: string;
-  title: string;
-  html: string;
-  frontmatter: Frontmatter;
-  properties?: string;
-  displayOrder: number;
-  fallbackImage?: string;
-}
-
-export interface ImageContent {
-  type: "image";
-  id: string;
-  fileName: string;
-  dimensions: ImageDimensions;
-  contentType: string;
-}
 
 export interface ImageDimensions {
   width: number;
@@ -150,75 +120,6 @@ export interface ImageDimensions {
 // =============================================================================
 
 export type BuildTargetType = "epub" | "print" | "pod";
-
-export interface BuildTarget {
-  type: BuildTargetType;
-  css: string;
-  enableImageResizing: boolean;
-  enableImageCrop: boolean;
-}
-
-export interface BuildOptions {
-  /** Build target type */
-  target: BuildTargetType;
-  /** Output mode */
-  output?: "file" | "memory";
-}
-
-export interface BuildResult {
-  /** Output file path (when output mode is 'file') */
-  outputPath?: string;
-  /** Output data (when output mode is 'memory') */
-  data?: Uint8Array;
-  /** List of generated content items */
-  contents: ContentItem[];
-}
-
-// =============================================================================
-// Path Configuration
-// =============================================================================
-
-export interface PathConfig {
-  /** Source directory */
-  src: string;
-  /** Build directory */
-  build: string;
-  /** Release directory */
-  release: string;
-  /** Markdown source directory */
-  markdown: string;
-  /** Styles directory */
-  styles: string;
-  /** Images directory */
-  images: string;
-  /** Templates directory */
-  templates: string;
-  /** META-INF directory */
-  metaInf: string;
-}
-
-// =============================================================================
-// Progress Events
-// =============================================================================
-
-export type BuildPhase =
-  | "clean"
-  | "copy"
-  | "css"
-  | "image"
-  | "markdown"
-  | "opf"
-  | "navigation"
-  | "archive";
-
-export interface ProgressEvent {
-  phase: BuildPhase;
-  current: number;
-  total: number;
-  message?: string;
-}
-
-export type ProgressCallback = (event: ProgressEvent) => void;
 
 // =============================================================================
 // Logger

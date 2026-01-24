@@ -4,7 +4,7 @@ import * as p from "@clack/prompts";
 import type { ProjectOptions } from "./types.js";
 
 /**
- * Scaffold a new project
+ * Scaffold a new project using SSG format
  */
 export async function scaffold(options: ProjectOptions): Promise<void> {
   const projectDir = path.resolve(process.cwd(), options.name);
@@ -30,8 +30,8 @@ export async function scaffold(options: ProjectOptions): Promise<void> {
   // Create project directory
   fs.mkdirSync(projectDir, { recursive: true });
 
-  // Create directory structure
-  const dirs = ["src", "src/markdown", "src/style", "src/templates", "src/image", "src/META-INF"];
+  // Create SSG directory structure
+  const dirs = ["src", "src/item", "src/item/xhtml", "src/item/style", "src/item/image"];
 
   for (const dir of dirs) {
     fs.mkdirSync(path.join(projectDir, dir), { recursive: true });
@@ -41,10 +41,7 @@ export async function scaffold(options: ProjectOptions): Promise<void> {
   await generatePackageJson(projectDir, options);
   await generateBookJson(projectDir, options);
   await generateStyles(projectDir, options);
-  await generateTemplates(projectDir, options);
   await generateSampleContent(projectDir, options);
-  await generateMetaInf(projectDir);
-  await generateMimetype(projectDir);
   await generateGitignore(projectDir);
   await generateReadme(projectDir, options);
 
@@ -91,28 +88,10 @@ async function generateBookJson(projectDir: string, options: ProjectOptions): Pr
     layout: options.template === "manga" ? "pre-paginated" : "reflowable",
     pageDirection: options.pageDirection,
     primaryWritingMode: options.writingMode,
-    targets: {
-      epub: {
-        css: "epub.scss",
-        enableImageResizing: true,
-      },
-      print: {
-        css: "print.scss",
-        enableImageResizing: false,
-      },
-      pod: {
-        css: "pod.scss",
-        enableImageResizing: false,
-      },
-    },
-    epubImageCrops: [],
-    pagesToBeGeneratedFromImage: [],
   };
 
-  fs.writeFileSync(
-    path.join(projectDir, "src/book.json"),
-    JSON.stringify(bookJson, null, 2) + "\n",
-  );
+  // book.json is at project root in SSG format
+  fs.writeFileSync(path.join(projectDir, "book.json"), JSON.stringify(bookJson, null, 2) + "\n");
 }
 
 async function generateStyles(projectDir: string, options: ProjectOptions): Promise<void> {
@@ -200,100 +179,40 @@ p + p {
 }
 `;
 
-  fs.writeFileSync(path.join(projectDir, "src/style/base.scss"), baseScss);
-  fs.writeFileSync(path.join(projectDir, "src/style/epub.scss"), epubScss);
-  fs.writeFileSync(path.join(projectDir, "src/style/print.scss"), printScss);
-  fs.writeFileSync(path.join(projectDir, "src/style/pod.scss"), podScss);
-}
-
-async function generateTemplates(projectDir: string, options: ProjectOptions): Promise<void> {
-  // xhtml.ejs
-  const xhtmlTemplate = `<?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE html>
-<html xmlns="http://www.w3.org/1999/xhtml" xmlns:epub="http://www.idpf.org/2007/ops" xml:lang="${options.lang}" lang="${options.lang}"<% if (frontmatter.htmlClass) { %> class="<%= frontmatter.htmlClass %>"<% } %>>
-<head>
-  <meta charset="UTF-8" />
-  <title><%= title %></title>
-<% if (frontmatter.viewport) { %>
-  <meta name="viewport" content="<%= frontmatter.viewport %>" />
-<% } %>
-  <link rel="stylesheet" type="text/css" href="../style/style.css" />
-</head>
-<body>
-<%- body %>
-</body>
-</html>
-`;
-
-  // navigation-documents.ejs
-  const navTemplate = `<?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE html>
-<html xmlns="http://www.w3.org/1999/xhtml" xmlns:epub="http://www.idpf.org/2007/ops" xml:lang="${options.lang}" lang="${options.lang}">
-<head>
-  <meta charset="UTF-8" />
-  <title>Navigation</title>
-</head>
-<body>
-  <nav epub:type="toc" id="toc">
-    <h1>Table of Contents</h1>
-    <ol>
-<% for (const item of navigationItems) { %>
-      <li><a href="xhtml/<%= item.fileName %>"><%= item.title %></a></li>
-<% } %>
-    </ol>
-  </nav>
-</body>
-</html>
-`;
-
-  // standard.opf.ejs
-  const opfTemplate = `<?xml version="1.0" encoding="UTF-8"?>
-<package xmlns="http://www.idpf.org/2007/opf" version="3.0" xml:lang="${options.lang}" unique-identifier="unique-id" prefix="ebpaj: http://www.ebpaj.jp/">
-  <metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
-    <dc:title><%= bookConfig.title %></dc:title>
-    <dc:language><%= bookConfig.lang %></dc:language>
-    <dc:identifier id="unique-id"><%= bookConfig.bookId.epub %></dc:identifier>
-<% for (const author of bookConfig.authors) { %>
-    <dc:creator><%= author.name %></dc:creator>
-<% } %>
-    <dc:publisher><%= bookConfig.publisher %></dc:publisher>
-    <meta property="dcterms:modified"><%= modified %></meta>
-<% if (bookConfig.layout === 'pre-paginated') { %>
-    <meta property="rendition:layout">pre-paginated</meta>
-    <meta property="rendition:spread">landscape</meta>
-<% } %>
-  </metadata>
-
-  <manifest>
-    <item id="nav" href="navigation-documents.xhtml" media-type="application/xhtml+xml" properties="nav" />
-    <item id="style" href="style/style.css" media-type="text/css" />
-<% for (const page of pages) { %>
-    <item id="<%= page.id %>" href="xhtml/<%= page.fileName %>" media-type="application/xhtml+xml"<% if (page.properties) { %> properties="<%= page.properties %>"<% } %> />
-<% } %>
-<% for (const image of images) { %>
-    <item id="<%= image.id %>" href="image/<%= image.fileName %>" media-type="<%= image.contentType %>" />
-<% } %>
-  </manifest>
-
-  <spine page-progression-direction="<%= bookConfig.pageDirection %>">
-<% for (const page of pages) { %>
-    <itemref idref="<%= page.id %>"<% if (page.frontmatter.epubPageProperty) { %> properties="<%= page.frontmatter.epubPageProperty %>"<% } %> />
-<% } %>
-  </spine>
-</package>
-`;
-
-  fs.writeFileSync(path.join(projectDir, "src/templates/xhtml.ejs"), xhtmlTemplate);
-  fs.writeFileSync(path.join(projectDir, "src/templates/navigation-documents.ejs"), navTemplate);
-  fs.writeFileSync(path.join(projectDir, "src/templates/standard.opf.ejs"), opfTemplate);
+  fs.writeFileSync(path.join(projectDir, "src/item/style/base.scss"), baseScss);
+  fs.writeFileSync(path.join(projectDir, "src/item/style/epub.scss"), epubScss);
+  fs.writeFileSync(path.join(projectDir, "src/item/style/print.scss"), printScss);
+  fs.writeFileSync(path.join(projectDir, "src/item/style/pod.scss"), podScss);
 }
 
 async function generateSampleContent(projectDir: string, options: ProjectOptions): Promise<void> {
   const isVertical = options.writingMode === "vertical-rl";
 
-  const sampleMd = `---
+  // Cover page
+  const coverMd = `---
+title: ${isVertical ? "表紙" : "Cover"}
+epubType: cover
+isGuideItem: true
+---
+
+# ${options.name}
+`;
+
+  // TOC page
+  const tocMd = `---
+title: ${isVertical ? "目次" : "Table of Contents"}
+epubType: toc
+isNavigationItem: true
+---
+
+# ${isVertical ? "目次" : "Table of Contents"}
+
+${isVertical ? "目次はビルド時に自動生成されます。" : "Table of contents will be auto-generated during build."}
+`;
+
+  // Introduction page
+  const introMd = `---
 title: ${isVertical ? "はじめに" : "Introduction"}
-displayOrder: 1
 isNavigationItem: true
 ---
 
@@ -306,23 +225,24 @@ ${
 }
 `;
 
-  fs.writeFileSync(path.join(projectDir, "src/markdown/p-001-intro.md"), sampleMd);
-}
+  // Colophon page
+  const colophonMd = `---
+title: ${isVertical ? "奥付" : "Colophon"}
+epubType: colophon
+---
 
-async function generateMetaInf(projectDir: string): Promise<void> {
-  const containerXml = `<?xml version="1.0" encoding="UTF-8"?>
-<container version="1.0" xmlns="urn:oasis:names:tc:opendocument:xmlns:container">
-  <rootfiles>
-    <rootfile full-path="item/standard.opf" media-type="application/oebps-package+xml" />
-  </rootfiles>
-</container>
+# ${isVertical ? "奥付" : "Colophon"}
+
+**${options.name}**
+
+${isVertical ? "著者：Author Name\n出版：Publisher" : "Author: Author Name\nPublisher: Publisher"}
 `;
 
-  fs.writeFileSync(path.join(projectDir, "src/META-INF/container.xml"), containerXml);
-}
-
-async function generateMimetype(projectDir: string): Promise<void> {
-  fs.writeFileSync(path.join(projectDir, "src/mimetype"), "application/epub+zip");
+  // SSG uses numeric prefix for display order (p-XXX-name.md)
+  fs.writeFileSync(path.join(projectDir, "src/item/xhtml/p-000-cover.md"), coverMd);
+  fs.writeFileSync(path.join(projectDir, "src/item/xhtml/p-010-toc.md"), tocMd);
+  fs.writeFileSync(path.join(projectDir, "src/item/xhtml/p-100-intro.md"), introMd);
+  fs.writeFileSync(path.join(projectDir, "src/item/xhtml/p-900-colophon.md"), colophonMd);
 }
 
 async function generateGitignore(projectDir: string): Promise<void> {
@@ -371,16 +291,25 @@ ${options.packageManager} run build:print
 
 \`\`\`
 ${options.name}/
+├── book.json              # Book configuration
 ├── src/
-│   ├── book.json          # Book configuration
-│   ├── markdown/          # Content (Markdown files)
-│   ├── style/             # Stylesheets (SCSS)
-│   ├── templates/         # EJS templates
-│   ├── image/             # Images
-│   └── META-INF/          # EPUB metadata
-├── _build/                # Build output (generated)
+│   └── item/
+│       ├── xhtml/         # Content (Markdown files)
+│       ├── style/         # Stylesheets (SCSS)
+│       └── image/         # Images
 └── _release/              # Final EPUB (generated)
 \`\`\`
+
+## File Naming Convention
+
+Markdown files in \`src/item/xhtml/\` use numeric prefixes to control display order:
+
+- \`p-000-cover.md\` - Cover page
+- \`p-010-toc.md\` - Table of contents
+- \`p-100-chapter1.md\` - Chapter 1
+- \`p-900-colophon.md\` - Colophon
+
+The numeric prefix (000, 010, 100, etc.) determines the order in the EPUB spine.
 
 ## Commands
 
