@@ -1,0 +1,9 @@
+# Node modules
+node_modules/
+
+# TypeScript build output
+dist/
+
+# EPubCheck JAR (downloaded for local dev)
+bin/
+epubcheck.jar

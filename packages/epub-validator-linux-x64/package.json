@@ -1,0 +1,29 @@
+{
+  "name": "@swibostyle/epub-validator-linux-x64",
+  "version": "0.1.0",
+  "type": "module",
+  "license": "MIT",
+  "description": "EPubCheck with bundled JRE for Linux x64 (no Java required)",
+  "os": ["linux"],
+  "cpu": ["x64"],
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist",
+    "jre",
+    "epubcheck.jar",
+    "lib"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "typecheck": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "@types/node": "^25.0.10",
+    "typescript": "^5.9.3"
+  }
+}

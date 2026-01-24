@@ -69,6 +69,26 @@
         "typescript": "^5.9.3",
       },
     },
+    "packages/epub-validator": {
+      "name": "@swibostyle/epub-validator",
+      "version": "0.1.0",
+      "devDependencies": {
+        "@types/node": "^25.0.10",
+        "bun-types": "^1.3.6",
+        "typescript": "^5.9.3",
+      },
+      "optionalDependencies": {
+        "@swibostyle/epub-validator-linux-x64": "^0.1.0",
+      },
+    },
+    "packages/epub-validator-linux-x64": {
+      "name": "@swibostyle/epub-validator-linux-x64",
+      "version": "0.1.0",
+      "devDependencies": {
+        "@types/node": "^25.0.10",
+        "typescript": "^5.9.3",
+      },
+    },
     "packages/pdf-server": {
       "name": "@swibostyle/pdf-server",
       "version": "0.1.0",
@@ -217,6 +237,10 @@
     "@swibostyle/cli": ["@swibostyle/cli@workspace:packages/cli"],
 
     "@swibostyle/core": ["@swibostyle/core@workspace:packages/core"],
+
+    "@swibostyle/epub-validator": ["@swibostyle/epub-validator@workspace:packages/epub-validator"],
+
+    "@swibostyle/epub-validator-linux-x64": ["@swibostyle/epub-validator-linux-x64@workspace:packages/epub-validator-linux-x64"],
 
     "@swibostyle/pdf-server": ["@swibostyle/pdf-server@workspace:packages/pdf-server"],
 

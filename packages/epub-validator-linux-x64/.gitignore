@@ -1,0 +1,8 @@
+# Build outputs
+dist/
+node_modules/
+
+# Bundled JRE and EPubCheck (downloaded during CI build)
+jre/
+epubcheck.jar
+lib/
