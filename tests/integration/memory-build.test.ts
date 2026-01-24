@@ -7,10 +7,19 @@ import {
   MemoryStorageAdapter,
   NoopImageAdapter,
   PassthroughCSSAdapter,
+  loadBookConfig,
+  NodeStorageAdapter,
 } from '../../packages/core/src/index.js';
 import type { BookConfig } from '../../packages/core/src/types.js';
 
 const FIXTURES_DIR = path.resolve(__dirname, '../fixtures/sample-project/src');
+
+// Strip JSON comments from a string (single-line // and multi-line)
+function stripJsonComments(json: string): string {
+  return json
+    .replace(/\/\/.*$/gm, '')
+    .replace(/\/\*[\s\S]*?\*\//g, '');
+}
 
 describe('Memory Storage Build', () => {
   test('should build EPUB entirely in memory', async () => {
@@ -26,6 +35,8 @@ describe('Memory Storage Build', () => {
         const stat = fs.statSync(fullPath);
 
         if (stat.isDirectory()) {
+          // Create directory in memory storage
+          storage.mkdirSync(relativePath);
           loadDir(fullPath, relativePath);
         } else {
           const content = fs.readFileSync(fullPath);
@@ -35,11 +46,16 @@ describe('Memory Storage Build', () => {
     };
 
     // Load fixtures into memory
+    storage.mkdirSync('/src');
     loadDir(FIXTURES_DIR, '/src');
 
-    // Load and parse config
+    // Load and parse config (handle JSON comments)
     const configContent = await storage.readTextFile('/src/book.json');
-    const config: BookConfig = JSON.parse(configContent);
+    const config: BookConfig = JSON.parse(stripJsonComments(configContent));
+    // Disable image resizing for NoopImageAdapter
+    config.targets = {
+      epub: { css: 'epub.scss', enableImageResizing: false },
+    };
 
     // Create context with memory storage
     const ctx = createBuildContext({
@@ -103,7 +119,18 @@ describe('Minimal Memory Build', () => {
       layout: 'reflowable',
       pageDirection: 'ltr',
       primaryWritingMode: 'horizontal-tb',
+      targets: {
+        epub: { css: 'epub.scss', enableImageResizing: false },
+      },
     };
+
+    // Create directories first
+    storage.mkdirSync('/src');
+    storage.mkdirSync('/src/META-INF');
+    storage.mkdirSync('/src/markdown');
+    storage.mkdirSync('/src/style');
+    storage.mkdirSync('/src/templates');
+    storage.mkdirSync('/src/image');
 
     // Create files
     storage.setFile('/src/book.json', JSON.stringify(config));

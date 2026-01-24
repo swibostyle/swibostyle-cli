@@ -49,6 +49,15 @@ export class MemoryStorageAdapter implements StorageAdapter {
   }
 
   /**
+   * Create a directory synchronously (for initialization)
+   */
+  mkdirSync(path: string): void {
+    const normalizedPath = this.normalizePath(path);
+    this.ensureParentDirs(normalizedPath + '/dummy');
+    this.files.set(normalizedPath, { type: 'directory', mtime: new Date() });
+  }
+
+  /**
    * Get all file paths (for debugging/export)
    */
   getAllPaths(): string[] {

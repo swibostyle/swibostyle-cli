@@ -1,5 +1,20 @@
-/_build
-/_release
-/参考
-/.vscode
+# Build outputs
+_build/
+_release/
+_temp/
+dist/
+
+# Dependencies
 node_modules/
+bun.lock
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Project specific
+/参考

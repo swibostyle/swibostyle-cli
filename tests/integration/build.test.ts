@@ -15,6 +15,18 @@ const FIXTURES_DIR = path.resolve(__dirname, '../fixtures/sample-project');
 const TEMP_BUILD_DIR = path.resolve(__dirname, '../fixtures/sample-project/_build');
 const TEMP_RELEASE_DIR = path.resolve(__dirname, '../fixtures/sample-project/_release');
 
+/**
+ * Helper to disable image resizing for NoopImageAdapter tests
+ */
+function disableImageResizing(config: ReturnType<typeof loadBookConfig extends (...args: never[]) => Promise<infer R> ? R : never>) {
+  config.targets = {
+    epub: { css: 'epub.scss', enableImageResizing: false },
+    print: { css: 'print.scss', enableImageResizing: false },
+    pod: { css: 'pod.scss', enableImageResizing: false },
+  };
+  return config;
+}
+
 describe('Build Pipeline Integration', () => {
   let storage: NodeStorageAdapter;
 
@@ -46,7 +58,7 @@ describe('Build Pipeline Integration', () => {
     const srcDir = path.join(FIXTURES_DIR, 'src');
     const configPath = path.join(srcDir, 'book.json');
 
-    const config = await loadBookConfig(storage, configPath);
+    const config = disableImageResizing(await loadBookConfig(storage, configPath));
     const paths = getDefaultPaths(srcDir, TEMP_BUILD_DIR, TEMP_RELEASE_DIR);
 
     const ctx = createBuildContext({
@@ -83,7 +95,7 @@ describe('Build Pipeline Integration', () => {
     const srcDir = path.join(FIXTURES_DIR, 'src');
     const configPath = path.join(srcDir, 'book.json');
 
-    const config = await loadBookConfig(storage, configPath);
+    const config = disableImageResizing(await loadBookConfig(storage, configPath));
     const paths = getDefaultPaths(srcDir, TEMP_BUILD_DIR, TEMP_RELEASE_DIR);
 
     const ctx = createBuildContext({
@@ -110,7 +122,7 @@ describe('Build Pipeline Integration', () => {
     const srcDir = path.join(FIXTURES_DIR, 'src');
     const configPath = path.join(srcDir, 'book.json');
 
-    const config = await loadBookConfig(storage, configPath);
+    const config = disableImageResizing(await loadBookConfig(storage, configPath));
     const paths = getDefaultPaths(srcDir, TEMP_BUILD_DIR, TEMP_RELEASE_DIR);
 
     const ctx = createBuildContext({
@@ -135,7 +147,7 @@ describe('Build Directory Structure', () => {
     const configPath = path.join(srcDir, 'book.json');
 
     const storage = new NodeStorageAdapter();
-    const config = await loadBookConfig(storage, configPath);
+    const config = disableImageResizing(await loadBookConfig(storage, configPath));
     const paths = getDefaultPaths(srcDir, TEMP_BUILD_DIR, TEMP_RELEASE_DIR);
 
     const ctx = createBuildContext({
