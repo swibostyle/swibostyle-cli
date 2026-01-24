@@ -15,12 +15,13 @@
     "wasm"
   ],
   "scripts": {
-    "build:wasm": "cd java && mvn clean compile",
+    "build:wasm": "cd java && mvn clean compile -B",
     "build:ts": "tsc",
     "build": "bun run build:wasm && bun run build:ts",
     "dev": "tsc --watch",
     "test": "bun test",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "validate": "bun scripts/validate.ts"
   },
   "devDependencies": {
     "@types/node": "^25.0.10",
