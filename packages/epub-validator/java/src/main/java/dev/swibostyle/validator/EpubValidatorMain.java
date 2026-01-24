@@ -1,6 +1,6 @@
 package dev.swibostyle.validator;
 
-import com.adobe.epubcheck.api.EPUBCheck;
+import com.adobe.epubcheck.api.EpubCheck;
 import com.adobe.epubcheck.api.EPUBLocation;
 import com.adobe.epubcheck.api.Report;
 import com.adobe.epubcheck.messages.Message;
@@ -61,8 +61,8 @@ public class EpubValidatorMain {
             // Create custom report to collect messages
             ValidationReport report = new ValidationReport();
 
-            // Run EPUBCheck
-            EPUBCheck checker = new EPUBCheck(inputStream, report, "input.epub");
+            // Run EpubCheck
+            EpubCheck checker = new EpubCheck(inputStream, report, "input.epub");
             boolean valid = checker.validate();
 
             // Build JSON result
