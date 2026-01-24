@@ -682,12 +682,29 @@ npm install @swibostyle/pdf-server
 
 ---
 
-## 次のステップ
+## 実装状況
 
-1. **Phase 1**: モノレポ基盤構築
-2. **Phase 2**: core パッケージ実装 (Node.js アダプター優先)
-3. **Phase 3**: cli パッケージ実装
-4. **Phase 4**: create-swibostyle 実装
-5. **Phase 5**: pdf-server 実装
-6. **Phase 6**: Browser アダプター実装
-7. **Phase 7**: OPS アダプター実装
+### 完了済み
+
+- [x] **Phase 1**: モノレポ基盤構築 (bun workspaces, TypeScript, oxlint, oxfmt)
+- [x] **Phase 2**: core パッケージ実装
+  - [x] StorageAdapter (Node, Memory)
+  - [x] ImageAdapter (Sharp, Noop)
+  - [x] CSSAdapter (Sass, Passthrough)
+  - [x] ビルドパイプライン (clean, copy, css, image, markdown, opf, navigation, archive)
+  - [x] book.json設定読み込み (JSON5対応)
+- [x] **Phase 3**: cli パッケージ実装 (build, preview, pdf コマンド)
+- [x] **Phase 4**: create-swibostyle 実装 (@clack/prompts)
+- [x] **Phase 5**: pdf-server 実装 (Express + Playwright)
+- [x] テスト基盤 (ユニットテスト + 結合テスト)
+- [x] CI/CD (GitHub Actions: audit, check, test, build)
+
+### 未実装 (将来)
+
+- [ ] **Phase 6**: Browser アダプター実装
+  - [ ] BrowserStorageAdapter (File System Access API / IndexedDB)
+  - [ ] CanvasImageAdapter / WasmImageAdapter
+  - [ ] dart-sass-wasm 対応
+- [ ] **Phase 7**: OPS アダプター実装 (S3, R2, GCS)
+- [ ] Web Worker 対応
+- [ ] 軽量版ビルド (@swibostyle/core/lite)
