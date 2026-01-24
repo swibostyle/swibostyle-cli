@@ -11,7 +11,9 @@
   "scripts": {
     "build": "bun run --filter '*' build",
     "dev": "bun run --filter '*' dev",
-    "test": "bun run --filter '*' test",
+    "test": "bun test",
+    "test:unit": "bun test packages/*/src",
+    "test:integration": "bun test tests/integration",
     "typecheck": "bun run --filter '*' typecheck",
     "clean": "rm -rf packages/*/dist"
   },
