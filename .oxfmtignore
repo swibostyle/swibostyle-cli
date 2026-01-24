@@ -1,6 +1,9 @@
 # Ignore JSON files (oxfmt has issues with JSON)
 **/*.json
 
+# Ignore Markdown files (oxfmt has issues with some Markdown)
+**/*.md
+
 # Ignore fixture files
 tests/fixtures
 
