@@ -48,9 +48,14 @@ export async function renderPDF(
   const page = await browser.newPage();
 
   try {
-    // Navigate to server root (redirects to viewer with book loaded)
+    // Construct viewer URL with book source
+    // HTTP redirects don't preserve URL fragments (#hash), so we navigate directly
+    const bookUrl = encodeURIComponent(`${serverUrl}/book/item/standard.opf`);
+    const viewerUrl = `${serverUrl}/viewer/index.html#src=${bookUrl}&bookMode=true&renderAllPages=true`;
+
     console.log(`Connecting to pdf-server: ${serverUrl}`);
-    await page.goto(serverUrl, { timeout, waitUntil: "networkidle" });
+    console.log(`Viewer URL: ${viewerUrl}`);
+    await page.goto(viewerUrl, { timeout, waitUntil: "networkidle" });
 
     // Wait for Vivliostyle to finish rendering
     // The viewer sets data-vivliostyle-viewer-status attribute
