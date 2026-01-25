@@ -63,8 +63,8 @@ bun install
 bun run build
 
 # Run CLI from the repo
-bun run swibo build           # in a book project directory
-bun run swibo --help          # show help
+bun run swibostyle build           # in a book project directory
+bun run swibostyle --help          # show help
 ```
 
 ## Getting Started - For Contributors
@@ -107,12 +107,12 @@ bun test tests/integration  # Integration tests
 
 ```bash
 # After building, run CLI commands with:
-bun run swibo <command>
+bun run swibostyle <command>
 
 # Examples:
-bun run swibo build
-bun run swibo preview
-bun run swibo pdf
+bun run swibostyle build
+bun run swibostyle preview
+bun run swibostyle pdf
 ```
 
 ## Package Structure
