@@ -18,29 +18,66 @@ Unlike traditional CSS typesetting tools that focus on PDF output, swibostyle ta
 | PDF generation | Built-in | Via Playwright (AGPL isolated) |
 | Runtime | Node.js | **Node.js / Bun** |
 
-## Installation
+## Getting Started - For Users
+
+> **Note**: This package is not yet published to npm. The instructions below describe the intended usage after release.
+
+### Create a new project
 
 ```bash
-bun install
+# After npm release
+bunx create-swibostyle my-book
+cd my-book
 ```
 
-## Usage
+### Basic commands
 
 ```bash
 # Build EPUB
-bun run swibo build
+bunx swibostyle build
 
 # Build for print (PDF conversion)
-bun run swibo build --target print
+bunx swibostyle build --target print
 
 # Start preview server
-bun run swibo preview
+bunx swibostyle preview
 
 # Generate PDF (requires pdf-server)
-bun run swibo pdf
+bunx swibostyle pdf
 ```
 
-## Development
+You can also use `npx` instead of `bunx`:
+
+```bash
+npx swibostyle build
+```
+
+### Try it now (before npm release)
+
+Until the package is published, you can try swibostyle by cloning this repository:
+
+```bash
+git clone https://github.com/swibostyle/swibostyle-cli.git
+cd swibostyle-cli
+bun install
+bun run build
+
+# Run CLI from the repo
+bun run swibo build           # in a book project directory
+bun run swibo --help          # show help
+```
+
+## Getting Started - For Contributors
+
+### Setup
+
+```bash
+git clone https://github.com/swibostyle/swibostyle-cli.git
+cd swibostyle-cli
+bun install
+```
+
+### Development commands
 
 ```bash
 # Build all packages
@@ -64,6 +101,18 @@ bun run check
 bun test                    # All tests
 bun test packages/core/src  # Unit tests
 bun test tests/integration  # Integration tests
+```
+
+### Running the CLI locally
+
+```bash
+# After building, run CLI commands with:
+bun run swibo <command>
+
+# Examples:
+bun run swibo build
+bun run swibo preview
+bun run swibo pdf
 ```
 
 ## Package Structure
