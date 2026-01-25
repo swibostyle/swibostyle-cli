@@ -28,8 +28,17 @@ jobs:
           registry-url: 'https://npm.pkg.github.com'
           scope: '@swibostyle'
 
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '21'
+
       - name: Install dependencies
         run: bun install
+
+      - name: Build JRE for epub-validator-linux-x64
+        run: bun run --filter '@swibostyle/epub-validator-linux-x64' build:jre
 
       - name: Build packages
         run: bun run build
