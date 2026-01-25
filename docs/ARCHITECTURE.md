@@ -22,10 +22,12 @@ Vivliostyle CLIとは異なり、**EPUB優先**の設計思想を持ち、CSS差
 ```
 swibostyle/
 ├── packages/
-│   ├── core/                 # MIT - コアロジック (環境非依存)
-│   ├── cli/                  # MIT - CLIインターフェース
-│   ├── create-swibostyle/    # MIT - プロジェクトテンプレート生成
-│   └── pdf-server/           # AGPL - PDF生成サーバー (分離)
+│   ├── core/                      # MIT - コアロジック (環境非依存)
+│   ├── cli/                       # MIT - CLIインターフェース
+│   ├── create-swibostyle/         # MIT - プロジェクトテンプレート生成
+│   ├── epub-validator/            # MIT - EPUB検証 (W3C EPubCheck)
+│   ├── epub-validator-linux-x64/  # MIT - Linux x64用JREバンドル版
+│   └── pdf-server/                # AGPL - PDF生成サーバー (分離)
 │
 ├── package.json              # bun workspaces
 ├── tsconfig.base.json
@@ -216,49 +218,39 @@ packages/core/
 │   │   ├── storage/
 │   │   │   ├── interface.ts        # StorageAdapter インターフェース
 │   │   │   ├── node.ts             # NodeStorageAdapter
-│   │   │   ├── memory.ts           # MemoryStorageAdapter
-│   │   │   └── ops.ts              # OPSStorageAdapter (S3/R2/GCS)
+│   │   │   └── memory.ts           # MemoryStorageAdapter
 │   │   │
 │   │   ├── image/
 │   │   │   ├── interface.ts        # ImageAdapter インターフェース
 │   │   │   ├── sharp.ts            # SharpImageAdapter
-│   │   │   ├── noop.ts             # NoopImageAdapter
-│   │   │   └── wasm.ts             # WasmImageAdapter (将来)
+│   │   │   └── noop.ts             # NoopImageAdapter
 │   │   │
 │   │   └── css/
 │   │       ├── interface.ts        # CSSAdapter インターフェース
 │   │       ├── sass.ts             # SassAdapter
-│   │       ├── postcss.ts          # PostCSSAdapter
 │   │       └── passthrough.ts      # PassthroughAdapter
 │   │
-│   ├── builder/                    # ビルドパイプライン
+│   ├── ssg/                        # SSGビルドシステム
 │   │   ├── index.ts
-│   │   ├── pipeline.ts             # メインパイプライン
+│   │   ├── build.ts                # メインビルドフロー
 │   │   ├── context.ts              # BuildContext
-│   │   ├── clean.ts
-│   │   ├── copy.ts
-│   │   └── archive.ts              # EPUB ZIP生成
+│   │   ├── router.ts               # Hono風ルーター
+│   │   ├── scanner.ts              # ファイルスキャナー
+│   │   ├── handlers.ts             # デフォルトハンドラー
+│   │   └── types.ts                # SSG型定義
 │   │
-│   ├── processors/                 # コンテンツプロセッサ
-│   │   ├── index.ts
-│   │   ├── css.ts                  # CSS処理オーケストレーション
-│   │   ├── markdown.ts             # VFM + EJS → XHTML
-│   │   ├── image.ts                # 画像処理オーケストレーション
-│   │   ├── opf.ts                  # OPF生成
-│   │   └── navigation.ts           # Navigation Documents生成
+│   ├── templates/                  # 組み込みテンプレート
+│   │   └── xhtml.ts                # XHTMLページテンプレート
 │   │
 │   ├── config/                     # 設定管理
 │   │   ├── index.ts
-│   │   ├── loader.ts               # 設定ファイル読み込み
-│   │   ├── schema.ts               # バリデーションスキーマ
-│   │   └── defaults.ts             # デフォルト値
+│   │   └── loader.ts               # 設定ファイル読み込み
 │   │
 │   └── utils/                      # ユーティリティ
 │       ├── index.ts
 │       ├── xhtml.ts                # XHTML変換
 │       ├── frontmatter.ts          # Frontmatter解析
-│       ├── mime.ts                 # MIMEタイプ判定
-│       └── path.ts                 # パス操作 (環境非依存)
+│       └── mime.ts                 # MIMEタイプ判定
 │
 ├── package.json
 └── tsconfig.json
@@ -649,6 +641,15 @@ worker.onmessage = (e) => {
 └─────────────────────┘     │  (AGPL, optional)       │
                             └─────────────────────────┘
 
+┌─────────────────────────────┐
+│  @swibostyle/epub-validator │ (独立、EPUB検証)
+└──────────────┬──────────────┘
+               │ optional dependency
+               ▼
+┌─────────────────────────────────────┐
+│  @swibostyle/epub-validator-linux-x64 │ (JREバンドル版)
+└─────────────────────────────────────┘
+
 ┌─────────────────────┐
 │  create-swibostyle  │ (独立、テンプレートのみ)
 └─────────────────────┘
@@ -663,6 +664,8 @@ worker.onmessage = (e) => {
 | @swibostyle/core | MIT | AGPL依存なし、再利用性重視 |
 | @swibostyle/cli | MIT | core依存のみ |
 | create-swibostyle | MIT | テンプレートのみ |
+| @swibostyle/epub-validator | MIT | EPubCheck (BSD-3-Clause) ラッパー |
+| @swibostyle/epub-validator-linux-x64 | MIT | JREバンドル版 |
 | @swibostyle/pdf-server | AGPL-3.0 | Vivliostyle Viewer依存 |
 
 ### AGPL隔離の仕組み
@@ -708,3 +711,10 @@ npm install @swibostyle/pdf-server
 - [ ] **Phase 7**: OPS アダプター実装 (S3, R2, GCS)
 - [ ] Web Worker 対応
 - [ ] 軽量版ビルド (@swibostyle/core/lite)
+
+---
+
+## クレジット
+
+- **コアロジック（オリジナルgulp版）**: [@butameron](https://github.com/butameron)
+- **CLI実装**: 主に [Claude Code](https://claude.ai/code) により作成
