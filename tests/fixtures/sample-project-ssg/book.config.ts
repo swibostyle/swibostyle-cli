@@ -1,6 +1,5 @@
-import { defineConfig } from "../../../packages/core/src/index.js";
-
-export default defineConfig({
+// For compiled binary compatibility, export plain object instead of using defineConfig
+export default {
   title:
     "ハックしないで監査役!! 小説こうしす!EEシリーズ 元社内SE祝園アカネ 監査役編 [1]",
   titleSortKey:
@@ -34,4 +33,4 @@ export default defineConfig({
   // 小説混在の場合は使えない
   bookType: "",
   originalResolution: "1693x2361",
-});
+};
