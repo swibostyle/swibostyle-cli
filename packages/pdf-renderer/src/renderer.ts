@@ -50,12 +50,12 @@ export async function renderPDF(
   try {
     // Construct viewer URL with book source
     // Vivliostyle auto-detects OPF when given the EPUB root directory
-    // HTTP redirects don't preserve URL fragments (#hash), so we navigate directly
-    const bookUrl = encodeURIComponent(`${serverUrl}/book/`);
+    // Don't encode the URL - Vivliostyle expects unencoded absolute URLs
+    const bookUrl = `${serverUrl}/book/`;
     const viewerUrl = `${serverUrl}/viewer/index.html#src=${bookUrl}&bookMode=true&renderAllPages=true`;
 
     console.log(`Connecting to pdf-server: ${serverUrl}`);
-    console.log(`Book URL: ${serverUrl}/book/`);
+    console.log(`Book URL: ${bookUrl}`);
     console.log(`Viewer URL: ${viewerUrl}`);
 
     // Listen for console messages
