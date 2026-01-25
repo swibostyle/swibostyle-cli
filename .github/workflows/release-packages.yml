@@ -95,11 +95,8 @@ jobs:
         env:
           NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Publish create-swibostyle
-        working-directory: packages/create-swibostyle
-        run: npm publish --access public
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      # create-swibostyle is skipped (no scope, GitHub Packages requires @scope/name)
+      # It will be published to npm registry only via release-npm.yml
 
       - name: Publish @swibostyle/cli
         working-directory: packages/cli
