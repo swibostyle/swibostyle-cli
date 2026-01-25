@@ -27,12 +27,18 @@ Unlike traditional CSS typesetting tools that focus on PDF output, swibostyle ta
 ```bash
 # After npm release
 bunx create-swibostyle my-book
+# or
+bunx swibostyle init my-book
+
 cd my-book
 ```
 
 ### Basic commands
 
 ```bash
+# Create a new project (interactive)
+bunx swibostyle init
+
 # Build EPUB
 bunx swibostyle build
 
@@ -138,6 +144,7 @@ bun test tests/integration  # Integration tests
 bun run swibostyle <command>
 
 # Examples:
+bun run swibostyle init my-book
 bun run swibostyle build
 bun run swibostyle preview
 bun run swibostyle pdf
