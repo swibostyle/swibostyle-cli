@@ -1,8 +1,8 @@
 # swibostyle
 
-An **EPUB-first Static Site Generator** for CSS typesetting.
+An **EPUB-first SSG** for CSS typesetting.
 
-The name "swibostyle" is a double meaning: **Swibo Style Generator** and **CSS Stylesheet**. "Swibo" (水母, suibo) means jellyfish in Japanese.
+"SSG" is a double meaning: **Static Site Generator** and **Swibo Style(sheet-based) Generator**. "Swibo" (水母, suibo) means jellyfish in Japanese.
 
 This tool was originally created for typesetting [SWIBO Fictions](https://github.com/kyoki-railway), the sci-fi label of Kyoki Railway Publishing (京姫鉄道出版).
 
