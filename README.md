@@ -67,17 +67,18 @@ bun test tests/integration  # 結合テスト
 ```
 swibostyle-cli/
 ├── packages/
-│   ├── core/                   # MIT - コアロジック (環境非依存)
-│   ├── cli/                    # MIT - CLIインターフェース
-│   ├── create-swibostyle/      # MIT - プロジェクトテンプレート生成
-│   ├── epub-validator/         # MIT - EPUB検証 (EPubCheck)
-│   └── pdf-server/             # AGPL - PDF生成サーバー (Vivliostyle)
+│   ├── core/                        # MIT - コアロジック (環境非依存)
+│   ├── cli/                         # MIT - CLIインターフェース
+│   ├── create-swibostyle/           # MIT - プロジェクトテンプレート生成
+│   ├── epub-validator/              # MIT - EPUB検証 (EPubCheck)
+│   ├── epub-validator-linux-x64/    # MIT - Linux x64用JREバンドル版
+│   └── pdf-server/                  # AGPL - PDF生成サーバー (Vivliostyle)
 ├── tests/
-│   ├── fixtures/               # テスト用サンプルプロジェクト
-│   └── integration/            # 結合テスト
+│   ├── fixtures/                    # テスト用サンプルプロジェクト
+│   └── integration/                 # 結合テスト
 └── docs/
-    ├── ARCHITECTURE.md         # 詳細設計書
-    └── SSG.md                  # SSG設計書
+    ├── ARCHITECTURE.md              # 詳細設計書
+    └── SSG.md                       # SSG設計書
 ```
 
 ### 各パッケージの役割
@@ -88,6 +89,7 @@ swibostyle-cli/
 | `@swibostyle/cli` | MIT | コマンドラインインターフェース |
 | `create-swibostyle` | MIT | プロジェクトスキャフォールド |
 | `@swibostyle/epub-validator` | MIT | W3C EPubCheckによるEPUB検証 |
+| `@swibostyle/epub-validator-linux-x64` | MIT | Linux x64用JREバンドル版（Java不要） |
 | `@swibostyle/pdf-server` | AGPL-3.0 | Vivliostyle + Playwright PDF生成 |
 
 ## アーキテクチャ

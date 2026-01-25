@@ -22,22 +22,17 @@ swibostyle-cli/
 │   │       │   ├── storage/    # NodeStorageAdapter, MemoryStorageAdapter
 │   │       │   ├── image/      # SharpImageAdapter, NoopImageAdapter
 │   │       │   └── css/        # SassAdapter, PassthroughCSSAdapter
-│   │       ├── builder/        # ビルドパイプライン
-│   │       │   ├── pipeline.ts # メインビルドフロー
+│   │       ├── ssg/            # SSGビルドシステム
+│   │       │   ├── build.ts    # メインビルドフロー
 │   │       │   ├── context.ts  # BuildContext定義
-│   │       │   └── archive.ts  # EPUB ZIP生成 (fflate)
-│   │       ├── processors/     # コンテンツ処理
-│   │       │   ├── markdown.ts # VFM → XHTML変換
-│   │       │   ├── css.ts      # CSS/Sass処理
-│   │       │   ├── image.ts    # 画像リサイズ/クロップ
-│   │       │   ├── opf.ts      # OPF生成
-│   │       │   └── navigation.ts
+│   │       │   ├── router.ts   # Hono風ルーター
+│   │       │   ├── scanner.ts  # ファイルスキャナー
+│   │       │   ├── handlers.ts # デフォルトハンドラー
+│   │       │   └── types.ts    # SSG型定義
 │   │       ├── templates/      # 組み込みテンプレート関数
-│   │       │   ├── xhtml.ts    # XHTMLページテンプレート
-│   │       │   ├── opf.ts      # OPFテンプレート
-│   │       │   └── navigation.ts # ナビゲーションテンプレート
+│   │       │   └── xhtml.ts    # XHTMLページテンプレート
 │   │       ├── config/         # book.json読み込み
-│   │       ├── utils/          # ユーティリティ
+│   │       ├── utils/          # ユーティリティ (mime, frontmatter, xhtml)
 │   │       ├── types.ts        # 型定義
 │   │       └── index.ts        # Public API
 │   │
@@ -52,17 +47,24 @@ swibostyle-cli/
 │   │       ├── scaffold.ts     # プロジェクト生成
 │   │       └── index.ts        # @clack/prompts CLI
 │   │
+│   ├── epub-validator/         # MIT - EPUB検証 (W3C EPubCheck)
+│   │
+│   ├── epub-validator-linux-x64/ # MIT - Linux x64用JREバンドル版
+│   │
 │   └── pdf-server/             # AGPL - PDF生成サーバー (Vivliostyle)
 │       └── src/
 │           ├── server.ts       # Express サーバー
 │           └── renderer.ts     # Playwright PDF生成
 │
 ├── tests/
-│   ├── fixtures/sample-project/ # 結合テスト用サンプル
+│   ├── fixtures/               # テスト用サンプルプロジェクト
+│   │   ├── sample-project/
+│   │   └── sample-project-ssg/
 │   └── integration/            # 結合テスト
 │
 ├── docs/
-│   └── ARCHITECTURE.md         # 詳細設計書
+│   ├── ARCHITECTURE.md         # 詳細設計書
+│   └── SSG.md                  # SSG設計書
 │
 ├── .github/workflows/ci.yml    # GitHub Actions CI
 ├── oxlint.json                 # Lintルール (type-aware, no style)
@@ -149,7 +151,7 @@ bun run clean         # distディレクトリ削除
 
 ## ライセンス
 
-- `core`, `cli`, `create-swibostyle`: MIT
+- `core`, `cli`, `create-swibostyle`, `epub-validator`, `epub-validator-linux-x64`: MIT
 - `pdf-server`: AGPL-3.0 (Vivliostyle依存のため分離)
 
 ## 注意事項
