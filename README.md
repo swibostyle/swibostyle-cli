@@ -54,17 +54,37 @@ npx swibostyle build
 
 ### Try it now (before npm release)
 
-Until the package is published, you can try swibostyle by cloning this repository:
+Download pre-built binaries from [GitHub Releases](https://github.com/swibostyle/swibostyle-cli/releases/tag/dev):
+
+```bash
+# Linux x64
+curl -L https://github.com/swibostyle/swibostyle-cli/releases/download/dev/swibostyle-linux-x64 -o swibostyle
+chmod +x swibostyle
+
+# macOS Apple Silicon
+curl -L https://github.com/swibostyle/swibostyle-cli/releases/download/dev/swibostyle-darwin-arm64 -o swibostyle
+chmod +x swibostyle
+
+# macOS Intel
+curl -L https://github.com/swibostyle/swibostyle-cli/releases/download/dev/swibostyle-darwin-x64 -o swibostyle
+chmod +x swibostyle
+```
+
+Then run:
+
+```bash
+./swibostyle --help
+./swibostyle build
+```
+
+Alternatively, build from source:
 
 ```bash
 git clone https://github.com/swibostyle/swibostyle-cli.git
 cd swibostyle-cli
 bun install
 bun run build
-
-# Run CLI from the repo
-bun run swibostyle build           # in a book project directory
-bun run swibostyle --help          # show help
+bun run swibostyle --help
 ```
 
 ## Getting Started - For Contributors
