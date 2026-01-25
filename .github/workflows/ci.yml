@@ -109,3 +109,16 @@ jobs:
         with:
           name: sample-epub
           path: tests/fixtures/sample-project-ssg/_release/*.epub
+
+      - name: Install Playwright Chromium
+        run: npx playwright install chromium
+
+      - name: Generate PDF from EPUB
+        working-directory: tests/fixtures/sample-project-ssg
+        run: bun ../../../packages/cli/src/index.ts pdf ./_release/book-epub.epub -o ./_release/book-epub.pdf
+
+      - name: Upload PDF artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: sample-pdf
+          path: tests/fixtures/sample-project-ssg/_release/*.pdf
