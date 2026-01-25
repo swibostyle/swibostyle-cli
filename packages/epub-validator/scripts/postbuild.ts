@@ -3,7 +3,7 @@
  * Post-build script to download EPubCheck JAR
  */
 
-import { existsSync, mkdirSync, createWriteStream } from "node:fs";
+import { existsSync, mkdirSync, createWriteStream, readFileSync } from "node:fs";
 import { createHash } from "node:crypto";
 import { resolve, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -13,9 +13,30 @@ import { execSync } from "node:child_process";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const PACKAGE_ROOT = resolve(__dirname, "..");
+const CONFIG_PATH = resolve(PACKAGE_ROOT, "../epub-validator-linux-x64/epubcheck.json");
 
-const EPUBCHECK_VERSION = "5.1.0";
-const EPUBCHECK_SHA256 = "74a59af8602bf59b1d04266a450d9cdcb5986e36d825adc403cde0d95e88c9e8";
+// Read config from shared epubcheck.json
+interface EpubcheckConfig {
+  version: string;
+  sha256: string;
+}
+
+function loadConfig(): EpubcheckConfig {
+  if (existsSync(CONFIG_PATH)) {
+    const content = readFileSync(CONFIG_PATH, "utf-8");
+    return JSON.parse(content) as EpubcheckConfig;
+  }
+  // Fallback defaults
+  console.warn(`Warning: ${CONFIG_PATH} not found, using defaults`);
+  return {
+    version: "5.1.0",
+    sha256: "74a59af8602bf59b1d04266a450d9cdcb5986e36d825adc403cde0d95e88c9e8",
+  };
+}
+
+const config = loadConfig();
+const EPUBCHECK_VERSION = config.version;
+const EPUBCHECK_SHA256 = config.sha256;
 const EPUBCHECK_URL = `https://github.com/w3c/epubcheck/releases/download/v${EPUBCHECK_VERSION}/epubcheck-${EPUBCHECK_VERSION}.zip`;
 
 const BIN_DIR = resolve(PACKAGE_ROOT, "bin");

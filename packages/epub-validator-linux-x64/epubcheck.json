@@ -1,0 +1,5 @@
+{
+  "version": "5.1.0",
+  "sha256": "74a59af8602bf59b1d04266a450d9cdcb5986e36d825adc403cde0d95e88c9e8",
+  "url": "https://github.com/w3c/epubcheck/releases/download/v${version}/epubcheck-${version}.zip"
+}

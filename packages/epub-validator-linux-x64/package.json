@@ -4,6 +4,14 @@
   "type": "module",
   "license": "MIT",
   "description": "EPubCheck with bundled JRE for Linux x64 (no Java required)",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/swibostyle/swibostyle-cli.git",
+    "directory": "packages/epub-validator-linux-x64"
+  },
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com"
+  },
   "os": ["linux"],
   "cpu": ["x64"],
   "exports": {
@@ -20,6 +28,7 @@
   ],
   "scripts": {
     "build": "tsup",
+    "build:jre": "./scripts/build-jre.sh",
     "dev": "tsup --watch",
     "typecheck": "tsc --noEmit"
   },

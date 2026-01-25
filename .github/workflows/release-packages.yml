@@ -1,0 +1,108 @@
+name: Release to GitHub Packages
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  packages: write
+
+jobs:
+  release:
+    name: Publish to GitHub Packages
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          registry-url: 'https://npm.pkg.github.com'
+          scope: '@swibostyle'
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '21'
+
+      - name: Install dependencies
+        run: bun install
+
+      - name: Build JRE for epub-validator-linux-x64
+        run: bun run --filter '@swibostyle/epub-validator-linux-x64' build:jre
+
+      - name: Build packages
+        run: bun run build
+
+      - name: Set dev version
+        run: |
+          SHORT_SHA=$(echo "${{ github.sha }}" | cut -c1-7)
+          TIMESTAMP=$(date +%Y%m%d%H%M%S)
+          DEV_VERSION="0.1.0-dev.${TIMESTAMP}.${SHORT_SHA}"
+          echo "DEV_VERSION=${DEV_VERSION}" >> $GITHUB_ENV
+
+          # Update version in all packages
+          for pkg in packages/*/package.json; do
+            jq --arg version "$DEV_VERSION" '.version = $version' "$pkg" > tmp.json && mv tmp.json "$pkg"
+          done
+
+          # Update workspace references to use the dev version
+          for pkg in packages/*/package.json; do
+            jq --arg version "$DEV_VERSION" '
+              if .dependencies then
+                .dependencies |= with_entries(
+                  if .value == "workspace:*" then .value = $version else . end
+                )
+              else . end |
+              if .optionalDependencies then
+                .optionalDependencies |= with_entries(
+                  if .key | startswith("@swibostyle/") then .value = $version else . end
+                )
+              else . end
+            ' "$pkg" > tmp.json && mv tmp.json "$pkg"
+          done
+
+      - name: Publish @swibostyle/core
+        working-directory: packages/core
+        run: npm publish --access public
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Publish @swibostyle/epub-validator
+        working-directory: packages/epub-validator
+        run: npm publish --access public
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Publish @swibostyle/epub-validator-linux-x64
+        working-directory: packages/epub-validator-linux-x64
+        run: npm publish --access public
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Publish @swibostyle/pdf-server
+        working-directory: packages/pdf-server
+        run: npm publish --access public
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Publish create-swibostyle
+        working-directory: packages/create-swibostyle
+        run: npm publish --access public
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Publish @swibostyle/cli
+        working-directory: packages/cli
+        run: npm publish --access public
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}

@@ -4,21 +4,17 @@ on:
   workflow_dispatch:
     inputs:
       epubcheck_version:
-        description: 'EPubCheck version'
-        required: true
-        default: '5.1.0'
+        description: 'EPubCheck version (leave empty to use epubcheck.json)'
+        required: false
+      epubcheck_sha256:
+        description: 'EPubCheck SHA256 checksum (leave empty to use epubcheck.json)'
+        required: false
   push:
     paths:
       - 'packages/epub-validator-linux-x64/**'
       - '.github/workflows/build-epubcheck.yml'
     branches:
       - main
-
-env:
-  EPUBCHECK_VERSION: ${{ github.event.inputs.epubcheck_version || '5.1.0' }}
-  # SHA256 hash of epubcheck-5.1.0.zip from official release
-  # Update this when changing EPUBCHECK_VERSION
-  EPUBCHECK_SHA256: "74a59af8602bf59b1d04266a450d9cdcb5986e36d825adc403cde0d95e88c9e8"
 
 jobs:
   build-linux-x64:
@@ -27,85 +23,28 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
       - name: Setup Java
         uses: actions/setup-java@v4
         with:
           distribution: 'temurin'
           java-version: '21'
 
-      - name: Download EPubCheck
-        run: |
-          curl -L -o epubcheck.zip \
-            "https://github.com/w3c/epubcheck/releases/download/v${EPUBCHECK_VERSION}/epubcheck-${EPUBCHECK_VERSION}.zip"
+      - name: Install dependencies
+        run: bun install
 
-      - name: Verify checksum
-        run: |
-          echo "Expected SHA256: ${EPUBCHECK_SHA256}"
-          ACTUAL_SHA256=$(sha256sum epubcheck.zip | awk '{print $1}')
-          echo "Actual SHA256:   ${ACTUAL_SHA256}"
-
-          if [ "${ACTUAL_SHA256}" != "${EPUBCHECK_SHA256}" ]; then
-            echo "ERROR: Checksum mismatch!"
-            echo "This could indicate a corrupted download or a security issue."
-            echo "If you're updating the EPubCheck version, update EPUBCHECK_SHA256 in the workflow."
-            exit 1
-          fi
-
-          echo "Checksum verified successfully"
-
-      - name: Extract EPubCheck
-        run: unzip epubcheck.zip
-
-      - name: Create minimal JRE with jlink
-        run: |
-          # Determine required modules by analyzing EPubCheck
-          # These are the modules needed for EPubCheck to run
-          MODULES="java.base,java.xml,java.logging,java.desktop,java.naming,java.management,java.sql,jdk.crypto.ec"
-
-          jlink \
-            --add-modules ${MODULES} \
-            --strip-debug \
-            --no-man-pages \
-            --no-header-files \
-            --compress=zip-6 \
-            --output jre-linux-x64
-
-          echo "JRE size: $(du -sh jre-linux-x64 | cut -f1)"
-
-      - name: Test bundled JRE
-        run: |
-          ./jre-linux-x64/bin/java -version
-          ./jre-linux-x64/bin/java -jar "epubcheck-${EPUBCHECK_VERSION}/epubcheck.jar" --version
-
-      - name: Package
-        working-directory: packages/epub-validator-linux-x64
-        run: |
-          # Copy JRE
-          cp -r ../../jre-linux-x64 jre
-
-          # Copy EPubCheck JAR and libs
-          cp "../../epubcheck-${EPUBCHECK_VERSION}/epubcheck.jar" .
-          cp -r "../../epubcheck-${EPUBCHECK_VERSION}/lib" .
-
-          # Create version info
-          echo "${EPUBCHECK_VERSION}" > VERSION
-          echo "${EPUBCHECK_SHA256}" > CHECKSUM
-
-          # Show package contents
-          echo "Package contents:"
-          ls -la
-          echo "Total size: $(du -sh . | cut -f1)"
-
-      - name: Setup Bun
-        uses: oven-sh/setup-bun@v2
-        with:
-          bun-version: latest
+      - name: Build JRE with jlink
+        run: bun run --filter '@swibostyle/epub-validator-linux-x64' build:jre
+        env:
+          EPUBCHECK_VERSION: ${{ github.event.inputs.epubcheck_version }}
+          EPUBCHECK_SHA256: ${{ github.event.inputs.epubcheck_sha256 }}
 
       - name: Build TypeScript
-        working-directory: packages/epub-validator-linux-x64
-        run: |
-          bun install
-          bun run build
+        run: bun run --filter '@swibostyle/epub-validator-linux-x64' build
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4

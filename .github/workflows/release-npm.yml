@@ -1,0 +1,104 @@
+name: Release to npm
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: read
+
+jobs:
+  release:
+    name: Publish to npm
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          registry-url: 'https://registry.npmjs.org'
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '21'
+
+      - name: Install dependencies
+        run: bun install
+
+      - name: Build JRE for epub-validator-linux-x64
+        run: bun run --filter '@swibostyle/epub-validator-linux-x64' build:jre
+
+      - name: Build packages
+        run: bun run build
+
+      - name: Extract version from tag
+        run: |
+          VERSION=${GITHUB_REF#refs/tags/v}
+          echo "VERSION=${VERSION}" >> $GITHUB_ENV
+
+          # Update version in all packages
+          for pkg in packages/*/package.json; do
+            jq --arg version "$VERSION" '.version = $version' "$pkg" > tmp.json && mv tmp.json "$pkg"
+          done
+
+          # Update workspace references to use the release version
+          for pkg in packages/*/package.json; do
+            jq --arg version "$VERSION" '
+              if .dependencies then
+                .dependencies |= with_entries(
+                  if .value == "workspace:*" then .value = $version else . end
+                )
+              else . end |
+              if .optionalDependencies then
+                .optionalDependencies |= with_entries(
+                  if .key | startswith("@swibostyle/") then .value = $version else . end
+                )
+              else . end
+            ' "$pkg" > tmp.json && mv tmp.json "$pkg"
+          done
+
+      - name: Publish @swibostyle/core
+        working-directory: packages/core
+        run: npm publish --registry https://registry.npmjs.org --access public
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: Publish @swibostyle/epub-validator
+        working-directory: packages/epub-validator
+        run: npm publish --registry https://registry.npmjs.org --access public
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: Publish @swibostyle/epub-validator-linux-x64
+        working-directory: packages/epub-validator-linux-x64
+        run: npm publish --registry https://registry.npmjs.org --access public
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: Publish @swibostyle/pdf-server
+        working-directory: packages/pdf-server
+        run: npm publish --registry https://registry.npmjs.org --access public
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: Publish create-swibostyle
+        working-directory: packages/create-swibostyle
+        run: npm publish --registry https://registry.npmjs.org --access public
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: Publish @swibostyle/cli
+        working-directory: packages/cli
+        run: npm publish --registry https://registry.npmjs.org --access public
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
