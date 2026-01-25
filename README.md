@@ -1,131 +1,135 @@
 # swibostyle
 
-CSS組版によるEPUB生成CLIツール。
+An **EPUB-first Static Site Generator** for CSS typesetting.
 
-**EPUB優先**の設計思想で、CSS差分による印刷対応を行います。
+The name "swibostyle" is a double meaning: **Swibo Style Generator** and **CSS Stylesheet**. "Swibo" (水母, suibo) means jellyfish in Japanese.
 
-## 特徴
+This tool was originally created for typesetting [SWIBO Fictions](https://github.com/kyoki-railway), the sci-fi label of Kyoki Railway Publishing (京姫鉄道出版).
 
-| 項目 | Vivliostyle CLI | swibostyle |
+## Philosophy
+
+Unlike traditional CSS typesetting tools that focus on PDF output, swibostyle takes an **EPUB-first** approach:
+
+| | Vivliostyle CLI | swibostyle |
 |------|-----------------|------------|
-| 主出力 | PDF | **EPUB** |
-| 印刷対応 | 直接生成 | CSS差分で派生 |
-| ライセンス | AGPL | **MIT** (コア) + AGPL (PDFサーバー分離) |
-| PDF生成 | 内蔵 | Playwright経由（AGPL隔離） |
-| 実行環境 | Node.js | **Node.js / Bun** |
+| Primary output | PDF | **EPUB** |
+| Print support | Direct generation | CSS delta from EPUB |
+| License | AGPL | **MIT** (core) + AGPL (PDF server isolated) |
+| PDF generation | Built-in | Via Playwright (AGPL isolated) |
+| Runtime | Node.js | **Node.js / Bun** |
 
-## インストール
+## Installation
 
 ```bash
 bun install
 ```
 
-## 使い方
+## Usage
 
 ```bash
-# EPUB生成
+# Build EPUB
 bun run swibo build
 
-# 印刷用ファイル生成（PDF変換用）
+# Build for print (PDF conversion)
 bun run swibo build --target print
 
-# プレビューサーバー起動
+# Start preview server
 bun run swibo preview
 
-# PDF生成（pdf-serverが必要）
+# Generate PDF (requires pdf-server)
 bun run swibo pdf
 ```
 
-## 開発コマンド
+## Development
 
 ```bash
-# 全パッケージビルド
+# Build all packages
 bun run build
 
-# 型チェック
+# Type check
 bun run typecheck
 
 # Lint
 bun run lint
 bun run lint:fix
 
-# フォーマット
+# Format
 bun run format
 bun run format:check
 
-# 全チェック (typecheck + lint + format:check)
+# Run all checks (typecheck + lint + format:check)
 bun run check
 
-# テスト
-bun test                    # 全テスト
-bun test packages/core/src  # ユニットテスト
-bun test tests/integration  # 結合テスト
+# Test
+bun test                    # All tests
+bun test packages/core/src  # Unit tests
+bun test tests/integration  # Integration tests
 ```
 
-## パッケージ構成
+## Package Structure
 
 ```
 swibostyle-cli/
 ├── packages/
-│   ├── core/                        # MIT - コアロジック (環境非依存)
-│   ├── cli/                         # MIT - CLIインターフェース
-│   ├── create-swibostyle/           # MIT - プロジェクトテンプレート生成
-│   ├── epub-validator/              # MIT - EPUB検証 (EPubCheck)
-│   ├── epub-validator-linux-x64/    # MIT - Linux x64用JREバンドル版
-│   └── pdf-server/                  # AGPL - PDF生成サーバー (Vivliostyle)
+│   ├── core/                        # MIT - Core logic (environment-agnostic)
+│   ├── cli/                         # MIT - CLI interface
+│   ├── create-swibostyle/           # MIT - Project scaffolding
+│   ├── epub-validator/              # MIT - EPUB validation (EPubCheck)
+│   ├── epub-validator-linux-x64/    # MIT - Bundled JRE for Linux x64
+│   └── pdf-server/                  # AGPL - PDF generation server (Vivliostyle)
 ├── tests/
-│   ├── fixtures/                    # テスト用サンプルプロジェクト
-│   └── integration/                 # 結合テスト
+│   ├── fixtures/                    # Test fixtures
+│   └── integration/                 # Integration tests
 └── docs/
-    ├── ARCHITECTURE.md              # 詳細設計書
-    └── SSG.md                       # SSG設計書
+    ├── ARCHITECTURE.md              # Architecture documentation
+    └── SSG.md                       # SSG design document
 ```
 
-### 各パッケージの役割
+### Packages
 
-| パッケージ | ライセンス | 説明 |
-|-----------|-----------|------|
-| `@swibostyle/core` | MIT | ビルドパイプライン、アダプター層 |
-| `@swibostyle/cli` | MIT | コマンドラインインターフェース |
-| `create-swibostyle` | MIT | プロジェクトスキャフォールド |
-| `@swibostyle/epub-validator` | MIT | W3C EPubCheckによるEPUB検証 |
-| `@swibostyle/epub-validator-linux-x64` | MIT | Linux x64用JREバンドル版（Java不要） |
-| `@swibostyle/pdf-server` | AGPL-3.0 | Vivliostyle + Playwright PDF生成 |
+| Package | License | Description |
+|---------|---------|-------------|
+| `@swibostyle/core` | MIT | Build pipeline, adapter layer |
+| `@swibostyle/cli` | MIT | Command-line interface |
+| `create-swibostyle` | MIT | Project scaffolding |
+| `@swibostyle/epub-validator` | MIT | EPUB validation with W3C EPubCheck |
+| `@swibostyle/epub-validator-linux-x64` | MIT | Bundled JRE version (no Java required) |
+| `@swibostyle/pdf-server` | AGPL-3.0 | Vivliostyle + Playwright PDF generation |
 
-## アーキテクチャ
+## Architecture
 
-### アダプターパターン
+### Adapter Pattern
 
-環境に応じて実装を切り替え可能：
+Swappable implementations for different environments:
 
-| アダプター | 実装 | 用途 |
-|-----------|------|------|
-| StorageAdapter | NodeStorageAdapter | Node.js/Bunファイルシステム |
-|  | MemoryStorageAdapter | テスト/ブラウザ |
-| ImageAdapter | SharpImageAdapter | 本番画像処理 |
-|  | NoopImageAdapter | テスト/サイズ取得のみ |
-| CSSAdapter | SassAdapter | Sass処理 |
-|  | PassthroughCSSAdapter | 素のCSS |
+| Adapter | Implementation | Use Case |
+|---------|----------------|----------|
+| StorageAdapter | NodeStorageAdapter | Node.js/Bun filesystem |
+| | MemoryStorageAdapter | Testing/Browser |
+| ImageAdapter | SharpImageAdapter | Production image processing |
+| | NoopImageAdapter | Testing/size detection only |
+| CSSAdapter | SassAdapter | Sass processing |
+| | PassthroughCSSAdapter | Plain CSS |
 
-### ビルドフロー
+### Build Flow
 
 ```
 Clean → Copy → CSS → Image → Markdown → OPF → Navigation → Archive
 ```
 
-詳細は [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) を参照してください。
+See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) for details.
 
 ## book.json
 
-プロジェクトのメタデータは `book.json` (JSON5形式) で設定：
+Project metadata is configured in `book.json` (JSON5 format):
 
 ```json5
 {
-  "title": "書籍タイトル",
+  "title": "Book Title",
   "authors": [
-    { "name": "著者名", "role": "aut" }
+    { "name": "Author Name", "role": "aut" }
   ],
-  "publisher": "出版社",
+  "publisher": "Publisher",
   "lang": "ja",
   "bookId": {
     "epub": "urn:uuid:xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
@@ -140,16 +144,16 @@ Clean → Copy → CSS → Image → Markdown → OPF → Navigation → Archive
 }
 ```
 
-## ライセンス
+## License
 
 - `core`, `cli`, `create-swibostyle`, `epub-validator`: MIT
-- `pdf-server`: AGPL-3.0 (Vivliostyle依存のため分離)
+- `pdf-server`: AGPL-3.0 (isolated due to Vivliostyle dependency)
 
-## クレジット
+## Credits
 
-- **コアロジック（オリジナルgulp版）**: [@butameron](https://github.com/butameron)
-- **CLI実装**: 主に [Claude Code](https://claude.ai/code) により作成
+- **Core logic (original gulp version)**: [@butameron](https://github.com/butameron)
+- **CLI implementation**: Primarily built with [Claude Code](https://claude.ai/code)
 
 ---
 
-*本プロジェクトは[Vivliostyle](https://vivliostyle.org/)のCSS組版技術を活用しています。*
+*This project utilizes [Vivliostyle](https://vivliostyle.org/)'s CSS typesetting technology.*
