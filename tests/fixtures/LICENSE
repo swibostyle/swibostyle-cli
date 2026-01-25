@@ -1,15 +1,20 @@
-# swibostyle-cli License
+# Sample Fixtures License
 
-This repository contains multiple components with different licenses.
+This directory contains sample content from SWIBO Fictions (京姫鉄道出版).
 
-## Default License (MIT)
+## Contents (Markdown, CSS/SCSS, Images)
 
-Unless otherwise specified, all code in this repository is licensed under the MIT License:
+The cover and illustrations are licensed under the [CC-BY 4.0 License](https://creativecommons.org/licenses/by/4.0/).
 
-```
+The text of these documents will be licensed under CC-BY 4.0 from January 1, 2028.
+
+**Request**: Please refrain from uses that could tarnish the image or dignity of the work or its characters.
+
+## Code (TypeScript, JSON)
+
 MIT License
 
-Copyright (c) 2024 swibostyle contributors
+Copyright (C) 2022 Kyoki Railway LLC and Ibuta Kakeru.
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -28,18 +33,3 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
-```
-
-## Exceptions
-
-### packages/pdf-server (AGPL-3.0)
-
-The `@swibostyle/pdf-server` package is licensed under AGPL-3.0 due to its
-dependency on Vivliostyle. See [packages/pdf-server/LICENSE](./packages/pdf-server/LICENSE)
-for details.
-
-### tests/fixtures (Mixed)
-
-Sample content in `tests/fixtures/` is from SWIBO Fictions and has separate
-licensing terms (CC-BY 4.0 for content, MIT for code).
-See [tests/fixtures/LICENSE](./tests/fixtures/LICENSE) for details.

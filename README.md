@@ -268,8 +268,10 @@ See [docs/CONFIG.md](docs/CONFIG.md) for detailed configuration options.
 
 ## License
 
-- `core`, `cli`, `create-swibostyle`, `epub-validator`: MIT
+- `core`, `cli`, `create-swibostyle`, `epub-validator`, `epub-validator-linux-x64`: MIT
 - `pdf-server`: AGPL-3.0 (isolated due to Vivliostyle dependency)
+
+See [LICENSE](./LICENSE) for the full MIT license text.
 
 ## Credits
 
