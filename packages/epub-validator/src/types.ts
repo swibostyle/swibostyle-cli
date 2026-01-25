@@ -57,7 +57,7 @@ export interface EpubValidator {
   /**
    * Get the validator type.
    */
-  readonly type: "bundled" | "system-java";
+  readonly type: "bundled" | "system-java" | "lightweight";
 }
 
 /**
