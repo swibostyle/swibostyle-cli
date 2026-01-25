@@ -56,6 +56,8 @@ npx swibostyle build
 
 Download pre-built binaries from [GitHub Releases](https://github.com/swibostyle/swibostyle-cli/releases/tag/dev):
 
+**Linux / macOS:**
+
 ```bash
 # Linux x64
 curl -L https://github.com/swibostyle/swibostyle-cli/releases/download/dev/swibostyle-linux-x64 -o swibostyle
@@ -68,13 +70,19 @@ chmod +x swibostyle
 # macOS Intel
 curl -L https://github.com/swibostyle/swibostyle-cli/releases/download/dev/swibostyle-darwin-x64 -o swibostyle
 chmod +x swibostyle
+
+# Run
+./swibostyle --help
 ```
 
-Then run:
+**Windows (PowerShell):**
 
-```bash
-./swibostyle --help
-./swibostyle build
+```powershell
+# Download
+Invoke-WebRequest -Uri "https://github.com/swibostyle/swibostyle-cli/releases/download/dev/swibostyle-windows-x64.exe" -OutFile "swibostyle.exe"
+
+# Run
+.\swibostyle.exe --help
 ```
 
 Alternatively, build from source:
