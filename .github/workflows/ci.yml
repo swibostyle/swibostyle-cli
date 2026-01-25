@@ -47,6 +47,12 @@ jobs:
       - name: Build epub-validator (required for linux-x64 typecheck)
         run: bun run --filter '@swibostyle/epub-validator' build
 
+      - name: Build pdf-server (required for CLI typecheck)
+        run: bun run --filter '@swibostyle/pdf-server' build
+
+      - name: Build pdf-renderer (required for CLI typecheck)
+        run: bun run --filter '@swibostyle/pdf-renderer' build
+
       - name: Typecheck
         run: bun run typecheck
 
