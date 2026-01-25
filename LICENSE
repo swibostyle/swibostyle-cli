@@ -1,3 +1,12 @@
+# swibostyle-cli License
+
+This repository contains multiple components with different licenses.
+
+## Default License (MIT)
+
+Unless otherwise specified, all code in this repository is licensed under the MIT License:
+
+```
 MIT License
 
 Copyright (c) 2024 swibostyle contributors
@@ -19,3 +28,18 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
+```
+
+## Exceptions
+
+### packages/pdf-server (AGPL-3.0)
+
+The `@swibostyle/pdf-server` package is licensed under AGPL-3.0 due to its
+dependency on Vivliostyle. See [packages/pdf-server/LICENSE](./packages/pdf-server/LICENSE)
+for details.
+
+### tests/fixtures (Mixed)
+
+Sample content in `tests/fixtures/` is from SWIBO Fictions and has separate
+licensing terms (CC-BY 4.0 for content, MIT for code).
+See [tests/fixtures/LICENSE](./tests/fixtures/LICENSE) for details.
