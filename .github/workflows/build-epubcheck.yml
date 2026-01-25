@@ -4,23 +4,17 @@ on:
   workflow_dispatch:
     inputs:
       epubcheck_version:
-        description: 'EPubCheck version'
-        required: true
-        default: '5.1.0'
+        description: 'EPubCheck version (leave empty to use epubcheck.json)'
+        required: false
       epubcheck_sha256:
-        description: 'EPubCheck SHA256 checksum'
-        required: true
-        default: '74a59af8602bf59b1d04266a450d9cdcb5986e36d825adc403cde0d95e88c9e8'
+        description: 'EPubCheck SHA256 checksum (leave empty to use epubcheck.json)'
+        required: false
   push:
     paths:
       - 'packages/epub-validator-linux-x64/**'
       - '.github/workflows/build-epubcheck.yml'
     branches:
       - main
-
-env:
-  EPUBCHECK_VERSION: ${{ github.event.inputs.epubcheck_version || '5.1.0' }}
-  EPUBCHECK_SHA256: ${{ github.event.inputs.epubcheck_sha256 || '74a59af8602bf59b1d04266a450d9cdcb5986e36d825adc403cde0d95e88c9e8' }}
 
 jobs:
   build-linux-x64:
@@ -45,6 +39,9 @@ jobs:
 
       - name: Build JRE with jlink
         run: bun run --filter '@swibostyle/epub-validator-linux-x64' build:jre
+        env:
+          EPUBCHECK_VERSION: ${{ github.event.inputs.epubcheck_version }}
+          EPUBCHECK_SHA256: ${{ github.event.inputs.epubcheck_sha256 }}
 
       - name: Build TypeScript
         run: bun run --filter '@swibostyle/epub-validator-linux-x64' build

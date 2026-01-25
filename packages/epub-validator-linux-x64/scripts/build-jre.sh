@@ -3,9 +3,21 @@ set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PACKAGE_DIR="$(dirname "$SCRIPT_DIR")"
+CONFIG_FILE="${PACKAGE_DIR}/epubcheck.json"
 
-EPUBCHECK_VERSION="${EPUBCHECK_VERSION:-5.1.0}"
-EPUBCHECK_SHA256="${EPUBCHECK_SHA256:-74a59af8602bf59b1d04266a450d9cdcb5986e36d825adc403cde0d95e88c9e8}"
+# Read config from epubcheck.json (can be overridden by env vars)
+if [ -f "$CONFIG_FILE" ]; then
+  CONFIG_VERSION=$(jq -r '.version' "$CONFIG_FILE")
+  CONFIG_SHA256=$(jq -r '.sha256' "$CONFIG_FILE")
+else
+  echo "Warning: ${CONFIG_FILE} not found, using defaults"
+  CONFIG_VERSION="5.1.0"
+  CONFIG_SHA256="74a59af8602bf59b1d04266a450d9cdcb5986e36d825adc403cde0d95e88c9e8"
+fi
+
+# Environment variables override config file
+EPUBCHECK_VERSION="${EPUBCHECK_VERSION:-$CONFIG_VERSION}"
+EPUBCHECK_SHA256="${EPUBCHECK_SHA256:-$CONFIG_SHA256}"
 
 WORK_DIR=$(mktemp -d)
 trap "rm -rf $WORK_DIR" EXIT
