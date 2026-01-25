@@ -4,6 +4,14 @@
   "type": "module",
   "license": "MIT",
   "description": "EPUB validation using W3C EPubCheck with automatic fallback",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/swibostyle/swibostyle-cli.git",
+    "directory": "packages/epub-validator"
+  },
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com"
+  },
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",

@@ -4,6 +4,14 @@
   "type": "module",
   "license": "MIT",
   "description": "Core library for swibostyle CSS typesetting tool",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/swibostyle/swibostyle-cli.git",
+    "directory": "packages/core"
+  },
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com"
+  },
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
