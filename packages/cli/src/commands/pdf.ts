@@ -3,6 +3,8 @@ import ora from "ora";
 import pc from "picocolors";
 import * as path from "node:path";
 import * as fs from "node:fs";
+import * as os from "node:os";
+import * as fflate from "fflate";
 
 // Type definitions for optional dependencies
 type RenderPDF = (serverUrl: string, options?: { timeout?: number }) => Promise<Uint8Array>;
@@ -10,13 +12,15 @@ type CloseBrowser = () => Promise<void>;
 type CreateApp = (bookPath: string) => { fetch: (req: Request) => Response | Promise<Response> };
 
 export const pdfCommand = new Command("pdf")
-  .description("Generate PDF from EPUB build (requires @swibostyle/pdf-renderer)")
-  .option("-b, --build <dir>", "EPUB build directory", "./_build")
-  .option("-o, --output <file>", "Output PDF file", "./output.pdf")
+  .description("Generate PDF from EPUB file (requires @swibostyle/pdf-renderer)")
+  .argument("[epub]", "EPUB file to convert (default: ./_release/book-epub.epub)")
+  .option("-o, --output <file>", "Output PDF file")
   .option("-t, --timeout <ms>", "Render timeout in milliseconds", "120000")
   .option("-p, --port <port>", "Port for internal pdf-server", "13370")
-  .action(async (options) => {
+  .action(async (epubArg, options) => {
     const spinner = ora("Initializing PDF renderer...").start();
+
+    let tempDir: string | null = null;
 
     try {
       // Try to import pdf-renderer (optional dependency)
@@ -42,26 +46,22 @@ export const pdfCommand = new Command("pdf")
       }
 
       // Resolve paths
-      const buildPath = path.resolve(options.build);
-      const outputPath = path.resolve(options.output);
+      const epubPath = path.resolve(epubArg || "./_release/book-epub.epub");
       const timeout = parseInt(options.timeout, 10);
       const port = parseInt(options.port, 10);
 
-      // Verify build directory exists
-      if (!fs.existsSync(buildPath)) {
-        spinner.fail(pc.red(`Build directory not found: ${buildPath}`));
+      // Verify EPUB file exists
+      if (!fs.existsSync(epubPath)) {
+        spinner.fail(pc.red(`EPUB file not found: ${epubPath}`));
         console.log();
-        console.log(pc.yellow("Run 'swibostyle build' first to create the EPUB build."));
+        console.log(pc.yellow("Run 'swibostyle build' first to create the EPUB."));
         process.exit(1);
       }
 
-      // Verify OPF file exists
-      const opfPath = path.join(buildPath, "item", "standard.opf");
-      if (!fs.existsSync(opfPath)) {
-        spinner.fail(pc.red(`Not a valid EPUB build: ${buildPath}`));
-        console.log(pc.dim(`Expected OPF file at: ${opfPath}`));
-        process.exit(1);
-      }
+      // Determine output path
+      const outputPath = options.output
+        ? path.resolve(options.output)
+        : epubPath.replace(/\.epub$/i, ".pdf");
 
       // Try to import pdf-server (optional dependency)
       let createApp: CreateApp;
@@ -78,6 +78,30 @@ export const pdfCommand = new Command("pdf")
         process.exit(1);
       }
 
+      // Extract EPUB to temp directory
+      spinner.text = "Extracting EPUB...";
+      tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "swibostyle-pdf-"));
+
+      const epubData = fs.readFileSync(epubPath);
+      const unzipped = fflate.unzipSync(new Uint8Array(epubData));
+
+      // Write extracted files
+      for (const [filePath, data] of Object.entries(unzipped)) {
+        const fullPath = path.join(tempDir, filePath);
+        const dir = path.dirname(fullPath);
+        if (!fs.existsSync(dir)) {
+          fs.mkdirSync(dir, { recursive: true });
+        }
+        fs.writeFileSync(fullPath, data);
+      }
+
+      // Verify OPF file exists
+      const opfPath = path.join(tempDir, "item", "standard.opf");
+      if (!fs.existsSync(opfPath)) {
+        spinner.fail(pc.red(`Invalid EPUB: missing item/standard.opf`));
+        process.exit(1);
+      }
+
       spinner.text = "Starting internal pdf-server...";
 
       // Start internal server
@@ -88,7 +112,7 @@ export const pdfCommand = new Command("pdf")
         process.exit(1);
       }
 
-      const app = createApp(buildPath);
+      const app = createApp(tempDir);
       const server = honoServer.serve({
         fetch: app.fetch,
         port,
@@ -97,7 +121,7 @@ export const pdfCommand = new Command("pdf")
       const serverUrl = `http://localhost:${port}`;
 
       try {
-        spinner.text = `Rendering PDF from ${path.basename(buildPath)}...`;
+        spinner.text = `Rendering PDF from ${path.basename(epubPath)}...`;
 
         const pdf = await renderPDF(serverUrl, { timeout });
 
@@ -121,5 +145,10 @@ export const pdfCommand = new Command("pdf")
       spinner.fail(pc.red("PDF generation failed"));
       console.error(pc.red(error instanceof Error ? error.message : String(error)));
       process.exit(1);
+    } finally {
+      // Clean up temp directory
+      if (tempDir && fs.existsSync(tempDir)) {
+        fs.rmSync(tempDir, { recursive: true, force: true });
+      }
     }
   });

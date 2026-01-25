@@ -6,6 +6,12 @@ export default defineConfig({
   dts: true,
   sourcemap: true,
   clean: true,
-  // Keep workspace dependency external
-  external: ["@swibostyle/core"],
+  // Keep workspace and optional dependencies external
+  external: [
+    "@swibostyle/core",
+    "@swibostyle/pdf-renderer",
+    "@swibostyle/pdf-server",
+    "playwright",
+    "playwright-core",
+  ],
 });

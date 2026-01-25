@@ -13,7 +13,15 @@
     "registry": "https://npm.pkg.github.com"
   },
   "bin": {
-    "swibostyle-pdf-server": "./dist/index.js"
+    "swibostyle-pdf-server": "./dist/cli.js"
+  },
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    }
   },
   "files": [
     "dist"

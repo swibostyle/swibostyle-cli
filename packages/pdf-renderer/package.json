@@ -13,7 +13,7 @@
     "registry": "https://npm.pkg.github.com"
   },
   "bin": {
-    "swibostyle-pdf-renderer": "./dist/index.js"
+    "swibostyle-pdf-renderer": "./dist/cli.js"
   },
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",

@@ -30,6 +30,7 @@
     "@swibostyle/core": "workspace:*",
     "create-swibostyle": "workspace:*",
     "commander": "^14.0.2",
+    "fflate": "^0.8.2",
     "ora": "^9.1.0",
     "picocolors": "^1.1.1"
   },
