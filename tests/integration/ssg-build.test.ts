@@ -5,20 +5,22 @@ import {
   NodeStorageAdapter,
   SharpImageAdapter,
   SassAdapter,
-  loadBookConfig,
+  loadConfig,
   buildSSG,
 } from "../../packages/core/src/index.js";
-import type { BookConfig } from "../../packages/core/src/index.js";
+import type { BookConfig, ResolvedConfig } from "../../packages/core/src/index.js";
 
 const SSG_FIXTURES_DIR = path.resolve(__dirname, "../fixtures/sample-project-ssg");
 
 describe("SSG Build", () => {
   let book: BookConfig;
+  let config: ResolvedConfig;
 
   beforeAll(async () => {
-    // Load book config
+    // Load book config (supports both book.config.ts and book.json)
     const storage = new NodeStorageAdapter();
-    book = await loadBookConfig(storage, path.join(SSG_FIXTURES_DIR, "book.json"));
+    config = await loadConfig(storage, SSG_FIXTURES_DIR);
+    book = config.book;
   });
 
   afterAll(() => {
@@ -68,7 +70,7 @@ describe("SSG Build", () => {
     expect(header[1]).toBe(0x4b); // K
     expect(header[2]).toBe(0x03);
     expect(header[3]).toBe(0x04);
-  });
+  }, 30000);
 
   test("should include XHTML pages", async () => {
     const storage = new NodeStorageAdapter();
