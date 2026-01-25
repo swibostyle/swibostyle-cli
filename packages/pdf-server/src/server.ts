@@ -1,64 +1,119 @@
 import { Hono } from "hono";
-import { cors } from "hono/cors";
-import { logger } from "hono/logger";
-import { renderPDF, type RenderOptions } from "./renderer";
+import * as fs from "node:fs";
+import * as path from "node:path";
+import { createRequire } from "node:module";
 
-export function createApp() {
+const require = createRequire(import.meta.url);
+
+/**
+ * Get path to Vivliostyle Viewer lib directory
+ */
+function getViewerPath(): string {
+  const viewerPkgPath = require.resolve("@vivliostyle/viewer/package.json");
+  return path.join(path.dirname(viewerPkgPath), "lib");
+}
+
+/**
+ * Get MIME type for file extension
+ */
+function getMimeType(filePath: string): string {
+  const ext = path.extname(filePath).toLowerCase();
+  const mimeTypes: Record<string, string> = {
+    ".html": "text/html; charset=utf-8",
+    ".xhtml": "application/xhtml+xml; charset=utf-8",
+    ".css": "text/css; charset=utf-8",
+    ".js": "application/javascript; charset=utf-8",
+    ".mjs": "application/javascript; charset=utf-8",
+    ".json": "application/json; charset=utf-8",
+    ".opf": "application/oebps-package+xml; charset=utf-8",
+    ".ncx": "application/x-dtbncx+xml; charset=utf-8",
+    ".png": "image/png",
+    ".jpg": "image/jpeg",
+    ".jpeg": "image/jpeg",
+    ".gif": "image/gif",
+    ".webp": "image/webp",
+    ".svg": "image/svg+xml",
+    ".woff": "font/woff",
+    ".woff2": "font/woff2",
+    ".ttf": "font/ttf",
+    ".otf": "font/otf",
+    ".map": "application/json",
+  };
+  return mimeTypes[ext] || "application/octet-stream";
+}
+
+/**
+ * Create Vivliostyle Viewer server app
+ */
+export function createApp(bookPath: string) {
   const app = new Hono();
+  const viewerPath = getViewerPath();
 
-  // Middleware
-  app.use("*", logger());
-  app.use("*", cors());
+  // Verify book path exists
+  const resolvedBookPath = path.resolve(bookPath);
+  if (!fs.existsSync(resolvedBookPath)) {
+    throw new Error(`Book path not found: ${resolvedBookPath}`);
+  }
+
+  // Verify OPF file exists
+  const opfPath = path.join(resolvedBookPath, "item", "standard.opf");
+  if (!fs.existsSync(opfPath)) {
+    throw new Error(`OPF file not found: ${opfPath}`);
+  }
+
+  // Root: redirect to viewer with book URL
+  app.get("/", (c) => {
+    const host = c.req.header("host") || "localhost:3000";
+    const protocol = c.req.header("x-forwarded-proto") || "http";
+    const bookUrl = encodeURIComponent(`${protocol}://${host}/book/item/standard.opf`);
+    return c.redirect(`/viewer/index.html#src=${bookUrl}&bookMode=true&renderAllPages=true`);
+  });
 
   // Health check
   app.get("/health", (c) => {
-    return c.json({ status: "ok", version: "0.1.0" });
+    return c.json({ status: "ok", bookPath: resolvedBookPath });
   });
 
-  // API info
-  app.get("/", (c) => {
-    return c.json({
-      name: "@swibostyle/pdf-server",
-      version: "0.1.0",
-      license: "AGPL-3.0",
-      endpoints: {
-        "GET /health": "Health check",
-        "POST /render": "Render PDF from build directory (page size from CSS @page)",
-      },
+  // Serve Vivliostyle Viewer files
+  app.get("/viewer/*", async (c) => {
+    const reqPath = c.req.path.slice("/viewer/".length) || "index.html";
+    const filePath = path.join(viewerPath, reqPath);
+
+    const resolved = path.resolve(filePath);
+    if (!resolved.startsWith(path.resolve(viewerPath))) {
+      return c.text("Forbidden", 403);
+    }
+
+    if (!fs.existsSync(resolved)) {
+      return c.text(`Not found: ${reqPath}`, 404);
+    }
+
+    const content = fs.readFileSync(resolved);
+    return c.body(content, 200, {
+      "Content-Type": getMimeType(resolved),
+      "Access-Control-Allow-Origin": "*",
     });
   });
 
-  // Render PDF
-  app.post("/render", async (c) => {
-    try {
-      const body = await c.req.json();
-      const { source, options } = body as {
-        source: string; // Path to build directory containing item/standard.opf
-        options?: RenderOptions;
-      };
+  // Serve book files
+  app.get("/book/*", async (c) => {
+    const reqPath = c.req.path.slice("/book/".length);
+    const filePath = path.join(resolvedBookPath, reqPath);
 
-      if (!source) {
-        return c.json({ error: "source is required" }, 400);
-      }
-
-      const pdf = await renderPDF(source, options);
-
-      return new Response(pdf, {
-        headers: {
-          "Content-Type": "application/pdf",
-          "Content-Disposition": 'attachment; filename="output.pdf"',
-        },
-      });
-    } catch (error) {
-      console.error("Render error:", error);
-      return c.json(
-        {
-          error: "Failed to render PDF",
-          message: error instanceof Error ? error.message : String(error),
-        },
-        500,
-      );
+    const resolved = path.resolve(filePath);
+    if (!resolved.startsWith(resolvedBookPath)) {
+      return c.text("Forbidden", 403);
     }
+
+    if (!fs.existsSync(resolved)) {
+      return c.text(`Not found: ${reqPath}`, 404);
+    }
+
+    const content = fs.readFileSync(resolved);
+    return c.body(content, 200, {
+      "Content-Type": getMimeType(resolved),
+      "Access-Control-Allow-Origin": "*",
+    });
   });
 
   return app;

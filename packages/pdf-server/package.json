@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "type": "module",
   "license": "AGPL-3.0",
-  "description": "PDF generation server for swibostyle (AGPL licensed due to Vivliostyle dependency)",
+  "description": "Vivliostyle Viewer server for EPUB preview (AGPL licensed due to Vivliostyle dependency)",
   "repository": {
     "type": "git",
     "url": "https://github.com/swibostyle/swibostyle-cli.git",
@@ -27,8 +27,7 @@
   "dependencies": {
     "@hono/node-server": "^1.19.9",
     "@vivliostyle/viewer": "^2.40.0",
-    "hono": "^4.11.5",
-    "playwright": "^1.56.0"
+    "hono": "^4.11.5"
   },
   "devDependencies": {
     "@types/node": "^25.0.10",
