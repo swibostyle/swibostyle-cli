@@ -117,6 +117,7 @@ jobs:
           path: tests/fixtures/sample-project-ssg/_release/*.epub
 
       - name: Install Playwright Chromium
+        working-directory: packages/pdf-renderer
         run: npx playwright install chromium
 
       - name: Generate PDF from EPUB
