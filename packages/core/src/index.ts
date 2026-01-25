@@ -33,10 +33,52 @@ export { NoopImageAdapter } from "./adapters/image/noop";
 
 export type { CSSAdapter, CSSInput, CSSOutput } from "./adapters/css/interface";
 export { SassAdapter } from "./adapters/css/sass";
+export type { SassAdapterOptions } from "./adapters/css/sass";
 export { PassthroughCSSAdapter } from "./adapters/css/passthrough";
 
 // Config
 export { loadBookConfig, getDefaultBookConfig } from "./config/loader";
+export {
+  // Loader
+  loadConfig,
+  findConfigFile,
+  // Define helpers
+  defineConfig,
+  defineMarkdownPlugin,
+  defineCSSPlugin,
+  defineImagePlugin,
+  resolveConfig,
+  resolveConfigExport,
+  extractBookConfig,
+  chainValidators,
+  // Built-in validators
+  createEpubCheckValidator,
+  createCustomValidator,
+  warningsOnly,
+  ignoreErrors,
+  targetOnly,
+  noopValidator,
+} from "./config/index";
+
+export type {
+  UserConfig,
+  ResolvedConfig,
+  ConfigExport,
+  MarkdownPlugin,
+  CSSPlugin,
+  ImagePlugin,
+  BuildHooks,
+  Validator,
+  ValidatorFactory,
+  ValidatorOptions,
+  ValidationMessage,
+  ValidationResult,
+  PluginContext,
+  AdapterConfig,
+  SassAdapterConfigOptions,
+  ImageAdapterOptions,
+  VFMOptions,
+} from "./config/index";
 
 // Utils
 export { convertToXhtml } from "./utils/xhtml";

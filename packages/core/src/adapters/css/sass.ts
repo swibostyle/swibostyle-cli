@@ -2,10 +2,27 @@ import * as path from "node:path";
 import type { CSSAdapter, CSSInput, CSSOutput } from "./interface";
 
 /**
+ * Sass adapter options
+ */
+export interface SassAdapterOptions {
+  /** Output style (default: "expanded") */
+  style?: "expanded" | "compressed";
+  /** Additional load paths for @import resolution */
+  loadPaths?: string[];
+  /** Enable source maps (default: false) */
+  sourceMap?: boolean;
+}
+
+/**
  * Sass-based CSS adapter
  */
 export class SassAdapter implements CSSAdapter {
   private sass: typeof import("sass") | null = null;
+  private options: SassAdapterOptions;
+
+  constructor(options: SassAdapterOptions = {}) {
+    this.options = options;
+  }
 
   private async getSass(): Promise<typeof import("sass")> {
     if (!this.sass) {
@@ -17,10 +34,15 @@ export class SassAdapter implements CSSAdapter {
   async process(input: CSSInput): Promise<CSSOutput> {
     const sass = await this.getSass();
 
+    const loadPaths = [
+      ...(input.path ? [path.dirname(input.path)] : []),
+      ...(this.options.loadPaths ?? []),
+    ];
+
     const result = sass.compileString(input.content, {
-      style: "expanded",
-      sourceMap: input.sourceMap ?? false,
-      loadPaths: input.path ? [path.dirname(input.path)] : [],
+      style: this.options.style ?? "expanded",
+      sourceMap: input.sourceMap ?? this.options.sourceMap ?? false,
+      loadPaths,
     });
 
     return {
@@ -37,7 +59,8 @@ export class SassAdapter implements CSSAdapter {
 
     try {
       const result = sass.compile(entryPath, {
-        style: "expanded",
+        style: this.options.style ?? "expanded",
+        loadPaths: this.options.loadPaths,
       });
 
       return result.loadedUrls.map((url) => url.pathname).filter((p): p is string => p !== null);
