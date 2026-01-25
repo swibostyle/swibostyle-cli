@@ -4,18 +4,19 @@ import ora from "ora";
 import pc from "picocolors";
 import {
   buildSSG,
-  loadBookConfig,
+  loadConfig,
   NodeStorageAdapter,
   SharpImageAdapter,
   SassAdapter,
 } from "@swibostyle/core";
-import type { BuildTargetType } from "@swibostyle/core";
+import type { BuildTargetType, ResolvedConfig, SassAdapterOptions } from "@swibostyle/core";
 import { createLogger } from "../ui/logger";
 
 export const buildCommand = new Command("build")
   .description("Build EPUB from source files")
   .option("-t, --target <name>", "Build target name (default: epub)", "epub")
   .option("-v, --verbose", "Verbose output")
+  .option("--skip-validation", "Skip EPUB validation after build")
   .action(async (options) => {
     const spinner = ora("Initializing...").start();
     const startTime = Date.now();
@@ -29,15 +30,13 @@ export const buildCommand = new Command("build")
         process.exit(1);
       }
 
-      // Create adapters
-      const storage = new NodeStorageAdapter();
-      const imageAdapter = new SharpImageAdapter();
-      const cssAdapter = new SassAdapter();
-
       // Resolve project root
       const projectRoot = process.cwd();
       const srcDir = path.join(projectRoot, "src");
       const buildDir = path.join(projectRoot, "_build");
+
+      // Create storage adapter (needed to load config)
+      const storage = new NodeStorageAdapter();
 
       // Create logger
       const logger = options.verbose
@@ -57,8 +56,17 @@ export const buildCommand = new Command("build")
 
       spinner.text = "Loading configuration...";
 
-      // Load book config
-      const book = await loadBookConfig(storage, path.join(projectRoot, "book.json"));
+      // Load configuration (supports both book.config.ts and book.json)
+      const config = await loadConfig(storage, projectRoot);
+
+      // Create adapters (with configuration)
+      const imageAdapter = await resolveImageAdapter(config);
+      const cssAdapter = await resolveCSSAdapter(config);
+
+      // Call beforeBuild hook
+      if (config.hooks.beforeBuild) {
+        await config.hooks.beforeBuild({ book: config.book, target, logger });
+      }
 
       spinner.text = `Building ${pc.cyan(target)}...`;
 
@@ -70,7 +78,7 @@ export const buildCommand = new Command("build")
         projectRoot,
         srcDir,
         buildDir,
-        book,
+        book: config.book,
         target,
         logger,
       });
@@ -83,6 +91,50 @@ export const buildCommand = new Command("build")
       const imageCount = result.routes.filter((r) => r.type === "image").length;
 
       console.log(pc.dim(`  ${xhtmlCount} pages, ${imageCount} images`));
+
+      // Run validators (unless skipped)
+      const skipValidation = options.skipValidation || config.skipValidation;
+      if (!skipValidation && config.validators.length > 0 && result.outputPath) {
+        spinner.start("Validating EPUB...");
+
+        let hasErrors = false;
+        for (const validatorFactory of config.validators) {
+          const validator = await validatorFactory();
+          const validationResult = await validator.validate(result.outputPath, {
+            onProgress: (msg) => {
+              spinner.text = `Validating (${validator.name}): ${msg}`;
+            },
+          });
+
+          if (!validationResult.valid) {
+            hasErrors = true;
+            spinner.fail(pc.red(`Validation failed (${validator.name})`));
+
+            for (const error of validationResult.errors) {
+              const location = error.location
+                ? ` at ${error.location.path}:${error.location.line ?? "?"}`
+                : "";
+              console.error(pc.red(`  [${error.id}] ${error.message}${location}`));
+            }
+          }
+
+          for (const warning of validationResult.warnings) {
+            const location = warning.location
+              ? ` at ${warning.location.path}:${warning.location.line ?? "?"}`
+              : "";
+            console.warn(pc.yellow(`  [${warning.id}] ${warning.message}${location}`));
+          }
+        }
+
+        if (!hasErrors) {
+          spinner.succeed(pc.green("Validation passed"));
+        }
+      }
+
+      // Call afterBuild hook
+      if (config.hooks.afterBuild && result.outputPath) {
+        await config.hooks.afterBuild({ book: config.book, target, logger }, result.outputPath);
+      }
     } catch (error) {
       spinner.fail(pc.red("Build failed"));
       console.error(pc.red(error instanceof Error ? error.message : String(error)));
@@ -92,3 +144,53 @@ export const buildCommand = new Command("build")
       process.exit(1);
     }
   });
+
+/**
+ * Resolve image adapter from config
+ */
+async function resolveImageAdapter(config: ResolvedConfig) {
+  const adapterConfig = config.adapters.image;
+
+  if (!adapterConfig) {
+    return new SharpImageAdapter();
+  }
+
+  // If it's already an adapter instance
+  if (typeof adapterConfig === "object" && "getSize" in adapterConfig) {
+    return adapterConfig;
+  }
+
+  // If it's a factory function
+  if (typeof adapterConfig === "function") {
+    return adapterConfig();
+  }
+
+  // It's options for the default adapter
+  // Note: SharpImageAdapter doesn't currently support options,
+  // but we could extend it in the future
+  return new SharpImageAdapter();
+}
+
+/**
+ * Resolve CSS adapter from config
+ */
+async function resolveCSSAdapter(config: ResolvedConfig) {
+  const adapterConfig = config.adapters.css;
+
+  if (!adapterConfig) {
+    return new SassAdapter();
+  }
+
+  // If it's already an adapter instance
+  if (typeof adapterConfig === "object" && "process" in adapterConfig) {
+    return adapterConfig;
+  }
+
+  // If it's a factory function
+  if (typeof adapterConfig === "function") {
+    return adapterConfig();
+  }
+
+  // It's options for the SassAdapter
+  return new SassAdapter(adapterConfig as SassAdapterOptions);
+}
