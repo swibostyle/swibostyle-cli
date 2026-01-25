@@ -1,0 +1,10 @@
+{
+  "title": "Minimal Test Book",
+  "authors": [{ "name": "Test Author", "role": "aut" }],
+  "publisher": "Test Publisher",
+  "lang": "en",
+  "bookId": { "epub": "urn:uuid:test-minimal-json" },
+  "layout": "reflowable",
+  "pageDirection": "ltr",
+  "primaryWritingMode": "horizontal-tb"
+}

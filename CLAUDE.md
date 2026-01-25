@@ -31,7 +31,7 @@ swibostyle-cli/
 │   │       │   └── types.ts    # SSG型定義
 │   │       ├── templates/      # 組み込みテンプレート関数
 │   │       │   └── xhtml.ts    # XHTMLページテンプレート
-│   │       ├── config/         # book.json読み込み
+│   │       ├── config/         # 設定読み込み (book.config.ts / book.json)
 │   │       ├── utils/          # ユーティリティ (mime, frontmatter, xhtml)
 │   │       ├── types.ts        # 型定義
 │   │       └── index.ts        # Public API
@@ -64,6 +64,7 @@ swibostyle-cli/
 │
 ├── docs/
 │   ├── ARCHITECTURE.md         # 詳細設計書
+│   ├── CONFIG.md               # 設定ガイド (book.config.ts)
 │   └── SSG.md                  # SSG設計書
 │
 ├── .github/workflows/ci.yml    # GitHub Actions CI
@@ -78,17 +79,28 @@ swibostyle-cli/
 // ビルドターゲット
 type BuildTargetType = "epub" | "print" | "pod";
 
-// 本の設定 (book.json)
-interface BookConfig {
+// 本の設定 (book.config.ts / book.json)
+interface UserConfig {
+  // メタデータ
   title: string;
   authors: Author[];
   publisher: string;
   lang: string;
   bookId: { epub: string; print?: string };
-  layout: "reflowable" | "pre-paginated";
-  pageDirection: "ltr" | "rtl";
-  primaryWritingMode: "horizontal-tb" | "vertical-rl";
-  targets?: { epub?: TargetConfig; print?: TargetConfig; pod?: TargetConfig };
+  layout?: "reflowable" | "pre-paginated";
+  pageDirection?: "ltr" | "rtl";
+  primaryWritingMode?: "horizontal-tb" | "vertical-rl";
+  targets?: Record<string, TargetConfig>;
+
+  // 拡張設定
+  adapters?: AdapterConfig;       // アダプター設定
+  vfm?: VFMOptions;               // VFM設定
+  markdownPlugins?: MarkdownPlugin[];
+  cssPlugins?: CSSPlugin[];
+  imagePlugins?: ImagePlugin[];
+  hooks?: BuildHooks;             // ビルドライフサイクルフック
+  validators?: ValidatorFactory[]; // EPUBバリデータ
+  skipValidation?: boolean;
 }
 
 // ビルドコンテキスト
@@ -156,6 +168,7 @@ bun run clean         # distディレクトリ削除
 
 ## 注意事項
 
-- book.jsonはJSON5形式（コメント許可）
+- 設定ファイルは`book.config.ts`推奨（型安全、プラグイン対応）
+- `book.json`も引き続きサポート（JSON5形式、コメント許可）
 - 画像リサイズはEPUBストア要件に準拠 (Apple Books: 4MP以下, Google: 3200px以下)
 - oxfmtはJSON非対応のため.oxfmtignoreで除外

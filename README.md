@@ -119,9 +119,45 @@ Clean → Copy → CSS → Image → Markdown → OPF → Navigation → Archive
 
 See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) for details.
 
-## book.json
+## Configuration
 
-Project metadata is configured in `book.json` (JSON5 format):
+swibostyle supports two configuration formats:
+
+### book.config.ts (Recommended)
+
+TypeScript-first configuration with full IDE support:
+
+```ts
+import { defineConfig, createEpubCheckValidator } from "@swibostyle/core";
+
+export default defineConfig({
+  title: "Book Title",
+  authors: [{ name: "Author Name", role: "aut" }],
+  publisher: "Publisher",
+  lang: "ja",
+  bookId: { epub: "urn:uuid:..." },
+  layout: "pre-paginated",
+  pageDirection: "rtl",
+  primaryWritingMode: "vertical-rl",
+
+  // Sass configuration
+  adapters: {
+    css: {
+      style: "compressed",
+      loadPaths: ["./src/styles"],
+    },
+  },
+
+  // EPUB validation
+  validators: [
+    createEpubCheckValidator({ profile: "default" }),
+  ],
+});
+```
+
+### book.json (Legacy)
+
+JSON5 format (supports comments):
 
 ```json5
 {
@@ -143,6 +179,8 @@ Project metadata is configured in `book.json` (JSON5 format):
   }
 }
 ```
+
+See [docs/CONFIG.md](docs/CONFIG.md) for detailed configuration options.
 
 ## License
 
