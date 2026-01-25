@@ -1,56 +1,122 @@
 import { Command } from "commander";
 import ora from "ora";
 import pc from "picocolors";
+import * as path from "node:path";
+import * as fs from "node:fs";
+
+// Type definitions for optional dependencies
+type RenderPDF = (serverUrl: string, options?: { timeout?: number }) => Promise<Uint8Array>;
+type CloseBrowser = () => Promise<void>;
+type CreateApp = (bookPath: string) => { fetch: (req: Request) => Response | Promise<Response> };
 
 export const pdfCommand = new Command("pdf")
-  .description("Generate PDF using pdf-server (requires @swibostyle/pdf-server)")
-  .option("-t, --target <type>", "Build target (print, pod)", "print")
-  .option("-s, --src <dir>", "Source directory", "./src")
-  .option("-o, --output <file>", "Output PDF file")
-  .option("--server <url>", "PDF server URL", "http://localhost:3000")
+  .description("Generate PDF from EPUB build (requires @swibostyle/pdf-renderer)")
+  .option("-b, --build <dir>", "EPUB build directory", "./_build")
+  .option("-o, --output <file>", "Output PDF file", "./output.pdf")
+  .option("-t, --timeout <ms>", "Render timeout in milliseconds", "120000")
+  .option("-p, --port <port>", "Port for internal pdf-server", "13370")
   .action(async (options) => {
-    const spinner = ora("Checking PDF server...").start();
+    const spinner = ora("Initializing PDF renderer...").start();
 
     try {
-      const target = options.target;
+      // Try to import pdf-renderer (optional dependency)
+      let renderPDF: RenderPDF;
+      let closeBrowser: CloseBrowser;
 
-      // Validate target
-      if (!["print", "pod"].includes(target)) {
-        spinner.fail(pc.red(`Invalid target for PDF: ${target}. Use 'print' or 'pod'.`));
-        process.exit(1);
-      }
-
-      // Check if server is available
       try {
-        const response = await fetch(`${options.server}/health`);
-        if (!response.ok) {
-          throw new Error("Server not responding");
-        }
+        // @ts-expect-error - Optional dependency, may not be installed
+        const pdfRenderer = await import("@swibostyle/pdf-renderer").catch(() => null);
+        if (!pdfRenderer) throw new Error("Not found");
+        renderPDF = pdfRenderer.renderPDF as RenderPDF;
+        closeBrowser = pdfRenderer.closeBrowser as CloseBrowser;
       } catch {
-        spinner.fail(pc.red("PDF server is not available"));
+        spinner.fail(pc.red("@swibostyle/pdf-renderer is not installed"));
         console.log();
-        console.log(pc.yellow("To generate PDFs, you need to:"));
-        console.log(pc.dim("  1. Install the PDF server: npm install @swibostyle/pdf-server"));
-        console.log(pc.dim("  2. Start the server: npx swibostyle-pdf-server"));
-        console.log(pc.dim("  3. Run this command again"));
+        console.log(pc.yellow("To generate PDFs, install the required packages:"));
         console.log();
-        console.log(
-          pc.dim(
-            "Note: @swibostyle/pdf-server is licensed under AGPL due to Vivliostyle dependency.",
-          ),
-        );
+        console.log(pc.cyan("  npm install @swibostyle/pdf-renderer @swibostyle/pdf-server"));
+        console.log(pc.cyan("  npx playwright install chromium"));
+        console.log();
+        console.log(pc.dim("Note: PDF rendering requires Chromium browser (~150MB download)"));
         process.exit(1);
       }
 
-      spinner.text = `Generating PDF (${target})...`;
+      // Resolve paths
+      const buildPath = path.resolve(options.build);
+      const outputPath = path.resolve(options.output);
+      const timeout = parseInt(options.timeout, 10);
+      const port = parseInt(options.port, 10);
 
-      // TODO: Implement PDF generation via server API
-      // 1. Build EPUB with print/pod target
-      // 2. Send to pdf-server
-      // 3. Receive PDF
+      // Verify build directory exists
+      if (!fs.existsSync(buildPath)) {
+        spinner.fail(pc.red(`Build directory not found: ${buildPath}`));
+        console.log();
+        console.log(pc.yellow("Run 'swibostyle build' first to create the EPUB build."));
+        process.exit(1);
+      }
 
-      spinner.info(pc.yellow("PDF generation is not yet fully implemented"));
-      console.log(pc.dim("  Server connection successful, but PDF generation API is pending."));
+      // Verify OPF file exists
+      const opfPath = path.join(buildPath, "item", "standard.opf");
+      if (!fs.existsSync(opfPath)) {
+        spinner.fail(pc.red(`Not a valid EPUB build: ${buildPath}`));
+        console.log(pc.dim(`Expected OPF file at: ${opfPath}`));
+        process.exit(1);
+      }
+
+      // Try to import pdf-server (optional dependency)
+      let createApp: CreateApp;
+      try {
+        // @ts-expect-error - Optional dependency, may not be installed
+        const pdfServer = await import("@swibostyle/pdf-server").catch(() => null);
+        if (!pdfServer) throw new Error("Not found");
+        createApp = pdfServer.createApp as CreateApp;
+      } catch {
+        spinner.fail(pc.red("@swibostyle/pdf-server is not installed"));
+        console.log();
+        console.log(pc.yellow("Install pdf-server:"));
+        console.log(pc.cyan("  npm install @swibostyle/pdf-server"));
+        process.exit(1);
+      }
+
+      spinner.text = "Starting internal pdf-server...";
+
+      // Start internal server
+      // @ts-expect-error - Dynamic import
+      const honoServer = await import("@hono/node-server").catch(() => null);
+      if (!honoServer) {
+        spinner.fail(pc.red("@hono/node-server is not available"));
+        process.exit(1);
+      }
+
+      const app = createApp(buildPath);
+      const server = honoServer.serve({
+        fetch: app.fetch,
+        port,
+      });
+
+      const serverUrl = `http://localhost:${port}`;
+
+      try {
+        spinner.text = `Rendering PDF from ${path.basename(buildPath)}...`;
+
+        const pdf = await renderPDF(serverUrl, { timeout });
+
+        // Ensure output directory exists
+        const outputDir = path.dirname(outputPath);
+        if (!fs.existsSync(outputDir)) {
+          fs.mkdirSync(outputDir, { recursive: true });
+        }
+
+        // Write PDF
+        fs.writeFileSync(outputPath, pdf);
+
+        spinner.succeed(pc.green(`PDF saved: ${outputPath}`));
+        console.log(pc.dim(`  Size: ${(pdf.byteLength / 1024).toFixed(1)} KB`));
+      } finally {
+        // Cleanup
+        await closeBrowser();
+        server.close();
+      }
     } catch (error) {
       spinner.fail(pc.red("PDF generation failed"));
       console.error(pc.red(error instanceof Error ? error.message : String(error)));
