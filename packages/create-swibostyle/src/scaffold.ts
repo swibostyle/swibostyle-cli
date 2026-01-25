@@ -39,7 +39,7 @@ export async function scaffold(options: ProjectOptions): Promise<void> {
 
   // Generate files
   await generatePackageJson(projectDir, options);
-  await generateBookJson(projectDir, options);
+  await generateBookConfig(projectDir, options);
   await generateStyles(projectDir, options);
   await generateSampleContent(projectDir, options);
   await generateGitignore(projectDir);
@@ -62,6 +62,7 @@ async function generatePackageJson(projectDir: string, options: ProjectOptions):
     },
     dependencies: {
       "@swibostyle/cli": "^0.1.0",
+      "@swibostyle/core": "^0.1.0",
     },
   };
 
@@ -71,27 +72,31 @@ async function generatePackageJson(projectDir: string, options: ProjectOptions):
   );
 }
 
-async function generateBookJson(projectDir: string, options: ProjectOptions): Promise<void> {
-  const bookJson = {
-    title: options.name,
-    authors: [
-      {
-        name: "Author Name",
-        role: "aut",
-      },
-    ],
-    publisher: "Publisher",
-    lang: options.lang,
-    bookId: {
-      epub: "00000000000000000000",
-    },
-    layout: options.template === "manga" ? "pre-paginated" : "reflowable",
-    pageDirection: options.pageDirection,
-    primaryWritingMode: options.writingMode,
-  };
+async function generateBookConfig(projectDir: string, options: ProjectOptions): Promise<void> {
+  const layout = options.template === "manga" ? "pre-paginated" : "reflowable";
 
-  // book.json is at project root in SSG format
-  fs.writeFileSync(path.join(projectDir, "book.json"), JSON.stringify(bookJson, null, 2) + "\n");
+  const bookConfig = `import { defineConfig } from "@swibostyle/core";
+
+export default defineConfig({
+  title: "${options.name}",
+  authors: [
+    {
+      name: "Author Name",
+      role: "aut",
+    },
+  ],
+  publisher: "Publisher",
+  lang: "${options.lang}",
+  bookId: {
+    epub: "urn:uuid:00000000-0000-0000-0000-000000000000",
+  },
+  layout: "${layout}",
+  pageDirection: "${options.pageDirection}",
+  primaryWritingMode: "${options.writingMode}",
+});
+`;
+
+  fs.writeFileSync(path.join(projectDir, "book.config.ts"), bookConfig);
 }
 
 async function generateStyles(projectDir: string, options: ProjectOptions): Promise<void> {
@@ -291,7 +296,7 @@ ${options.packageManager} run build:print
 
 \`\`\`
 ${options.name}/
-├── book.json              # Book configuration
+├── book.config.ts         # Book configuration (TypeScript)
 ├── src/
 │   └── item/
 │       ├── xhtml/         # Content (Markdown files)
