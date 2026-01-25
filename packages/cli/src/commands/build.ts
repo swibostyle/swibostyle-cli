@@ -7,6 +7,7 @@ import {
   loadConfig,
   NodeStorageAdapter,
   SharpImageAdapter,
+  NoopImageAdapter,
   SassAdapter,
 } from "@swibostyle/core";
 import type { BuildTargetType, ResolvedConfig, SassAdapterOptions } from "@swibostyle/core";
@@ -146,17 +147,29 @@ export const buildCommand = new Command("build")
   });
 
 /**
+ * Check if sharp is available at runtime
+ * Used to detect compiled binary environment where sharp is externalized
+ */
+async function isSharpAvailable(): Promise<boolean> {
+  try {
+    // Dynamic import - sharp is external in compiled binary
+    // @ts-expect-error sharp may not be available in compiled binary
+    await import("sharp");
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+/**
  * Resolve image adapter from config
+ * Falls back to NoopImageAdapter if sharp is not available (e.g., in compiled binary)
  */
 async function resolveImageAdapter(config: ResolvedConfig) {
   const adapterConfig = config.adapters.image;
 
-  if (!adapterConfig) {
-    return new SharpImageAdapter();
-  }
-
   // If it's already an adapter instance
-  if (typeof adapterConfig === "object" && "getSize" in adapterConfig) {
+  if (adapterConfig && typeof adapterConfig === "object" && "getSize" in adapterConfig) {
     return adapterConfig;
   }
 
@@ -165,10 +178,14 @@ async function resolveImageAdapter(config: ResolvedConfig) {
     return adapterConfig();
   }
 
-  // It's options for the default adapter
-  // Note: SharpImageAdapter doesn't currently support options,
-  // but we could extend it in the future
-  return new SharpImageAdapter();
+  // Default: try SharpImageAdapter, fallback to NoopImageAdapter
+  if (await isSharpAvailable()) {
+    return new SharpImageAdapter();
+  }
+
+  // Fallback for compiled binary or environments without sharp
+  console.warn("[warn] sharp not available, using NoopImageAdapter (image processing disabled)");
+  return new NoopImageAdapter();
 }
 
 /**
