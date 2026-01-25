@@ -1,18 +1,15 @@
-#!/usr/bin/env node
-
 import { Command } from "commander";
 import * as p from "@clack/prompts";
 import pc from "picocolors";
-import { scaffold } from "./scaffold";
-import { runPrompts } from "./prompts";
-import type { ProjectOptions, TemplateType } from "./types";
+import {
+  scaffold,
+  runPrompts,
+  type ProjectOptions,
+  type TemplateType,
+} from "create-swibostyle/lib";
 
-const program = new Command();
-
-program
-  .name("create-swibostyle")
+export const initCommand = new Command("init")
   .description("Create a new swibostyle project")
-  .version("0.1.0")
   .argument("[project-name]", "Project name")
   .option("-t, --template <type>", "Template type (novel, manga, techbook, minimal)")
   .option("--lang <lang>", "Language code", "ja")
@@ -22,7 +19,7 @@ program
   .option("-y, --yes", "Skip prompts and use defaults")
   .action(async (projectName, options) => {
     console.log();
-    p.intro(pc.bgCyan(pc.black(" create-swibostyle ")));
+    p.intro(pc.bgCyan(pc.black(" swibostyle init ")));
 
     try {
       let projectOptions: ProjectOptions;
@@ -64,5 +61,3 @@ program
       process.exit(1);
     }
   });
-
-program.parse();

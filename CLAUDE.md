@@ -38,13 +38,15 @@ swibostyle-cli/
 │   │
 │   ├── cli/                    # MIT - CLIインターフェース
 │   │   └── src/
-│   │       ├── commands/       # build, preview, pdf コマンド
+│   │       ├── commands/       # init, build, preview, pdf コマンド
 │   │       ├── ui/             # ロガー、スピナー
 │   │       └── index.ts        # Commander.js エントリ
 │   │
 │   ├── create-swibostyle/      # MIT - プロジェクトテンプレート生成
 │   │   └── src/
 │   │       ├── scaffold.ts     # プロジェクト生成
+│   │       ├── prompts.ts      # インタラクティブプロンプト
+│   │       ├── lib.ts          # ライブラリエクスポート (CLIから再利用)
 │   │       └── index.ts        # @clack/prompts CLI
 │   │
 │   ├── epub-validator/         # MIT - EPUB検証 (W3C EPubCheck)
