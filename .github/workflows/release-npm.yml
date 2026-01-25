@@ -91,6 +91,12 @@ jobs:
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
+      - name: Publish @swibostyle/pdf-renderer
+        working-directory: packages/pdf-renderer
+        run: npm publish --registry https://registry.npmjs.org --access public
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
       - name: Publish create-swibostyle
         working-directory: packages/create-swibostyle
         run: npm publish --registry https://registry.npmjs.org --access public
