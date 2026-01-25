@@ -708,3 +708,10 @@ npm install @swibostyle/pdf-server
 - [ ] **Phase 7**: OPS アダプター実装 (S3, R2, GCS)
 - [ ] Web Worker 対応
 - [ ] 軽量版ビルド (@swibostyle/core/lite)
+
+---
+
+## クレジット
+
+- **コアロジック（オリジナルgulp版）**: [@butameron](https://github.com/butameron)
+- **CLI実装**: 主に [Claude Code](https://claude.ai/code) により作成
