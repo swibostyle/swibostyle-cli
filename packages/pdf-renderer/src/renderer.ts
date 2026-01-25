@@ -50,14 +50,26 @@ export async function renderPDF(
   try {
     // Navigate to server root (redirects to viewer with book loaded)
     console.log(`Connecting to pdf-server: ${serverUrl}`);
-    await page.goto(serverUrl, { timeout });
+    await page.goto(serverUrl, { timeout, waitUntil: "networkidle" });
 
     // Wait for Vivliostyle to finish rendering
     // The viewer sets data-vivliostyle-viewer-status attribute
     console.log("Waiting for Vivliostyle to render...");
+
+    // First wait for body to exist
+    await page.waitForSelector("body", { timeout });
+
+    // Log current status for debugging
+    const initialStatus = await page.evaluate(
+      `document.body?.getAttribute("data-vivliostyle-viewer-status") || "not-set"`,
+    );
+    console.log(`Initial Vivliostyle status: ${initialStatus}`);
+
+    // Wait for rendering to complete
     await page.waitForFunction(
       `(() => {
         const body = document.body;
+        if (!body) return false;
         const status = body.getAttribute("data-vivliostyle-viewer-status");
         // Status can be: loading, interactive, complete
         return status === "complete" || status === "interactive";
@@ -65,8 +77,14 @@ export async function renderPDF(
       { timeout },
     );
 
+    // Log final status
+    const finalStatus = await page.evaluate(
+      `document.body?.getAttribute("data-vivliostyle-viewer-status") || "not-set"`,
+    );
+    console.log(`Final Vivliostyle status: ${finalStatus}`);
+
     // Additional wait to ensure all pages are rendered
-    await page.waitForTimeout(1000);
+    await page.waitForTimeout(2000);
 
     console.log("Vivliostyle rendering complete, generating PDF...");
 
