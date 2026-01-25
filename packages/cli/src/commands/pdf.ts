@@ -28,7 +28,6 @@ export const pdfCommand = new Command("pdf")
       let closeBrowser: CloseBrowser;
 
       try {
-        // @ts-expect-error - Optional dependency, may not be installed
         const pdfRenderer = await import("@swibostyle/pdf-renderer").catch(() => null);
         if (!pdfRenderer) throw new Error("Not found");
         renderPDF = pdfRenderer.renderPDF as RenderPDF;
@@ -66,7 +65,6 @@ export const pdfCommand = new Command("pdf")
       // Try to import pdf-server (optional dependency)
       let createApp: CreateApp;
       try {
-        // @ts-expect-error - Optional dependency, may not be installed
         const pdfServer = await import("@swibostyle/pdf-server").catch(() => null);
         if (!pdfServer) throw new Error("Not found");
         createApp = pdfServer.createApp as CreateApp;
@@ -105,7 +103,6 @@ export const pdfCommand = new Command("pdf")
       spinner.text = "Starting internal pdf-server...";
 
       // Start internal server
-      // @ts-expect-error - Dynamic import
       const honoServer = await import("@hono/node-server").catch(() => null);
       if (!honoServer) {
         spinner.fail(pc.red("@hono/node-server is not available"));
