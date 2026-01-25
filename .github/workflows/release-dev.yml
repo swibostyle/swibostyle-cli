@@ -46,7 +46,7 @@ jobs:
         run: bun run build
 
       - name: Compile binary
-        run: bun build --compile --target=bun-${{ matrix.target }} ./packages/cli/src/index.ts --outfile ./dist/${{ matrix.artifact }}
+        run: bun build --compile --target=bun-${{ matrix.target }} ./packages/cli/src/index.ts --outfile ./dist/${{ matrix.artifact }} --external sharp --external psd
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
