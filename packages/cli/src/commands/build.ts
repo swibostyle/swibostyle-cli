@@ -8,6 +8,7 @@ import {
   NodeStorageAdapter,
   SharpImageAdapter,
   NoopImageAdapter,
+  isSharpAvailable,
   SassAdapter,
 } from "@swibostyle/core";
 import type { BuildTargetType, ResolvedConfig, SassAdapterOptions } from "@swibostyle/core";
@@ -145,21 +146,6 @@ export const buildCommand = new Command("build")
       process.exit(1);
     }
   });
-
-/**
- * Check if sharp is available at runtime
- * Used to detect compiled binary environment where sharp is externalized
- */
-async function isSharpAvailable(): Promise<boolean> {
-  try {
-    // Dynamic import - sharp is external in compiled binary
-    // @ts-expect-error sharp may not be available in compiled binary
-    await import("sharp");
-    return true;
-  } catch {
-    return false;
-  }
-}
 
 /**
  * Resolve image adapter from config
