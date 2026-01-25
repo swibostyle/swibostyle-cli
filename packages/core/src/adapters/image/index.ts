@@ -6,6 +6,7 @@ export type {
   ConvertOptions,
 } from "./interface";
 export { SharpImageAdapter } from "./sharp";
+export { JimpImageAdapter } from "./jimp";
 export { NoopImageAdapter } from "./noop";
 
 /**
@@ -15,6 +16,19 @@ export { NoopImageAdapter } from "./noop";
 export async function isSharpAvailable(): Promise<boolean> {
   try {
     await import("sharp");
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * Check if jimp is available at runtime.
+ * Jimp is a pure JavaScript image library that works in compiled binaries.
+ */
+export async function isJimpAvailable(): Promise<boolean> {
+  try {
+    await import("jimp");
     return true;
   } catch {
     return false;
