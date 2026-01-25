@@ -1,19 +1,27 @@
 {
-  "name": "@swibostyle/cli",
+  "name": "@swibostyle/pdf-renderer",
   "version": "0.1.0",
   "type": "module",
   "license": "MIT",
-  "description": "CLI for swibostyle CSS typesetting tool",
+  "description": "PDF renderer for swibostyle using Playwright",
   "repository": {
     "type": "git",
     "url": "https://github.com/swibostyle/swibostyle-cli.git",
-    "directory": "packages/cli"
+    "directory": "packages/pdf-renderer"
   },
   "publishConfig": {
     "registry": "https://npm.pkg.github.com"
   },
   "bin": {
-    "swibostyle": "./dist/index.js"
+    "swibostyle-pdf-renderer": "./dist/cli.js"
+  },
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    }
   },
   "files": [
     "dist"
@@ -25,20 +33,12 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@clack/prompts": "^0.11.0",
-    "@hono/node-server": "^1.19.9",
-    "@swibostyle/core": "workspace:*",
-    "create-swibostyle": "workspace:*",
-    "commander": "^14.0.2",
-    "fflate": "^0.8.2",
-    "ora": "^9.1.0",
-    "picocolors": "^1.1.1"
+    "playwright": "^1.50.0"
   },
   "devDependencies": {
-    "@swibostyle/pdf-renderer": "workspace:*",
-    "@swibostyle/pdf-server": "workspace:*",
     "@types/node": "^25.0.10",
     "bun-types": "^1.3.6",
+    "tsup": "^8.5.1",
     "typescript": "^5.9.3"
   }
 }

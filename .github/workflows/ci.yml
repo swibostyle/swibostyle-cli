@@ -47,6 +47,12 @@ jobs:
       - name: Build epub-validator (required for linux-x64 typecheck)
         run: bun run --filter '@swibostyle/epub-validator' build
 
+      - name: Build pdf-server (required for CLI typecheck)
+        run: bun run --filter '@swibostyle/pdf-server' build
+
+      - name: Build pdf-renderer (required for CLI typecheck)
+        run: bun run --filter '@swibostyle/pdf-renderer' build
+
       - name: Typecheck
         run: bun run typecheck
 
@@ -109,3 +115,17 @@ jobs:
         with:
           name: sample-epub
           path: tests/fixtures/sample-project-ssg/_release/*.epub
+
+      - name: Install Playwright Chromium
+        working-directory: packages/pdf-renderer
+        run: npx playwright install chromium
+
+      - name: Generate PDF from EPUB
+        working-directory: tests/fixtures/sample-project-ssg
+        run: bun ../../../packages/cli/src/index.ts pdf ./_release/book-epub.epub -o ./_release/book-epub.pdf
+
+      - name: Upload PDF artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: sample-pdf
+          path: tests/fixtures/sample-project-ssg/_release/*.pdf

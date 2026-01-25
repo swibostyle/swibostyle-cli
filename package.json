@@ -21,7 +21,7 @@
     "format:check": "oxfmt --ignore-path .oxfmtignore --check packages tests/integration",
     "check": "bun run typecheck && bun run lint && bun run format:check",
     "clean": "rm -rf packages/*/dist",
-    "compile": "bun build --compile ./packages/cli/src/index.ts --outfile ./dist/swibostyle --external sharp --external psd"
+    "compile": "bun build --compile ./packages/cli/src/index.ts --outfile ./dist/swibostyle --external sharp --external psd --external @swibostyle/pdf-renderer --external @swibostyle/pdf-server --external playwright"
   },
   "devDependencies": {
     "@types/node": "^25.0.10",

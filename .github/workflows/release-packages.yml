@@ -95,6 +95,12 @@ jobs:
         env:
           NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Publish @swibostyle/pdf-renderer
+        working-directory: packages/pdf-renderer
+        run: npm publish --access public
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
       # create-swibostyle is skipped (no scope, GitHub Packages requires @scope/name)
       # It will be published to npm registry only via release-npm.yml
 
