@@ -6,8 +6,10 @@ import {
   buildSSG,
   loadConfig,
   NodeStorageAdapter,
+  JimpImageAdapter,
   SharpImageAdapter,
   NoopImageAdapter,
+  isJimpAvailable,
   isSharpAvailable,
   SassAdapter,
 } from "@swibostyle/core";
@@ -149,7 +151,7 @@ export const buildCommand = new Command("build")
 
 /**
  * Resolve image adapter from config
- * Falls back to NoopImageAdapter if sharp is not available (e.g., in compiled binary)
+ * Priority: Jimp (pure JS, works in compiled binary) > Sharp (native, faster) > Noop (fallback)
  */
 async function resolveImageAdapter(config: ResolvedConfig) {
   const adapterConfig = config.adapters.image;
@@ -164,13 +166,20 @@ async function resolveImageAdapter(config: ResolvedConfig) {
     return adapterConfig();
   }
 
-  // Default: try SharpImageAdapter, fallback to NoopImageAdapter
+  // Default: try Jimp first (pure JS, works in compiled binary)
+  if (await isJimpAvailable()) {
+    return new JimpImageAdapter();
+  }
+
+  // Fallback to Sharp if available
   if (await isSharpAvailable()) {
     return new SharpImageAdapter();
   }
 
-  // Fallback for compiled binary or environments without sharp
-  console.warn("[warn] sharp not available, using NoopImageAdapter (image processing disabled)");
+  // Last resort: NoopImageAdapter (no image processing)
+  console.warn(
+    "[warn] No image adapter available, using NoopImageAdapter (image processing disabled)",
+  );
   return new NoopImageAdapter();
 }
 

@@ -23,13 +23,16 @@
     "@vivliostyle/vfm": "^2.5.0",
     "archiver": "^7.0.1",
     "fflate": "^0.8.2",
+    "jimp": "^1.6.0",
     "remark-frontmatter": "^5.0.0",
     "remark-parse": "^11.0.0",
     "sass": "^1.97.3",
-    "sharp": "^0.34.5",
     "unified": "^11.0.5",
     "yaml": "^2.8.2",
     "@xmldom/xmldom": "^0.8.11"
+  },
+  "optionalDependencies": {
+    "sharp": "^0.34.5"
   },
   "devDependencies": {
     "@types/archiver": "^7.0.0",

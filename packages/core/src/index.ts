@@ -28,7 +28,13 @@ export type {
   CropOptions,
   ConvertOptions,
 } from "./adapters/image/interface";
-export { SharpImageAdapter, NoopImageAdapter, isSharpAvailable } from "./adapters/image/index";
+export {
+  SharpImageAdapter,
+  JimpImageAdapter,
+  NoopImageAdapter,
+  isSharpAvailable,
+  isJimpAvailable,
+} from "./adapters/image/index";
 
 export type { CSSAdapter, CSSInput, CSSOutput } from "./adapters/css/interface";
 export { SassAdapter } from "./adapters/css/sass";
