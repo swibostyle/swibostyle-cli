@@ -8,3 +8,11 @@ export interface ProjectOptions {
   writingMode: "horizontal-tb" | "vertical-rl";
   packageManager: "bun" | "npm";
 }
+
+export interface PromptCliOptions {
+  template?: string;
+  lang?: string;
+  direction?: string;
+  writingMode?: string;
+  pm?: string;
+}
