@@ -49,13 +49,32 @@ export async function renderPDF(
 
   try {
     // Construct viewer URL with book source
+    // Vivliostyle auto-detects OPF when given the EPUB root directory
     // HTTP redirects don't preserve URL fragments (#hash), so we navigate directly
-    const bookUrl = encodeURIComponent(`${serverUrl}/book/item/standard.opf`);
+    const bookUrl = encodeURIComponent(`${serverUrl}/book/`);
     const viewerUrl = `${serverUrl}/viewer/index.html#src=${bookUrl}&bookMode=true&renderAllPages=true`;
 
     console.log(`Connecting to pdf-server: ${serverUrl}`);
+    console.log(`Book URL: ${serverUrl}/book/`);
     console.log(`Viewer URL: ${viewerUrl}`);
+
+    // Listen for console messages
+    page.on("console", (msg) => {
+      console.log(`[Browser ${msg.type()}] ${msg.text()}`);
+    });
+
+    // Listen for page errors
+    page.on("pageerror", (error) => {
+      console.log(`[Browser error] ${error.message}`);
+    });
+
     await page.goto(viewerUrl, { timeout, waitUntil: "networkidle" });
+
+    // Log current page info
+    const currentUrl = page.url();
+    const pageTitle = await page.title();
+    console.log(`Current URL: ${currentUrl}`);
+    console.log(`Page title: ${pageTitle}`);
 
     // Wait for Vivliostyle to finish rendering
     // The viewer sets data-vivliostyle-viewer-status attribute
@@ -69,6 +88,12 @@ export async function renderPDF(
       `document.body?.getAttribute("data-vivliostyle-viewer-status") || "not-set"`,
     );
     console.log(`Initial Vivliostyle status: ${initialStatus}`);
+
+    // Log body attributes for debugging
+    const bodyAttrs = await page.evaluate(
+      `Array.from(document.body.attributes).map(a => a.name + '=' + a.value).join(', ')`,
+    );
+    console.log(`Body attributes: ${bodyAttrs}`);
 
     // Wait for rendering to complete
     await page.waitForFunction(
