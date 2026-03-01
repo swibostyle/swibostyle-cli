@@ -6,7 +6,7 @@ import {
   runPrompts,
   type ProjectOptions,
   type TemplateType,
-} from "create-swibostyle/lib";
+} from "../init";
 
 export const initCommand = new Command("init")
   .description("Create a new swibostyle project")
