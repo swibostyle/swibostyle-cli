@@ -41,9 +41,6 @@ jobs:
       - name: Build core (required for CLI typecheck)
         run: bun run --filter '@swibostyle/core' build
 
-      - name: Build create-swibostyle (required for CLI typecheck)
-        run: bun run --filter 'create-swibostyle' build
-
       - name: Build epub-validator (required for linux-x64 typecheck)
         run: bun run --filter '@swibostyle/epub-validator' build
 
@@ -52,6 +49,9 @@ jobs:
 
       - name: Build pdf-renderer (required for CLI typecheck)
         run: bun run --filter '@swibostyle/pdf-renderer' build
+
+      - name: Build CLI (required for create-swibostyle typecheck)
+        run: bun run --filter '@swibostyle/cli' build
 
       - name: Typecheck
         run: bun run typecheck
