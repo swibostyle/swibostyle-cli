@@ -145,6 +145,24 @@ async function writeOutputsToDirectory(
 }
 
 /**
+ * Collect all files recursively under a directory, returning relative paths sorted alphabetically.
+ */
+function collectFilesRecursively(dir: string, base: string = ""): string[] {
+  const results: string[] = [];
+  const entries = fs.readdirSync(dir);
+  for (const entry of entries) {
+    const fullPath = path.join(dir, entry);
+    const relPath = base ? `${base}/${entry}` : entry;
+    if (fs.statSync(fullPath).isDirectory()) {
+      results.push(...collectFilesRecursively(fullPath, relPath));
+    } else {
+      results.push(relPath);
+    }
+  }
+  return results.sort();
+}
+
+/**
  * Create a simple static file server
  */
 function escapeHtml(value: string): string {
@@ -162,20 +180,28 @@ function createStaticServer(serveDir: string): http.Server {
     const pathname = decodeURIComponent(url.pathname);
 
     // Resolve file path
-    const filePath =
-      pathname === "/" ? "item/xhtml" : pathname.startsWith("/") ? pathname.slice(1) : pathname;
-    const fullPath = path.join(serveDir, filePath);
+    const filePath = pathname === "/" ? "" : pathname.startsWith("/") ? pathname.slice(1) : pathname;
+    const fullPath = pathname === "/" ? serveDir : path.join(serveDir, filePath);
+
+    const corsHeaders = { "Access-Control-Allow-Origin": "*" };
+
+    // Handle CORS preflight
+    if (req.method === "OPTIONS") {
+      res.writeHead(204, corsHeaders);
+      res.end();
+      return;
+    }
 
     // Security: prevent path traversal
     const resolved = path.resolve(fullPath);
     if (!resolved.startsWith(path.resolve(serveDir))) {
-      res.writeHead(403, { "Content-Type": "text/plain" });
+      res.writeHead(403, { "Content-Type": "text/plain", ...corsHeaders });
       res.end("Forbidden");
       return;
     }
 
     if (!fs.existsSync(resolved)) {
-      res.writeHead(404, { "Content-Type": "text/plain" });
+      res.writeHead(404, { "Content-Type": "text/plain", ...corsHeaders });
       res.end(`Not found: ${filePath}`);
       return;
     }
@@ -183,21 +209,37 @@ function createStaticServer(serveDir: string): http.Server {
     // Directory listing
     const stat = fs.statSync(resolved);
     if (stat.isDirectory()) {
-      const entries = fs.readdirSync(resolved);
-      const links = entries
-        .map((entry) => {
-          const entryPath = path.join(resolved, entry);
-          const isDir = fs.statSync(entryPath).isDirectory();
-          const hrefPath = `/${path.relative(serveDir, entryPath)}${isDir ? "/" : ""}`;
-          const safeHref = encodeURI(hrefPath);
-          const safeLabel = escapeHtml(`${entry}${isDir ? "/" : ""}`);
-          return `<li><a href="${safeHref}">${safeLabel}</a></li>`;
-        })
-        .join("\n");
+      const isRoot = pathname === "/";
+      let links: string;
 
-      const safeFilePath = escapeHtml(filePath);
+      if (isRoot) {
+        // Root: show all files recursively
+        const allFiles = collectFilesRecursively(serveDir);
+        links = allFiles
+          .map((relPath) => {
+            const safeHref = encodeURI(`/${relPath}`);
+            const safeLabel = escapeHtml(relPath);
+            return `<li><a href="${safeHref}">${safeLabel}</a></li>`;
+          })
+          .join("\n");
+      } else {
+        // Subdirectory: show immediate entries
+        const entries = fs.readdirSync(resolved);
+        links = entries
+          .map((entry) => {
+            const entryPath = path.join(resolved, entry);
+            const isDir = fs.statSync(entryPath).isDirectory();
+            const hrefPath = `/${path.relative(serveDir, entryPath)}${isDir ? "/" : ""}`;
+            const safeHref = encodeURI(hrefPath);
+            const safeLabel = escapeHtml(`${entry}${isDir ? "/" : ""}`);
+            return `<li><a href="${safeHref}">${safeLabel}</a></li>`;
+          })
+          .join("\n");
+      }
 
-      res.writeHead(200, { "Content-Type": "text/html; charset=utf-8" });
+      const safeFilePath = escapeHtml(filePath || "/");
+
+      res.writeHead(200, { "Content-Type": "text/html; charset=utf-8", ...corsHeaders });
       res.end(`<!DOCTYPE html>
 <html><head><meta charset="UTF-8"><title>Index of /${safeFilePath}</title>
 <style>body{font-family:monospace;margin:2em}a{text-decoration:none}a:hover{text-decoration:underline}li{padding:2px 0}</style>
@@ -211,7 +253,7 @@ function createStaticServer(serveDir: string): http.Server {
 
     res.writeHead(200, {
       "Content-Type": contentType,
-      "Access-Control-Allow-Origin": "*",
+      ...corsHeaders,
     });
     res.end(content);
   });
