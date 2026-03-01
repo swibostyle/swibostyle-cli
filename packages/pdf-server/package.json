@@ -35,7 +35,7 @@
   "dependencies": {
     "@hono/node-server": "^1.19.9",
     "@vivliostyle/viewer": "^2.40.0",
-    "hono": "^4.11.5"
+    "hono": "^4.11.7"
   },
   "devDependencies": {
     "@types/node": "^25.0.10",
