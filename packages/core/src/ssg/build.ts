@@ -14,6 +14,7 @@ import type {
   Router,
   ImageInfo,
   SSGBuildResult,
+  SSGBuildOutputs,
   RegisteredRoute,
 } from "./types";
 import {
@@ -58,10 +59,14 @@ export interface SSGBuildContext {
 }
 
 /**
- * Build an EPUB using the SSG router system
+ * Build SSG outputs (intermediate result before archiving)
+ *
+ * This produces a Map of output path to file content, which can be:
+ * - Archived into an EPUB (via buildSSG)
+ * - Written to a directory (for serve/preview)
  */
-export async function buildSSG(ctx: SSGBuildContext): Promise<SSGBuildResult> {
-  const { storage, imageAdapter, projectRoot, srcDir, book, target, logger } = ctx;
+export async function buildSSGOutputs(ctx: SSGBuildContext): Promise<SSGBuildOutputs> {
+  const { storage, imageAdapter, srcDir, book, target, logger } = ctx;
 
   logger?.info(`Building ${target} with SSG...`);
 
@@ -214,11 +219,22 @@ export async function buildSSG(ctx: SSGBuildContext): Promise<SSGBuildResult> {
     }
   }
 
-  // 9. Create EPUB archive
-  logger?.info(`Creating EPUB archive with ${outputs.size} files...`);
-  const epubData = await createEpubArchiveFromMap(outputs);
+  return { files: outputs, routes };
+}
 
-  // 10. Write output file
+/**
+ * Build an EPUB using the SSG router system
+ */
+export async function buildSSG(ctx: SSGBuildContext): Promise<SSGBuildResult> {
+  const { storage, projectRoot, target, logger } = ctx;
+
+  const { files, routes } = await buildSSGOutputs(ctx);
+
+  // Create EPUB archive
+  logger?.info(`Creating EPUB archive with ${files.size} files...`);
+  const epubData = await createEpubArchiveFromMap(files);
+
+  // Write output file
   const outputPath = `${projectRoot}/_release/book-${target}.epub`;
   await storage.mkdir(`${projectRoot}/_release`, { recursive: true });
   await storage.writeFile(outputPath, epubData);

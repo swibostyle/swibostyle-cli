@@ -2,6 +2,7 @@
 _build/
 _release/
 _temp/
+.swibostyle/
 dist/
 *.tsbuildinfo
 
