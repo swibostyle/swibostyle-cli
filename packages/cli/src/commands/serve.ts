@@ -180,7 +180,8 @@ function createStaticServer(serveDir: string): http.Server {
     const pathname = decodeURIComponent(url.pathname);
 
     // Resolve file path
-    const filePath = pathname === "/" ? "" : pathname.startsWith("/") ? pathname.slice(1) : pathname;
+    const filePath =
+      pathname === "/" ? "" : pathname.startsWith("/") ? pathname.slice(1) : pathname;
     const fullPath = pathname === "/" ? serveDir : path.join(serveDir, filePath);
 
     const corsHeaders = { "Access-Control-Allow-Origin": "*" };
