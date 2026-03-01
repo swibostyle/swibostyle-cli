@@ -147,6 +147,15 @@ async function writeOutputsToDirectory(
 /**
  * Create a simple static file server
  */
+function escapeHtml(value: string): string {
+  return value
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
+
 function createStaticServer(serveDir: string): http.Server {
   return http.createServer((req, res) => {
     const url = new URL(req.url || "/", `http://${req.headers.host}`);
@@ -179,16 +188,20 @@ function createStaticServer(serveDir: string): http.Server {
         .map((entry) => {
           const entryPath = path.join(resolved, entry);
           const isDir = fs.statSync(entryPath).isDirectory();
-          const href = `/${path.relative(serveDir, entryPath)}${isDir ? "/" : ""}`;
-          return `<li><a href="${href}">${entry}${isDir ? "/" : ""}</a></li>`;
+          const hrefPath = `/${path.relative(serveDir, entryPath)}${isDir ? "/" : ""}`;
+          const safeHref = encodeURI(hrefPath);
+          const safeLabel = escapeHtml(`${entry}${isDir ? "/" : ""}`);
+          return `<li><a href="${safeHref}">${safeLabel}</a></li>`;
         })
         .join("\n");
 
+      const safeFilePath = escapeHtml(filePath);
+
       res.writeHead(200, { "Content-Type": "text/html; charset=utf-8" });
       res.end(`<!DOCTYPE html>
-<html><head><meta charset="UTF-8"><title>Index of /${filePath}</title>
+<html><head><meta charset="UTF-8"><title>Index of /${safeFilePath}</title>
 <style>body{font-family:monospace;margin:2em}a{text-decoration:none}a:hover{text-decoration:underline}li{padding:2px 0}</style>
-</head><body><h1>Index of /${filePath}</h1><ul>${links}</ul></body></html>`);
+</head><body><h1>Index of /${safeFilePath}</h1><ul>${links}</ul></body></html>`);
       return;
     }
 
