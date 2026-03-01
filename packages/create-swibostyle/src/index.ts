@@ -3,9 +3,7 @@
 import { Command } from "commander";
 import * as p from "@clack/prompts";
 import pc from "picocolors";
-import { scaffold } from "./scaffold";
-import { runPrompts } from "./prompts";
-import type { ProjectOptions, TemplateType } from "./types";
+import { scaffold, runPrompts, type ProjectOptions, type TemplateType } from "@swibostyle/cli/init";
 
 const program = new Command();
 

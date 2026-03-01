@@ -12,18 +12,6 @@
   "publishConfig": {
     "registry": "https://npm.pkg.github.com"
   },
-  "main": "./dist/lib.js",
-  "types": "./dist/lib.d.ts",
-  "exports": {
-    ".": {
-      "types": "./dist/lib.d.ts",
-      "import": "./dist/lib.js"
-    },
-    "./lib": {
-      "types": "./dist/lib.d.ts",
-      "import": "./dist/lib.js"
-    }
-  },
   "bin": {
     "create-swibostyle": "./dist/index.js"
   },
@@ -39,6 +27,7 @@
   },
   "dependencies": {
     "@clack/prompts": "^0.11.0",
+    "@swibostyle/cli": "workspace:*",
     "commander": "^14.0.2",
     "picocolors": "^1.1.1"
   },
