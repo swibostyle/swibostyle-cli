@@ -234,3 +234,13 @@ export interface SSGBuildResult {
   /** Generated routes */
   routes: RouteInfo[];
 }
+
+/**
+ * SSG build outputs (intermediate result before archiving)
+ */
+export interface SSGBuildOutputs {
+  /** Map of output path to file content */
+  files: Map<string, Uint8Array>;
+  /** Generated routes */
+  routes: RouteInfo[];
+}

@@ -4,6 +4,7 @@ import { Command } from "commander";
 import { buildCommand } from "./commands/build";
 import { initCommand } from "./commands/init";
 import { previewCommand } from "./commands/preview";
+import { serveCommand } from "./commands/serve";
 import { pdfCommand } from "./commands/pdf";
 
 const program = new Command();
@@ -13,6 +14,7 @@ program.name("swibostyle").description("CSS typesetting CLI for EPUB generation"
 // Register commands
 program.addCommand(buildCommand);
 program.addCommand(initCommand);
+program.addCommand(serveCommand);
 program.addCommand(previewCommand);
 program.addCommand(pdfCommand);
 

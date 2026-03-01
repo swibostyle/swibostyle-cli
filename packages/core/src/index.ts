@@ -112,6 +112,7 @@ export {
   createDefaultRouter,
   // Build
   buildSSG,
+  buildSSGOutputs,
 } from "./ssg/index";
 
 export type {
@@ -136,6 +137,7 @@ export type {
   // Build types
   SSGBuildOptions,
   SSGBuildResult,
+  SSGBuildOutputs,
   SSGBuildContext,
   // Context types
   SSGContextOptions,

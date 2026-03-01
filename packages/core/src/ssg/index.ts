@@ -22,6 +22,7 @@ export type {
   ScannerOptions,
   SSGBuildOptions,
   SSGBuildResult,
+  SSGBuildOutputs,
 } from "./types";
 
 // Router
@@ -45,5 +46,5 @@ export type { ScanOptions, ScannedRoute } from "./scanner";
 export { createDefaultRouter } from "./handlers";
 
 // Build
-export { buildSSG } from "./build";
+export { buildSSG, buildSSGOutputs } from "./build";
 export type { SSGBuildContext } from "./build";
