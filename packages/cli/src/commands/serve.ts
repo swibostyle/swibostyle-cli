@@ -21,16 +21,8 @@ import { createLogger } from "../ui/logger";
 
 const SERVE_DIR = ".swibostyle/serve";
 
-/** SSE clients waiting for reload events */
-const sseClients = new Set<http.ServerResponse>();
-
-/** Reload script injected into XHTML pages for live reload */
-const RELOAD_SCRIPT = `<script type="text/javascript"><![CDATA[
-(function(){var e=new EventSource("/__sse");e.onmessage=function(){location.reload()};e.onerror=function(){e.close();setTimeout(function(){location.reload()},2000)}})();
-]]></script>`;
-
 export const serveCommand = new Command("serve")
-  .description("Start a development server with live reload")
+  .description("Build and serve book files over HTTP")
   .option("-p, --port <port>", "Server port", "3000")
   .option("-t, --target <name>", "Build target name", "epub")
   .option("-v, --verbose", "Verbose output")
@@ -70,7 +62,7 @@ export const serveCommand = new Command("serve")
       const imageAdapter = await resolveImageAdapter(config);
       const cssAdapter = await resolveCSSAdapter(config);
 
-      // Initial build
+      // Build
       spinner.text = `Building ${pc.cyan(target)}...`;
       const startTime = Date.now();
 
@@ -98,14 +90,7 @@ export const serveCommand = new Command("serve")
       );
 
       // Start HTTP server
-      const xhtmlPages = result.routes.filter((r) => r.type === "xhtml");
-      const server = createServer(
-        serveDir,
-        xhtmlPages.map((r) => ({
-          path: r.path,
-          title: r.metadata.title || r.path,
-        })),
-      );
+      const server = createStaticServer(serveDir);
 
       server.listen(port, () => {
         console.log();
@@ -114,75 +99,14 @@ export const serveCommand = new Command("serve")
         console.log(
           `  ${pc.green("➜")}  ${pc.bold("Local:")}   ${pc.cyan(`http://localhost:${port}/`)}`,
         );
-        console.log();
-        console.log(pc.dim("  Watching for changes in src/..."));
+        console.log(pc.dim(`  Serving from ${SERVE_DIR}/`));
         console.log(pc.dim("  Press Ctrl+C to stop."));
         console.log();
-      });
-
-      // Watch for changes
-      let rebuildTimer: ReturnType<typeof setTimeout> | null = null;
-      let isRebuilding = false;
-
-      const watcher = fs.watch(srcDir, { recursive: true }, (_event, filename) => {
-        if (!filename) return;
-
-        // Ignore hidden files and temp files
-        if (filename.startsWith(".") || filename.endsWith("~")) return;
-
-        // Debounce rebuilds
-        if (rebuildTimer) clearTimeout(rebuildTimer);
-        rebuildTimer = setTimeout(async () => {
-          if (isRebuilding) return;
-          isRebuilding = true;
-
-          const rebuildStart = Date.now();
-          console.log(
-            pc.dim(`  [${new Date().toLocaleTimeString()}] Change detected: ${filename}`),
-          );
-
-          try {
-            const newResult = await buildSSGOutputs({
-              storage,
-              imageAdapter,
-              cssAdapter,
-              projectRoot,
-              srcDir,
-              buildDir: serveDir,
-              book: config.book,
-              target,
-              logger: { info: () => {}, debug: () => {}, warn: () => {}, error: () => {} },
-            });
-
-            await writeOutputsToDirectory(newResult.files, serveDir);
-
-            const rebuildElapsed = ((Date.now() - rebuildStart) / 1000).toFixed(2);
-            console.log(
-              pc.green(`  [${new Date().toLocaleTimeString()}] Rebuilt (${rebuildElapsed}s)`),
-            );
-
-            // Notify SSE clients to reload
-            notifyReload();
-          } catch (error) {
-            console.error(
-              pc.red(
-                `  [${new Date().toLocaleTimeString()}] Rebuild failed: ${error instanceof Error ? error.message : String(error)}`,
-              ),
-            );
-          } finally {
-            isRebuilding = false;
-          }
-        }, 200);
       });
 
       // Graceful shutdown
       const shutdown = () => {
         console.log(pc.dim("\n  Shutting down..."));
-        watcher.close();
-        for (const client of sseClients) {
-          client.end();
-        }
-        sseClients.clear();
         server.close(() => process.exit(0));
       };
 
@@ -221,44 +145,19 @@ async function writeOutputsToDirectory(
 }
 
 /**
- * Create HTTP server for serving build outputs
+ * Create a simple static file server
  */
-function createServer(
-  serveDir: string,
-  pages: Array<{ path: string; title: string }>,
-): http.Server {
+function createStaticServer(serveDir: string): http.Server {
   return http.createServer((req, res) => {
     const url = new URL(req.url || "/", `http://${req.headers.host}`);
     const pathname = decodeURIComponent(url.pathname);
 
-    // SSE endpoint for live reload
-    if (pathname === "/__sse") {
-      res.writeHead(200, {
-        "Content-Type": "text/event-stream",
-        "Cache-Control": "no-cache",
-        Connection: "keep-alive",
-        "Access-Control-Allow-Origin": "*",
-      });
-      res.write("data: connected\n\n");
-      sseClients.add(res);
-      req.on("close", () => sseClients.delete(res));
-      return;
-    }
-
-    // Index page
-    if (pathname === "/") {
-      const html = generateIndexPage(pages);
-      res.writeHead(200, { "Content-Type": "text/html; charset=utf-8" });
-      res.end(html);
-      return;
-    }
-
-    // Serve static files from serveDir
-    // Strip leading slash
-    const filePath = pathname.startsWith("/") ? pathname.slice(1) : pathname;
+    // Resolve file path
+    const filePath =
+      pathname === "/" ? "item/xhtml" : pathname.startsWith("/") ? pathname.slice(1) : pathname;
     const fullPath = path.join(serveDir, filePath);
 
-    // Security check: prevent path traversal
+    // Security: prevent path traversal
     const resolved = path.resolve(fullPath);
     if (!resolved.startsWith(path.resolve(serveDir))) {
       res.writeHead(403, { "Content-Type": "text/plain" });
@@ -272,20 +171,30 @@ function createServer(
       return;
     }
 
-    const content = fs.readFileSync(resolved);
-    const contentType = getContentType(resolved);
+    // Directory listing
+    const stat = fs.statSync(resolved);
+    if (stat.isDirectory()) {
+      const entries = fs.readdirSync(resolved);
+      const links = entries
+        .map((entry) => {
+          const entryPath = path.join(resolved, entry);
+          const isDir = fs.statSync(entryPath).isDirectory();
+          const href = `/${path.relative(serveDir, entryPath)}${isDir ? "/" : ""}`;
+          return `<li><a href="${href}">${entry}${isDir ? "/" : ""}</a></li>`;
+        })
+        .join("\n");
 
-    // Inject live reload script into XHTML pages
-    if (resolved.endsWith(".xhtml")) {
-      const text = content.toString("utf-8");
-      const injected = text.replace("</body>", `${RELOAD_SCRIPT}</body>`);
-      res.writeHead(200, {
-        "Content-Type": "application/xhtml+xml; charset=utf-8",
-        "Access-Control-Allow-Origin": "*",
-      });
-      res.end(injected);
+      res.writeHead(200, { "Content-Type": "text/html; charset=utf-8" });
+      res.end(`<!DOCTYPE html>
+<html><head><meta charset="UTF-8"><title>Index of /${filePath}</title>
+<style>body{font-family:monospace;margin:2em}a{text-decoration:none}a:hover{text-decoration:underline}li{padding:2px 0}</style>
+</head><body><h1>Index of /${filePath}</h1><ul>${links}</ul></body></html>`);
       return;
     }
+
+    // Serve file
+    const content = fs.readFileSync(resolved);
+    const contentType = getContentType(resolved);
 
     res.writeHead(200, {
       "Content-Type": contentType,
@@ -293,64 +202,6 @@ function createServer(
     });
     res.end(content);
   });
-}
-
-/**
- * Generate index page listing all XHTML pages
- */
-function generateIndexPage(pages: Array<{ path: string; title: string }>): string {
-  const pageLinks = pages
-    .map(
-      (p) =>
-        `      <li><a href="/${p.path}">${escapeHtml(p.title)}</a> <span style="color:#888">${escapeHtml(p.path)}</span></li>`,
-    )
-    .join("\n");
-
-  return `<!DOCTYPE html>
-<html lang="ja">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>swibostyle serve</title>
-  <style>
-    body { font-family: system-ui, sans-serif; max-width: 800px; margin: 40px auto; padding: 0 20px; color: #333; }
-    h1 { font-size: 1.5rem; border-bottom: 1px solid #eee; padding-bottom: 8px; }
-    ul { list-style: none; padding: 0; }
-    li { padding: 6px 0; border-bottom: 1px solid #f5f5f5; }
-    a { color: #0066cc; text-decoration: none; }
-    a:hover { text-decoration: underline; }
-    span { font-size: 0.85em; margin-left: 8px; }
-  </style>
-</head>
-<body>
-  <h1>swibostyle serve</h1>
-  <p>Pages:</p>
-  <ul>
-${pageLinks}
-  </ul>
-  <script>
-    var e = new EventSource("/__sse");
-    e.onmessage = function() { location.reload(); };
-  </script>
-</body>
-</html>`;
-}
-
-function escapeHtml(s: string): string {
-  return s
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;");
-}
-
-/**
- * Notify all SSE clients to reload
- */
-function notifyReload(): void {
-  for (const client of sseClients) {
-    client.write("data: reload\n\n");
-  }
 }
 
 /**
