@@ -1,12 +1,7 @@
 import { Command } from "commander";
 import * as p from "@clack/prompts";
 import pc from "picocolors";
-import {
-  scaffold,
-  runPrompts,
-  type ProjectOptions,
-  type TemplateType,
-} from "../init";
+import { scaffold, runPrompts, type ProjectOptions, type TemplateType } from "../init";
 
 export const initCommand = new Command("init")
   .description("Create a new swibostyle project")
